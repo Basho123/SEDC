@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <title>DOM PHONEBOOK</title>
+</head>
+
+<body>
+    <div id="userInputData">
+        <div>
+            <label for="name">Input new name here:</label>
+            <input type="text" name="name" id="name" placeholder="Name">
+            <br>
+            <label for="lastName">Input new last name here:</label>
+            <input type="text" name="lastName" id="lastName" placeholder="Last Name">
+            <br>
+            <label for="Company">Input company here:</label>
+            <input type="text" name="company" id="company" placeholder="Company">
+        </div>
+        <div>
+            <label for="phoneNumber">Input phone number here:</label>
+            <input type="number" name="phoneNumber" id="phoneNumber">
+            <button id="submitButton">ADD NUMBER</button>
+        </div>
+        <div>
+            <label for="image">post a link from an image here</label>
+            <input type="url" name="image" id="image">
+        </div>
+    </div>
+    <h1>PHONEBOOK</h1>
+    <div id="masterBook">
+        <div class="phoneBook">
+            <div>
+                <h2>Ivan</h2>
+                <h2>Jamandilovski</h2>
+                <h2>Trci-Lazi DOOEL</h2>
+            </div>
+            <div>
+                <h4>Number:</h4>
+                <h3 class="number">+38976547739</h3>
+            </div>
+            <div>
+                <img src="images/avatar.jpg" alt="image of the person's number" width="200px">
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
