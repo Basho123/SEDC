@@ -1,7 +1,7 @@
 //script.js
 alert("This excercise sums all the numbers in a given array");
 
-numberPrompt = [
+let numberPrompt = [
     parseFloat(prompt("Enter number 1")),
     parseFloat(prompt("Enter number 2")),
     parseFloat(prompt("Enter number 3")),
