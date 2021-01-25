@@ -1,0 +1,24 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: black;
+    margin: 0px auto;
+}
+
+table {
+    font-size: 25px;
+    color: blanchedalmond;
+    margin: 100px auto;   
+}
+
+.tableStyle0{
+    background-color: rgb(32, 32, 32);
+}
+
+.tableStyle1{
+    background-color: rgb(10, 10, 10);
+}
+
+.footer{
+    text-align: center;
+    color: rgb(255, 220, 155);
+}
