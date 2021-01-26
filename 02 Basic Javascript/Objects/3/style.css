@@ -1,0 +1,30 @@
+/* style.css */
+
+*{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    text-align: center;
+}
+
+input{
+    border-radius: 15px; 
+    width: 150px;
+    height: 30px;
+    font-size: 16px;
+    padding: 5px;   
+}
+
+select{
+    border-radius: 25px;
+}
+
+button{
+    color: red;
+}
+
+td{
+    width: 200px;
+    text-align: center;
+}

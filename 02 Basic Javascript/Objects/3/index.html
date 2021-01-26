@@ -1,17 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>jQuery exercises</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <title>Objects homework 3</title>
 </head>
-<body>
 
-    
-    
+<body style="background-color: black; color: wheat;">
+    <header>
+        <h1>Reading status of a book</h1>
+    </header>
+    <main id="main">
+        
+        <form action="">
+            <input type="text" name="books" id="books" placeholder="input book here">
+            <input type="text" name="author" id="author" placeholder="input author here">
+            
+            <br>
+            <br>
+            <label for="select">Has Read</label>
+            <br>
+            <select name="select" id="select">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+          
+            <br>
+            <br>
+            <button id="submit">Submit the book</button>
+        </form>
 
-    <!-- jquery from CDN -->
-    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+        <div>
+            <table border="2px" style="border: solid wheat; margin: 15px auto;">
+                <thead>
+                    <tr>
+                        <td>BOOK NAME</td>
+                        <td>BOOK AUTHOR</td>
+                        <td>HAS READ</td>
+                        <td>DATE OF SUBMITTING</td>
+                        <td>AT TIME</td>
+                    </tr>
+                </thead>
+                <tbody id="toAddInside">
+
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+
+
+
+    <script src="lib/jquery/jquery.js"></script>
     <script src="lib/script.js"></script>
 </body>
+
 </html>
