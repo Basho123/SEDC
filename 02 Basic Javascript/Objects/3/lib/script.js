@@ -8,6 +8,21 @@ $(document).ready(function () {
     let day = currentDate.getDate();
     let month = currentDate.getMonth()+1;
     let year = currentDate.getFullYear();
+
+
+    if (month >= 0 && month < 10){
+        month = `0${currentDate.getMonth()+1}`;
+    }  
+    if (day >= 0 && day < 10){
+        day = `0${currentDate.getDate()}`;
+    }    
+    if (minutes >= 0 && minutes < 10){
+        minutes = `0${currentDate.getMinutes()}`;
+    }
+    if (seconds >= 0 && seconds < 10){
+        seconds = `0${currentDate.getSeconds()}`;
+    }
+
     
     let date = `${day}.${month}.${year}`;
     let time = `${hours}:${minutes}:${seconds}`
