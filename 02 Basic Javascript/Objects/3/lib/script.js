@@ -8,8 +8,6 @@ $(document).ready(function () {
     let day = currentDate.getDate();
     let month = currentDate.getMonth()+1;
     let year = currentDate.getFullYear();
-
-
     if (month >= 0 && month < 10){
         month = `0${currentDate.getMonth()+1}`;
     }  
