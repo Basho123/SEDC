@@ -1,0 +1,136 @@
+/* style.css calculator */
+@font-face{
+    font-family: "digital";
+    src: url(../fonts/digital-7.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: black;
+    color: wheat;
+    display: flex;
+    justify-content: center;
+    margin-top: 200px;
+}
+
+
+/* CALCULATOR HOUSING */
+#calculatorHousing {
+    width: 750px;
+    height: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;    
+    background-color: rgb(65, 64, 64);
+    border-radius: 50px;
+}
+
+
+/* CALCULATOR DISPLAY */
+#calculatorDisplay{
+    margin-top: 25px;
+    width: 100%;
+    height: 25%;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+   
+}
+
+#val1{  
+    width: 70%;
+    height: 70%;
+    text-align: right;
+      
+    font-size: 100px;
+    font-family: "digital";
+}
+#val2 {
+    width: 70%;
+    height: 30%;
+      
+    text-align: center;
+    font-size: 30px;
+    font-family: "digital";
+}
+
+
+/* BUTTONS */
+
+#buttons{
+    width: 80%;
+    height: 75%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+   
+}
+
+#number-buttons {
+    margin-top: 45px;
+    width: 46%;   
+    height: 50%;
+    display: flex;
+    flex-wrap: wrap;  
+    justify-content: space-between;      
+}
+
+#zero{
+    order: 10;
+}
+#one{
+    order: 7;
+}
+#two{
+    order: 8;
+}
+
+#three{
+    order: 9;
+}
+
+#four{
+    order: 4;
+}
+
+#five{
+    order: 5;
+}
+
+#six{
+    order: 6;
+}
+#seven{
+    order: 1;
+}
+#eight{
+    order: 2;
+}
+#nine{
+    order: 3;
+}
+
+#clear{
+    order:11;
+}
+#dot{
+    order:9;
+}
+
+#operator-buttons {
+    margin-top: 45px;
+    width: 30%;
+    height: 30%;
+}
+.smallButton {
+    margin-top: 5px;
+    width: 85px;
+    height: 55px;
+    font-size: 50px;
+}
