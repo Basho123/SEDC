@@ -1,0 +1,39 @@
+/* style.css */
+
+body{
+    background-color:magenta;
+}
+
+#printing{
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 40px;
+    text-align: center;
+}
+
+#mainWindow{    
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+}
+
+button{
+    width:40%;
+    height: 300px;
+    border-radius: 30px;
+    background-color: black;
+    color: rgb(255, 255, 255);
+    margin-top: 50px;
+    margin: 10px;
+    font-size: 50px;
+}
+
+h1{
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 80px;
+    text-align: center;
+    margin-top: 20%;
+}
+

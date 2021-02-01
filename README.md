@@ -1,2 +1,3 @@
-# SEDC
-homeworks from SEDC
+# SEDC 
+Homeworks
+   
