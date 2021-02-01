@@ -3,9 +3,17 @@
 body{
     background-color:magenta;
 }
+*:focus{
+    outline: none;
+}
 
 #printing{
-    color: white;
+    background-color: white;
+    margin: 0px auto;
+    border: solid 5px black;
+    width: 80%;
+    height: 300px;
+    color: rgb(0, 0, 0);
     font-family: Arial, Helvetica, sans-serif;
     font-size: 40px;
     text-align: center;
@@ -27,6 +35,36 @@ button{
     margin-top: 50px;
     margin: 10px;
     font-size: 50px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#buttonInside{
+    width:180px;
+    height: 40px;    
+    border-radius: 10px;
+    font-size: 25px;
+
+}
+
+#buttonInside:focus{
+    outline: none;
+}
+#moneyInput{
+    border-radius: 10px;
+    background-color: black;
+    color: white;
+    height: 50px;
+    width: 150px;
+    font-size: 30px;
+    font-family: monospace;
+}
+
+#moneyInput:focus{
+    outline: none;
 }
 
 h1{

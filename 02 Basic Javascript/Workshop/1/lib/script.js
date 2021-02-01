@@ -3,7 +3,7 @@
 - between each two even numbers, for exammple 025468 is 0-254-6-8 */
 
 
-let startingNumbers = 216566565468784651231586988486868446;
+let startingNumbers = 1234567890
 console.log(`starting numbers`, startingNumbers);
 let numbers = startingNumbers + ``;
 console.log(`numbers in string`, numbers);
