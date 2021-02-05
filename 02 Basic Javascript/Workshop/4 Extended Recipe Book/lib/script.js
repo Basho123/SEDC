@@ -37,8 +37,10 @@ let spliceButtonValueArr = [];
 
 
 
-//
+//SAVE BUTTON
 postButton.addEventListener('click', function () {
+
+    //ALERT IF ANY FIELD IS EMPTY
     if (
         recipeNameInput.value === `` ||
         ingredientsInput.value === `` ||
@@ -46,14 +48,20 @@ postButton.addEventListener('click', function () {
     ) {
         alert(`Please fill all the fields`);
     }
-    else {
-        tBody.innerHTML = ``;
 
+    
+    else {
+        
+        //FIRST CLEAR THE INNER HTML
+        tBody.innerHTML = ``;
+        
+        //THEN ADD THE INPUT FIELD VALUES TO THE ARRAYS
         recipeNameArr.push(recipeNameInput.value)
         ingredientsArr.push(ingredientsInput.value)
         timeToMakeArr.push(timeToMakeInput.value)
         spliceButtonValueArr.push(`Delete this recipe`);
 
+        //LOOP TO PRINT THE ARRAYS IN TABLE
         for (i = 0; i < recipeNameArr.length; i++) {
             tBody.innerHTML += `
         <tr> 
@@ -65,25 +73,33 @@ postButton.addEventListener('click', function () {
         </tr>
         `
         }
+
+        //THIS IS FOR THE DELETE BUTTON
         for (let i = 0; i < spliceButtonValueArr.length; i++) {
-            spliceButton[i].addEventListener('click', function (event) {
+            spliceButton[i].addEventListener('click', function (event) {                
+            //WE USE ARRAY SPLICE TO REMOVE THE ITEMS DELETED FROM THE ARRAY
                 recipeNameArr.splice([i], 1);
                 ingredientsArr.splice([i], 1);
                 timeToMakeArr.splice([i], 1);
                 spliceButtonValueArr.splice([i], 1);
+            //AND THEN DELETE THE PARENT NODE HTML ELEMENT
                 event.target.parentNode.parentNode.remove(event.parentNode)
             }, false)
         };
+
+        //CLEAR ALL THE VALUES
         recipeNameInput.value = ``
         ingredientsInput.value = ``
         timeToMakeInput.value = ``
     }
 })
 
+//SHOW LONGEST RECIPE BUTTON
 showLongest.addEventListener('click', function () {
     tBody.innerHTML = ``;
     let longestTime = 0;
 
+    //CHECK WITH longestTime variable and replace the HTML if passed
     for (i = 0; i < recipeNameArr.length; i++) {
         if (timeToMakeArr[i] > longestTime) {
             longestTime = timeToMakeArr[i];
@@ -100,10 +116,13 @@ showLongest.addEventListener('click', function () {
     }
 })
 
+
+//SHOW SHORTEST RECIPE BUTTON
 showShortest.addEventListener('click', function () {
     tBody.innerHTML = ``;
     let shortestTime = Infinity;
 
+    //CHECK WITH shortestTime variable and replace the HTML if passed
     for (i = 0; i < recipeNameArr.length; i++) {
         if (timeToMakeArr[i] < shortestTime) {
             shortestTime = timeToMakeArr[i];
@@ -120,7 +139,12 @@ showShortest.addEventListener('click', function () {
     }
 })
 
+
+//SHOW ALL RECIPES BUTTON
 showAll.addEventListener('click', function () {
+
+    //THIS IS JUST A COPY OF THE SAVE BUTTON CLICK FUNCTION, BUT WITHOUT THE ARRAY PUSH THINGS
+
     tBody.innerHTML = ``;
     for (i = 0; i < recipeNameArr.length; i++) {
         tBody.innerHTML += `
