@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" type="text/css" />
+  <title>Extended recipe book</title>
+</head>
+
+<body>
+
+  <header>
+    <h1>Extended recipe book</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td><label for="recipeNameInput">Name of the recipe</label></td>
+          <td><input type="text" id="recipeNameInput" /></td>
+        </tr>
+        <tr>
+          <td><label for="ingredientsInput">Ingredients</label></td>
+          <td><input type="text" id="ingredientsInput" /></td>
+        </tr>
+        <tr>
+          <td><label for="timeToMakeInput">Time to make</label></td>
+          <td><input type="number" id="timeToMakeInput" /></td>
+        </tr>
+        <tr>
+          <td colspan="2"><button>Save recipe</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </header>
+
+  <main>
+    <table border="2px">
+      <thead>
+        <tr>
+          <th class="narrow">№</th>
+          <th>Recipe Name</th>
+          <th>Ingredients Input</th>
+          <th colspan="2">Time to make</th>
+        </tr>
+      </thead>
+      <tbody>
+      
+      </tbody>
+      <tfoot>
+        <tr> 
+                 
+          <td colspan="2"><button>Show recipe that takes the longest time to make</button></td>
+          <td><button>show recipe that takes the shortest time to make</button></td>
+          <td colspan="2"><button>show all recipes</button></td>
+        </tr>
+      </tfoot>
+    </table>
+  </main>
+
+  <footer>
+    <p>Designed and created by &copy; Ivan Jamandilovski, SEDC 05.02.2021</p>
+  </footer>
+
+
+
+
+
+
+
+  <script src="lib/script.js"></script>
+</body>
+</html>

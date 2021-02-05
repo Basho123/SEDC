@@ -23,7 +23,7 @@ let inputNumber = 0;
 //WE TAKE THE TEXT FROM THESE ARRAYS, AND USE EMPTY SPACES TO ACCOMODATE THE FOR LOOP
 let arrayWithNumbers = [``, `one `, `two `, `three `, `four `, `five `, `six `, `seven `, `eight `, `nine `]
 let arrWithTeens = [`ten `, `eleven `, `twelve `, `thirteen `, `fourteen `, `fifteen `, `sixteen `, `seventeen `, `eighteen `, `nineteen `,]
-let arrWithDecades = [``, ``, `twenty `, `thirty `, `fourty `, `fifty `, `sixty `, `seveny `, `eighty `, `ninety `,]
+let arrWithDecades = [``, ``, `twenty `, `thirty `, `fourty `, `fifty `, `sixty `, `seventy `, `eighty `, `ninety `,]
 
 
 //THE WORDS ARE IMBUED HERE
