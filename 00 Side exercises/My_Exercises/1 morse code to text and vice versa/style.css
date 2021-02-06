@@ -34,6 +34,7 @@ main{
 }
 
 textarea{
+    margin-top: 20px;  
     width: 45%;
     height: 300px;
     font-size: 30px;
@@ -44,7 +45,7 @@ textarea{
 
 button{
     width: 10%;
-    margin: 25px auto;
+    margin: 35px auto;
     height: 55px;
     width: 300px;
     font-size: 40px;
