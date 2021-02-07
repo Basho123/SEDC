@@ -18,9 +18,7 @@ let morseAnvil = [];
 let morseWelder = [];
 
 button.addEventListener('click', function () {
-    console.log(`dots before`, morseCodeInput.value.length);
-    console.log(`letters before`, normalTextInput.value.length);
-
+    //LETTERS TO MORSE
     divToChange.innerHTML = ``
     if (normalTextInput.value.length > 0 && morseCodeInput.value.length === 0) {
         for (let i = 0; i < normalTextInput.value.length; i++) {
@@ -28,54 +26,45 @@ button.addEventListener('click', function () {
                 if (normalTextInput.value[i] == capitalLetters[g] || normalTextInput.value[i] == smallLetters[g]) {
                     morseAnvil += morseCode[g] + ` `;
                     if (normalTextInput.value[i] == ` `) {
-                        morseAnvil += `&nbsp;&nbsp;&nbsp;`;
+                        morseAnvil += `&nbsp;&nbsp;&nbsp`;
                     }
                     break;
                 }
             }
         }
         divToChange.innerHTML = `
-        <h2>The text to be converted:</h2>
+        <h3>The text to be converted:</h3>
          <p> ${normalTextInput.value} </p>
-        <h2>The text converted in morse code:</h2>
+        <h3>The text converted in morse code:</h3>
          <p> ${morseAnvil} </p>
         `
     }
 
+    //MORSE TO LETTERS
     if (normalTextInput.value.length === 0 && morseCodeInput.value.length > 0) {
-        morseCodeInput.value += ` `;
-        for (let i = 0; i < morseCodeInput.value.length; i++) {
-            if (morseCodeInput.value[i] != ` `) {
-                morseWelder += morseCodeInput.value[i]
-                continue
-            }
-            else if (morseCodeInput.value[i] == ` ` && morseWelder != ``) {
-                morseAnvil.push(morseWelder, ``,);
-                morseWelder = ``;
-            }
-            else if (morseCodeInput.value[i] == ` ` && morseWelder == ``) {
-                morseAnvil.push(`&nbsp; `);
-                morseWelder = ``;
-            }
-            else continue;
-        }
-        console.log(morseAnvil);
+        morseCodeInput.value += ` `;        
+
+        //WE WELD TOGETHER ALL THE CHARACTERS WITH THIS STATEMENT AFTER EACH SPACE
+        morseAnvil = morseCodeInput.value.split(" ");      
+      
+        //THIS CHANGES THE GIVEN SIGNAL TO ITS CORELATING LETTER
         for (let i = 0; i < morseAnvil.length; i++) {
             for (let g = 0; g < capitalLetters.length; g++) {
                 if (morseAnvil[i] == morseCode[g]) {
                     wordsAnvil += capitalLetters[g];
                     break;
                 }
-                if (morseAnvil[i] == `&nbsp; `) {
+                //IF EMPTY SPACE IS FOUND, INSERT A SPACE
+                if (morseAnvil[i] == ``) {
                     wordsAnvil += ` `;
                     break;
                 }
             }
         }
         divToChange.innerHTML = `
-        <h2>The morse code to be converted:</h2>
+        <h3>The morse code to be converted:</h3>
          <p> ${morseCodeInput.value} </p>
-        <h2>The morse code converted in text:</h2>
+        <h3>The morse code converted in text:</h3>
          <p> ${wordsAnvil} </p>
         `
 
