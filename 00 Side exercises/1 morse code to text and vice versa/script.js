@@ -15,8 +15,6 @@ let morseCode = [`.-`, `-...`, `-.-.`, `-..`, `.`, `..-.`, `--.`, `....`, `..`, 
 let wordsAnvil = [];
 let morseAnvil = [];
 
-let morseWelder = [];
-
 button.addEventListener('click', function () {
     //LETTERS TO MORSE
     divToChange.innerHTML = ``
@@ -80,8 +78,7 @@ button.addEventListener('click', function () {
     normalTextInput.value = ``;
     morseCodeInput.value = ``;
     wordsAnvil = [];
-    morseAnvil = [];
-    morseWelder = [];
+    morseAnvil = [];  
 
     console.log(`dots after`, morseCodeInput.value.length);
     console.log(`letters after`, normalTextInput.value.length);
