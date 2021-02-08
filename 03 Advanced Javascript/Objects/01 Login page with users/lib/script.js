@@ -219,7 +219,7 @@ loginButton.addEventListener('click', function () {
                 }
 
                 //THE HEADLINE
-                document.getElementById('headline').innerText = `Welcome ${each.name}`;
+                document.getElementById('headline').innerText = `Добредојде ${each.name}`;
 
                 //SIGN OUT BUTTON
                 document.getElementById('signOutButton').addEventListener(`click`, function () {
