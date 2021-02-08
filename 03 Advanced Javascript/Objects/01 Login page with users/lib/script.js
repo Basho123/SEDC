@@ -107,6 +107,7 @@ document.getElementById("registerNowButton").addEventListener('click', function 
 // REGISTER BUTTON WHEN REGISTER FORM SHOWS
 registerNewButton.addEventListener('click', function () {
     let canCreate = true;
+    //debugger;
 
     //console.log(logInForm.style.display);
     //CHECK IF USERNAME IS ALREADY TAKEN
@@ -149,7 +150,8 @@ registerNewButton.addEventListener('click', function () {
         registerUserName.value = ``;
         registerPassword.value = ``;
         verifyPassword.value = ``;
-        logInFormDiv.style.display = `flex`;
+        logInForm.style.display = `flex`;
+        logInForm.style.height = `200px`;
         loginButton.click();
     }
 
