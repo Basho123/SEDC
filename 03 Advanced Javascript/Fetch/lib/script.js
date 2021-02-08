@@ -15,9 +15,10 @@ document.getElementById("firstButton").addEventListener('click', function () {
         .then(users => {
             for (let each of users) {
                 listToPrintUsers.innerHTML +=
-                    `<li>${each.name}</li>
-            <li>${each.username}</li>
-            <li>${each.email}</li>
+                    `<li>Name: ${each.name}</li>
+            <li>Username: ${each.username}</li>
+            <li>Email: ${each.email}</li>
+            <br/>
             `
             }
         })
@@ -47,7 +48,7 @@ document.getElementById("secondButton").addEventListener('click', function () {
 
                 h2.innerText = `albums that have "omnis" in their title`;
                 listToPrintAlbums.innerHTML +=
-                    `<li>ID: ${each.userId} Title: ${each.title}</li>`
+                    `<li>ID: ${each.userId} Title: ${each.title}</li><br/>`
             }
         })
 })
