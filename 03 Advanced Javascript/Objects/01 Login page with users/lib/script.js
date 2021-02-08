@@ -81,6 +81,7 @@ adminTableDiv.hidden = true;
 //REGISTER NEW MEMBER LINK BUTTON
 let simpleSwitch = true;
 document.getElementById("registerNowButton").addEventListener('click', function () {
+    debugger;
     switch (simpleSwitch) {
         case true:
             logInForm.style.display = `none`;
@@ -107,8 +108,7 @@ document.getElementById("registerNowButton").addEventListener('click', function 
 // REGISTER BUTTON WHEN REGISTER FORM SHOWS
 registerNewButton.addEventListener('click', function () {
     let canCreate = true;
-    //debugger;
-
+  
     //console.log(logInForm.style.display);
     //CHECK IF USERNAME IS ALREADY TAKEN
     for (let user of usersArray) {
@@ -224,17 +224,19 @@ loginButton.addEventListener('click', function () {
                 document.getElementById('headline').innerText = `Добредојде ${each.name}`;
 
                 //SIGN OUT BUTTON
-                document.getElementById('signOutButton').addEventListener(`click`, function () {
+                document.getElementById('signOutButton').addEventListener(`click`, function () {                    
                     loggedInDiv.style.display = `none`;
                     registerDiv.hidden = true;
                     adminTableDiv.hidden = true;
+                    simpleSwitch = true;
                     signedIn = false;
                     document.getElementById("paragraphToChange").innerHTML = `Не сте корисник? <a href=# id="registerNowButton">Регистрирај се</a>`
                     logInForm.style.display = `flex`;
 
-                    //THIS IS CALLED AGAIN BEACUSE THE HTML WAS DESTROYED
+                    // THIS IS CALLED AGAIN BEACUSE THE HTML WAS DESTROYED
                     document.getElementById("registerNowButton").addEventListener('click', function () {
-                        switch (simpleSwitch) {
+                        debugger;
+                        switch (simpleSwitch) {                         
                             case true:
                                 logInForm.style.display = `none`;
                                 logInForm.style.height = `0px`;
