@@ -2,7 +2,8 @@
 //morse Code
 
 //is imported from another file 
-import morseCode from "./constMorse.js";
+
+//import morseCode from "./constMorse.js";
 
 let normalTextInput = document.getElementById('normalText');
 let morseCodeInput = document.getElementById('morseCode');
