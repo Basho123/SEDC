@@ -1,31 +1,43 @@
 //script.js
 //morse Code
 
+//is imported from another file 
+import morseCode from "./constMorse.js";
+
 let normalTextInput = document.getElementById('normalText');
 let morseCodeInput = document.getElementById('morseCode');
 
 let button = document.getElementById('button');
 let divToChange = document.getElementById('toChange');
 
-const morseCode = [`.-`, `-...`, `-.-.`, `-..`, `.`, `..-.`, `--.`, `....`, `..`, `.---`, `-.-`, `.-..`, `--`, `-.`, `---`, `.--.`, `--.-`, `.-.`, `...`, `-`, `..-`, `...-`, `.--`, `-..-`, `-.--`, `--..`, ` `, `-.-.--`, `.-..-.`,`.... .- ... .... - .- --.`,`...-..-`,`.--. . .-. -.-. . -. -`,`.-...`,``,'-.--.','-.--.-','... - .- .-.','.-.-.','--..--','-....-',`.-.-.-`,'-..-.',`-----`,`.----`, `..---`, `...--`, `....-`, `.....`, `-....`, `--...`, `---..`, `----.`,`---...`,`-.-.-.`,`.-.. . .-. ..-. - .- .-. .-. --- .--`,`-...-`,`.-. .. --. .... - .- .-. .-. --- .--`,`..--..`,`.--.-.`];
-
-//CHARACTERS ARE GENERATED HERE
-let characterArray = [];
 //THIS IS THE CHARACTER CLASS
-class Character {
-    constructor(capitalLetter, lowercaseLetter, morse) {
-        this.capitalLetter = capitalLetter;
-        this.lowercaseLetter = lowercaseLetter;
-        this.morse = morse;
-    }    
-}
-//THIS GENERATES THE CHARACTERS
-for (let i = 0; i < 26; i++) {
-    characterArray.push(new Character(String.fromCharCode(65 + i), String.fromCharCode(97 + i), morseCode[i]))
-}
-for (let i = 0; i < 33; i++) {
-    characterArray.push(new Character(String.fromCharCode(32 + i), String.fromCharCode(32 + i), morseCode[26+i]))
-}
+let objectCreator = (morse) => {
+    let charArray = [];
+    let arrayToReturn = [];
+
+    //CHARACTERS ARE GENERATED HERE
+    //letters
+    for (let i = 0; i < 26; i++) {
+        charArray.push(String.fromCharCode(65 + i))
+    }
+    //signs
+    for (let i = 0; i < 33; i++) {
+        charArray.push(String.fromCharCode(32 + i))
+    }
+    //create the class
+    charArray.forEach((element, index) => {
+        arrayToReturn.push({
+        capitalLetter: element,
+        lowercaseLetter: element.toLowerCase(),
+        morse: morse[index],
+      });
+    });
+    //return the value
+    return arrayToReturn;
+  };
+  //SAVING THE VALUE IN A VARIABLE FOR EASIER MANIPULATION
+  let characterArray = objectCreator(morseCode); 
+
 //THESE ARE IMBUED WITH WORDS OR SIGNS
 let wordsAnvil = [];
 let morseAnvil = [];
@@ -53,7 +65,7 @@ button.addEventListener('click', function () {
         `
     }
     //MORSE TO LETTERS
-    if (normalTextInput.value.length === 0 && morseCodeInput.value.length > 0) {
+    else if (normalTextInput.value.length === 0 && morseCodeInput.value.length > 0) {
         morseCodeInput.value += ` `;
 
         //WE WELD TOGETHER ALL THE CHARACTERS WITH THIS STATEMENT AFTER EACH SPACE
@@ -80,19 +92,17 @@ button.addEventListener('click', function () {
          <p> ${wordsAnvil} </p>
         `
     }
-
-    if (normalTextInput.value.length > 0 && morseCodeInput.value.length > 0) {
+    
+    else if (normalTextInput.value.length > 0 && morseCodeInput.value.length > 0) {
         alert(`Please enter either text or morse code, not both.`);
     }
-    if (normalTextInput.value.length === 0 && morseCodeInput.value.length === 0) {
+    else if (normalTextInput.value.length === 0 && morseCodeInput.value.length === 0) {
         alert(`Input fields are empty.`);
     }
 
+    //RESET THE INPUTS
     normalTextInput.value = ``;
     morseCodeInput.value = ``;
     wordsAnvil = [];
     morseAnvil = [];
-
-    console.log(`dots after`, morseCodeInput.value.length);
-    console.log(`letters after`, normalTextInput.value.length);
 })
