@@ -70,6 +70,15 @@ usersArray.push(new User(`Ceca`, `krknicki`, false));
 usersArray.push(new User(`Jana`, `tamanamBlagoVoSekoeVreme`, false));
 usersArray.push(new User(`Nikola`, `doruckuvamZgibovi`, false));
 
+fetch(`https://jsonplaceholder.typicode.com/users`)
+.then(convert => convert.json())
+.then(users =>{
+    for (let each of users){
+        usersArray.push(new User(each.username, each.email, false))
+    }
+})
+console.log(usersArray);
+
 
 //THIS IS WHERE SOME THINGS ARE HIDDEN AND SOME ARE SHOWN
 loggedInDiv.style.display = `none`;
