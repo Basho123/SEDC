@@ -7,11 +7,26 @@ let morseCodeInput = document.getElementById('morseCode');
 let button = document.getElementById('button');
 let divToChange = document.getElementById('toChange');
 
-let capitalLetters = [`A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`, `I`, `J`, `K`, `L`, `M`, `N`, `O`, `P`, `Q`, `R`, `S`, `T`, `U`, `V`, `W`, `X`, `Y`, `Z`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `0`, ` `, `.`, `,`, `?`, `!`]
-let smallLetters = [`a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`, `i`, `j`, `k`, `l`, `m`, `n`, `o`, `p`, `q`, `r`, `s`, `t`, `u`, `v`, `w`, `x`, `y`, `z`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `0`, ` `, `.`, `,`, `?`, `!`]
+const morseCode = [`.-`, `-...`, `-.-.`, `-..`, `.`, `..-.`, `--.`, `....`, `..`, `.---`, `-.-`, `.-..`, `--`, `-.`, `---`, `.--.`, `--.-`, `.-.`, `...`, `-`, `..-`, `...-`, `.--`, `-..-`, `-.--`, `--..`, ` `, `-.-.--`, `.-..-.`,`.... .- ... .... - .- --.`,`...-..-`,`.--. . .-. -.-. . -. -`,`.-...`,``,'-.--.','-.--.-','... - .- .-.','.-.-.','--..--','-....-',`.-.-.-`,'-..-.',`-----`,`.----`, `..---`, `...--`, `....-`, `.....`, `-....`, `--...`, `---..`, `----.`,`---...`,`-.-.-.`,`.-.. . .-. ..-. - .- .-. .-. --- .--`,`-...-`,`.-. .. --. .... - .- .-. .-. --- .--`,`..--..`,`.--.-.`];
 
-let morseCode = [`.-`, `-...`, `-.-.`, `-..`, `.`, `..-.`, `--.`, `....`, `..`, `.---`, `-.-`, `.-..`, `--`, `-.`, `---`, `.--.`, `--.-`, `.-.`, `...`, `-`, `..-`, `...-`, `.--`, `-..-`, `-.--`, `--..`, `.----`, `..---`, `...--`, `....-`, `.....`, `-....`, `--...`, `---..`, `----.`, `-----`, ` `, `·−·−·−`, `--..--`, `..--..`, `-.-.--`];
-
+//CHARACTERS ARE GENERATED HERE
+let characterArray = [];
+//THIS IS THE CHARACTER CLASS
+class Character {
+    constructor(capitalLetter, lowercaseLetter, morse) {
+        this.capitalLetter = capitalLetter;
+        this.lowercaseLetter = lowercaseLetter;
+        this.morse = morse;
+    }    
+}
+//THIS GENERATES THE CHARACTERS
+for (let i = 0; i < 26; i++) {
+    characterArray.push(new Character(String.fromCharCode(65 + i), String.fromCharCode(97 + i), morseCode[i]))
+}
+for (let i = 0; i < 33; i++) {
+    characterArray.push(new Character(String.fromCharCode(32 + i), String.fromCharCode(32 + i), morseCode[26+i]))
+}
+//THESE ARE IMBUED WITH WORDS OR SIGNS
 let wordsAnvil = [];
 let morseAnvil = [];
 
@@ -21,8 +36,8 @@ button.addEventListener('click', function () {
     if (normalTextInput.value.length > 0 && morseCodeInput.value.length === 0) {
         for (let i = 0; i < normalTextInput.value.length; i++) {
             for (let g = 0; g < morseCode.length; g++) {
-                if (normalTextInput.value[i] == capitalLetters[g] || normalTextInput.value[i] == smallLetters[g]) {
-                    morseAnvil += morseCode[g] + ` `;
+                if (normalTextInput.value[i] == characterArray[g].capitalLetter || normalTextInput.value[i] == characterArray[g].lowercaseLetter) {
+                    morseAnvil += characterArray[g].morse + ` `;
                     if (normalTextInput.value[i] == ` `) {
                         morseAnvil += `&nbsp;&nbsp;&nbsp`;
                     }
@@ -37,19 +52,18 @@ button.addEventListener('click', function () {
          <p> ${morseAnvil} </p>
         `
     }
-
     //MORSE TO LETTERS
     if (normalTextInput.value.length === 0 && morseCodeInput.value.length > 0) {
-        morseCodeInput.value += ` `;        
+        morseCodeInput.value += ` `;
 
         //WE WELD TOGETHER ALL THE CHARACTERS WITH THIS STATEMENT AFTER EACH SPACE
-        morseAnvil = morseCodeInput.value.split(" ");      
-      
+        morseAnvil = morseCodeInput.value.split(" ");
+
         //THIS CHANGES THE GIVEN SIGNAL TO ITS CORELATING LETTER
         for (let i = 0; i < morseAnvil.length; i++) {
-            for (let g = 0; g < capitalLetters.length; g++) {
+            for (let g = 0; g < characterArray.length; g++) {
                 if (morseAnvil[i] == morseCode[g]) {
-                    wordsAnvil += capitalLetters[g];
+                    wordsAnvil += characterArray[g].capitalLetter;
                     break;
                 }
                 //IF EMPTY SPACE IS FOUND, INSERT A SPACE
@@ -65,7 +79,6 @@ button.addEventListener('click', function () {
         <h3>The morse code converted in text:</h3>
          <p> ${wordsAnvil} </p>
         `
-
     }
 
     if (normalTextInput.value.length > 0 && morseCodeInput.value.length > 0) {
@@ -78,9 +91,8 @@ button.addEventListener('click', function () {
     normalTextInput.value = ``;
     morseCodeInput.value = ``;
     wordsAnvil = [];
-    morseAnvil = [];  
+    morseAnvil = [];
 
     console.log(`dots after`, morseCodeInput.value.length);
     console.log(`letters after`, normalTextInput.value.length);
-
 })
