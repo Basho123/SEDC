@@ -35,7 +35,7 @@ document.getElementById("firstButton").addEventListener('click', function () {
             <li>Company:
             <ul> 
             <li>Name: ${each.company.name}</li>  
-            <li>catchPhrase: ${each.company.Catchphrase}</li>  
+            <li>Catch phrase: ${each.company.catchPhrase}</li>  
             <li>bs: ${each.company.bs}</li> 
             </ul>
             <br/>
