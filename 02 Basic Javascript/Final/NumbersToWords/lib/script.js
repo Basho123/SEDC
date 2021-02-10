@@ -33,131 +33,57 @@ let stringAnvil = ``;
 /////////////// FUNCTIONS OF NUMBERS ////////////
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-function ones(i, g) {
-	if (inputNumber[i] == g && inputNumber[i - 1] != 1) {
-		stringAnvil += arrayWithNumbers[g];
-	}
+let ones = (i, g) => {
+	inputNumber[i] == g && inputNumber[i - 1] != 1 ? stringAnvil += arrayWithNumbers[g] : i
 }
-
-function tens(i, q) {
+let tens = (i, q) => {
 	//TEENS		
-	if (inputNumber[i] == 1 && inputNumber[i + 1] == q) {
-		stringAnvil += arrWithTeens[q];
-	}
-	//ADULTS
-	else if (inputNumber[i] == q) {
-		stringAnvil += arrWithDecades[q];
-	}
+	inputNumber[i] == 1 && inputNumber[i + 1] == q ? stringAnvil += arrWithTeens[q]
+		//ADULTS
+		: inputNumber[i] == q ? stringAnvil += arrWithDecades[q] : i
 }
 
-function hundreds(i, t) {
+let hundreds = (i, t) => {
 	// ones(i, t);
-	if (inputNumber[i] == g) {
-		stringAnvil += arrayWithNumbers[g];
-	}
-	if (t == inputNumber[i] && inputNumber[i] > 0) {
-		stringAnvil += `hundred `;
-	}
-
+	inputNumber[i] == g ? stringAnvil += arrayWithNumbers[g] : i
+	t == inputNumber[i] && inputNumber[i] > 0 ? stringAnvil += `hundred ` : i
 }
 
-function thousands(i, g) {
+//FIRST PARAMETER IS TO FIND THE LENGTH OF DIGITS, SECOND IS TO COUNT THROUGH THE NUMBERS, 
+//THIRD PARAMETER ARGUMENT IS THE MAXIMUM LENGTH OF THE NUMBER, AND FOURTH IS FOR THE STRING
+let coolFunction = (i, g, digit, string) => {
 	let toContinue = true;
 	let someCounter = 0;
 
-	if (inputNumber[i - 1] != 1) {
-		ones(i, g);
-	}
+	inputNumber[i - 1] != 1 ? ones(i, g) : i;
+
 	for (let k = 0; k < inputNumber.length; k++) {
-		inputNumber.length === 7 + k ? someCounter += k
+		inputNumber.length === digit + k ? someCounter += k
 			: false
 	}
 	//VALIDATION WHEN THERE ARE ZEROS IN THE MIDDLE
-	if (inputNumber.length === 7 + someCounter &&
+	if (inputNumber.length === digit + someCounter &&
 		g == inputNumber[i] && inputNumber[1 + someCounter] == 0 &&
 		g == inputNumber[i] && inputNumber[2 + someCounter] == 0 &&
 		g == inputNumber[i] && inputNumber[3 + someCounter] == 0) {
 		stringAnvil += ``;
-		toContinue = false;		
+		toContinue = false;
 	}
-
-	if (g == inputNumber[i] && toContinue === true) {
-		stringAnvil += `thousand `;
-	}
+	g == inputNumber[i] && toContinue === true ? stringAnvil += string : i;
 }
 
-function millions(i, g) {
-	let toContinue = true;
-	let someCounter = 0;
 
-	if (inputNumber[i - 1] != 1) {
-		ones(i, g);
-	}
-	for (let k = 0; k < inputNumber.length; k++) {
-		inputNumber.length === 10 + k ? someCounter += k
-			: false
-	}
-	//VALIDATION WHEN THERE ARE ZEROS IN THE MIDDLE
-	if (inputNumber.length === 10 + someCounter &&
-		g == inputNumber[i] && inputNumber[1 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[2 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[3 + someCounter] == 0) {
-		stringAnvil += ``;
-		toContinue = false;		
-	}
-
-	if (g == inputNumber[i] && toContinue === true) {
-		stringAnvil += `million `;
-	}
+let thousands = (i, g) => {
+	coolFunction(i, g, 7, `thousand `)
 }
-function trillions(i, g) {
-	let toContinue = true;
-	let someCounter = 0;
-
-	if (inputNumber[i - 1] != 1) {
-		ones(i, g);
-	}
-	for (let k = 0; k < inputNumber.length; k++) {
-		inputNumber.length === 13 + k ? someCounter += k
-			: false
-	}
-	//VALIDATION WHEN THERE ARE ZEROS IN THE MIDDLE
-	if (inputNumber.length === 13 + someCounter &&
-		g == inputNumber[i] && inputNumber[1 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[2 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[3 + someCounter] == 0) {
-		stringAnvil += ``;
-		toContinue = false;		
-	}
-
-	if (g == inputNumber[i] && toContinue === true) {
-		stringAnvil += `trillion `;
-	}
+let millions = (i, g) => {
+	coolFunction(i, g, 10, `million `)
 }
-
-function billions(i, g) {
-	let toContinue = true;
-	let someCounter = 0;
-
-	if (inputNumber[i - 1] != 1) {
-		ones(i, g);
-	}
-	for (let k = 0; k < inputNumber.length; k++) {
-		inputNumber.length === 16 + k ? someCounter += k
-			: false
-	}
-	//VALIDATION WHEN THERE ARE ZEROS IN THE MIDDLE
-	if (inputNumber.length === 16 + someCounter &&
-		g == inputNumber[i] && inputNumber[1 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[2 + someCounter] == 0 &&
-		g == inputNumber[i] && inputNumber[3 + someCounter] == 0) {
-		stringAnvil += ``;
-		toContinue = false;		
-	}
-
-	if (g == inputNumber[i] && toContinue === true) {
-		stringAnvil += `billion `;
-	}
+let trillions = (i, g) => {
+	coolFunction(i, g, 13, `trillion `)
+}
+let billions = (i, g) => {
+	coolFunction(i, g, 16, `billion `)
 }
 
 //FUNCTIONS ARE STORED IN ARRAYS TO BE USED IN FOR LOOPS
@@ -171,7 +97,7 @@ let arrWithFunctionsHigher = [trillions, hundreds, tens, millions]
 /////////////////////////////////////////////////
 
 
-post.addEventListener('click', function () {
+post.addEventListener('click', () => {
 	inputNumber = value.value;
 	textContainer.innerHTML = ``
 	stringAnvil = ``;
@@ -180,385 +106,382 @@ post.addEventListener('click', function () {
 	for (let i = 0; i < inputNumber.length; i++) {
 		//1 DIGIT
 		//ONES
-		if (inputNumber.length === 1) {
-			for (g = 0; g <= 9; g++) {
-				ones(i, g);
-			}
-		}
+		switch (inputNumber.length) {
+			//CASE NUMBER IS DIGIT LENGTH
+			case 1:
+				for (g = 0; g <= 9; g++) {
+					ones(i, g);
+				}
+				break;
 
-		//2 DIGIT	
-		//THIS TAKES 2 FUNCTIONS AND PUTS THEM IN 1 LOOP	
-		if (inputNumber.length === 2) {
-			for (let k = 0; k < 2; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 4](i, g);
+			case 2:
+				for (let k = 0; k < 2; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 4](i, g);
+						}
 					}
 				}
-			}
-		}
-		//3 DIGIT		
-		//THIS TAKES 3 FUNCTIONS AND PUTS THEM IN 1 LOOP		
-		if (inputNumber.length === 3) {
-			for (let k = 0; k < 3; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-		}
-		//4 DIGIT
-		//THIS TAKES 4 FUNCTIONS AND PUTS THEM IN 1 LOOP	
-		if (inputNumber.length === 4) {
-			for (let k = 0; k < 4; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 2](i, g);
-					}
-				}
-			}
-		}
-		//5 DIGIT
-		//THIS TAKES 4 FUNCTIONS IN LOOP AND ADDS A FUNCTION BEFORE	
-		if (inputNumber.length === 5) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					//TEN THOUSANDS
-					tens(i, g);
-				}
-			}
-			for (let k = 1; k < 5; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 1](i, g);
-					}
-				}
-			}
-		}
-		//6 DIGIT
-		// THERE ARE 2 LOOPS WITH LOOPING FUNCTIONS
-		if (inputNumber.length === 6) {
-			for (let k = 0; k < 2; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
-		}
-		//7 DIGIT
-		//MILLIONS
-		if (inputNumber.length === 7) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					millions(i, g);
-				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 1) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 1) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
-		}
-		//8 DIGIT
-		//THREE LOOPS WITH LOOPING FUNCTIONS
-		if (inputNumber.length === 8) {
-			for (let k = 2; k < 4; k++) {
-				if (i == k - 2) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
-					}
-				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 2) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 2) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
-		}
-		//9 DIGIT
-		if (inputNumber.length === 9) {
-			for (let k = 1; k < 4; k++) {
-				if (i == k - 1) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
-					}
-				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 3) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 3) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
-		}
-		//10 DIGIT
-		//TRILLIONS
-		if (inputNumber.length === 10) {
-			for (let k = 0; k < 4; k++) {
-				if (i == k) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
-					}
-				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 4) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
-					}
-				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 4) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
+				break;
 
-		}
-		//11 DIGIT	
-		if (inputNumber.length === 11) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			for (let k = 0; k < 4; k++) {
-				if (i == k + 1) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
+			case 3:
+				for (let k = 0; k < 3; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
 					}
 				}
-			}
+				break;
 
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 5) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
+			case 4:
+				for (let k = 0; k < 4; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 2](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 5) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
-					}
-				}
-			}
-		}
-		//12 DIGIT
-		if (inputNumber.length === 12) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					hundreds(i, g);
-				}
-			}
-			if (i == 1) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			for (let k = 0; k < 4; k++) {
-				if (i == k + 2) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
-					}
-				}
-			}
+				break;
 
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 6) {
+			case 5:
+				if (i == 0) {
 					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
+						//TEN THOUSANDS
+						tens(i, g);
 					}
 				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 6) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
+				for (let k = 1; k < 5; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 1](i, g);
+						}
 					}
 				}
-			}
-		}
-		//13 DIGIT
-		//BILLIONS
-		if (inputNumber.length === 13) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					billions(i, g);
-				}
-			}
-			if (i == 1) {
-				for (g = 0; g <= 9; g++) {
-					hundreds(i, g);
-				}
-			}
-			if (i == 2) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			for (let k = 0; k < 4; k++) {
-				if (i == k + 3) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
+				break;
+
+			case 6:
+				// THERE ARE 2 LOOPS WITH LOOPING FUNCTIONS		// arrWithFunctions = [trillions, millions, thousands, hundreds, tens, ones]
+				for (let k = 0; k < 2; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 7) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
+				for (let k = 2; k < 6; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 7) {
+
+				break;
+
+			//MILLIONS
+			case 7:
+				if (i == 0) {
 					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
+						millions(i, g);
 					}
 				}
-			}
-		}
-		//14 DIGIT
-		if (inputNumber.length === 14) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			if (i == 1) {
-				for (g = 0; g <= 9; g++) {
-					billions(i, g);
-				}
-			}
-			if (i == 2) {
-				for (g = 0; g <= 9; g++) {
-					hundreds(i, g);
-				}
-			}
-			if (i == 3) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			for (let k = 0; k < 4; k++) {
-				if (i == k + 4) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 1) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 8) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 1) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 8) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
+
+				break;
+
+			case 8:
+				//THREE LOOPS WITH LOOPING FUNCTIONS			
+				for (let k = 2; k < 4; k++) {
+					if (i == k - 2) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);
+						}
 					}
 				}
-			}
-		}
-		//15 DIGIT
-		if (inputNumber.length === 15) {
-			if (i == 0) {
-				for (g = 0; g <= 9; g++) {
-					hundreds(i, g);
-				}
-			}
-			if (i == 1) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			if (i == 2) {
-				for (g = 0; g <= 9; g++) {
-					billions(i, g);
-				}
-			}
-			if (i == 3) {
-				for (g = 0; g <= 9; g++) {
-					hundreds(i, g);
-				}
-			}
-			if (i == 4) {
-				for (g = 0; g <= 9; g++) {
-					tens(i, g);
-				}
-			}
-			for (let k = 0; k < 4; k++) {
-				if (i == k + 5) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctionsHigher[k](i, g);
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 2) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 0; k < 2; k++) {
-				if (i == k + 9) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k + 3](i, g);
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 2) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
 					}
 				}
-			}
-			for (let k = 2; k < 6; k++) {
-				if (i == k + 9) {
-					for (g = 0; g <= 9; g++) {
-						arrWithFunctions[k](i, g);
+				break;
+
+			case 9:
+				for (let k = 1; k < 4; k++) {
+					if (i == k - 1) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);
+						}
 					}
 				}
-			}
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 3) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 3) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			//TRILLIONS
+			case 10:
+				for (let k = 0; k < 4; k++) {
+					if (i == k) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);
+						}
+					}
+				}
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 4) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);  // arrWithFunctions = [trillions, millions, thousands, hundreds, tens, ones]
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 4) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			case 11:
+				if (i == 0) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				for (let k = 0; k < 4; k++) {
+					if (i == k + 1) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);  // arrWithFunctionsHigher = [trillions, hundreds, tens, millions]
+						}
+					}
+				}
+
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 5) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 5) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			case 12:
+				if (i == 0) {
+					for (g = 0; g <= 9; g++) {
+						hundreds(i, g);
+					}
+				}
+				if (i == 1) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				for (let k = 0; k < 4; k++) {
+					if (i == k + 2) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);   // arrWithFunctionsHigher = [trillions, hundreds, tens, millions]
+						}
+					}
+				}
+
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 6) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);  //arrWithFunctions = [trillions, millions, thousands, hundreds, tens, ones]
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 6) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			case 13:
+				//BILLIONS
+				if (i == 0) {
+					for (g = 0; g <= 9; g++) {
+						billions(i, g);
+					}
+				}
+				if (i == 1) {
+					for (g = 0; g <= 9; g++) {
+						hundreds(i, g);
+					}
+				}
+				if (i == 2) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				for (let k = 0; k < 4; k++) {
+					if (i == k + 3) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);  // arrWithFunctionsHigher = [trillions, hundreds, tens, millions]
+						} 
+					}
+				}
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 7) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 7) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			case 14:
+				if (i == 0) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				if (i == 1) {
+					for (g = 0; g <= 9; g++) {
+						billions(i, g);
+					}
+				}
+				if (i == 2) {
+					for (g = 0; g <= 9; g++) {
+						hundreds(i, g);
+					}
+				}
+				if (i == 3) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				for (let k = 0; k < 4; k++) {
+					if (i == k + 4) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);
+						}
+					}
+				}
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 8) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 8) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+
+			case 15:
+				if (i == 0) {
+					for (g = 0; g <= 9; g++) {
+						hundreds(i, g);
+					}
+				}
+				if (i == 1) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				if (i == 2) {
+					for (g = 0; g <= 9; g++) {
+						billions(i, g);
+					}
+				}
+				if (i == 3) {
+					for (g = 0; g <= 9; g++) {
+						hundreds(i, g);
+					}
+				}
+				if (i == 4) {
+					for (g = 0; g <= 9; g++) {
+						tens(i, g);
+					}
+				}
+				for (let k = 0; k < 4; k++) {
+					if (i == k + 5) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctionsHigher[k](i, g);
+						}
+					}
+				}
+				for (let k = 0; k < 2; k++) {
+					if (i == k + 9) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k + 3](i, g);  // arrWithFunctions = [trillions, millions, thousands, hundreds, tens, ones]
+						}
+					}
+				}
+				for (let k = 2; k < 6; k++) {
+					if (i == k + 9) {
+						for (g = 0; g <= 9; g++) {
+							arrWithFunctions[k](i, g);
+						}
+					}
+				}
+				break;
+			default:
+				break;
 		}
 	}
 
-	//TEXT PRINT, COULD'VE LIMIT WITH jQuery, BUT, FUCK IT :)
-	if (inputNumber.length > 15) {
-		textContainer.innerHTML = `<h2 id="numberWordPrint">Please enter smaller number, max 1000 quadrillion-1</h2>`
-	}
-	else
-		textContainer.innerHTML =
-			`<h2 id="numberWordPrint">${stringAnvil}</h2>`
+	//TEXT PRINT
+	inputNumber.length > 15 ? textContainer.innerHTML = `<h2 id="numberWordPrint">Please enter smaller number, max 1000 quadrillion-1</h2>`
+		: textContainer.innerHTML = `<h2 id="numberWordPrint">${stringAnvil}</h2>`
 })
 
 

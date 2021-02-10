@@ -2,7 +2,7 @@
 
 // MATHEMATICALLY CORRECT CALCULATOR, by Ivan Jamandilovski 01.02.20201
 
-$(document).ready(() => {
+$(document).ready(function () {
 
     console.log(`KEYCOMMANDS: \n\nDel, Escape, c: clear all \nPageUp: Sound on/off \nPageDown: Power on/off \nEnter: Equals \n\n ver. 1.0`);
 
@@ -57,62 +57,66 @@ $(document).ready(() => {
 
     /*THIS FUNCTION IS USED TO RESET THE COUNTER TO SHOW ZERO AFTER EACH OPERATOR, BUT NOT 
     ADD TO THE NUMBER, AND LENGTH CHECK IS TO HANDLE THE DECIMAL NUMBER*/
-    deleteZero = () => val1.value == 0 && val1.value.length === 1 ? val1.value = '' :
+    function deleteZero() {
+        if (val1.value == 0 && val1.value.length === 1) {
+            val1.value = '';
+        }
+    }
 
-        ////////////////////////////////////////
-        //THIS HANDLES THE YELLOW POWER BUTTON//
-        ////////////////////////////////////////
+    ////////////////////////////////////////
+    //THIS HANDLES THE YELLOW POWER BUTTON//
+    ////////////////////////////////////////
 
-        powerButton.click(() => {
-            //THE POWER BUTTON ON STATE
-            if (onOff === true) {
-                val1.style.animationName = "power-on";
-                val1.style.animationDuration = "0.5s";
-                val1.style.animationFillMode = "both";
+    powerButton.click(function () {
+        //THE POWER BUTTON ON STATE
+        if (onOff === true) {
+            val1.style.animationName = "power-on";
+            val1.style.animationDuration = "0.5s";
+            val1.style.animationFillMode = "both";
 
-                val2.style.animationName = "power-on";
-                val2.style.animationDuration = "0.49s";
-                val2.style.animationFillMode = "both";
+            val2.style.animationName = "power-on";
+            val2.style.animationDuration = "0.49s";
+            val2.style.animationFillMode = "both";
 
-                for (let each of buttonForStyling) {
-                    each.style.color = "white"
-                    each.style.textShadow = "0px 0px 25px white"
-                }
-
-                beep = $("#beep")[0];
-                clearBut.click();
-                beep.play();
-                console.log(`=POWER ON=`);
+            for (let each of buttonForStyling) {
+                each.style.color = "white"
+                each.style.textShadow = "0px 0px 25px white"
             }
-            //POWER BUTTON OFF STATE
-            else {
-                val1.style.animationName = "power-off";
-                val1.style.animationDuration = "2s";
-                val1.style.animationFillMode = "both";
 
-                val2.style.animationName = "power-off";
-                val2.style.animationDuration = "2s";
-                val2.style.animationFillMode = "both";
+            beep = $("#beep")[0];
+            clearBut.click();
+            beep.play();
+            console.log(`=POWER ON=`);
+        }
+        //POWER BUTTON OFF STATE
+        else {
+            val1.style.animationName = "power-off";
+            val1.style.animationDuration = "2s";
+            val1.style.animationFillMode = "both";
+
+            val2.style.animationName = "power-off";
+            val2.style.animationDuration = "2s";
+            val2.style.animationFillMode = "both";
 
 
-                for (let each of buttonForStyling) {
-                    each.style.color = "gray"
-                    each.style.textShadow = "0px 0px 0px white"
-                }
-
-                beep = $("#dummy")[0];
-                console.log(`=POWER OFF=`);
-                clearBut.click();
+            for (let each of buttonForStyling) {
+                each.style.color = "gray"
+                each.style.textShadow = "0px 0px 0px white"
             }
-            onOff = !onOff;
+
+            beep = $("#dummy")[0];
+            console.log(`=POWER OFF=`);
+            clearBut.click();
+        }
+        onOff = !onOff;
 
 
-        })
+    })
 
     /////////////////////////////////////
     //THIS HANDLES THE RED AUDIO BUTTON//
     /////////////////////////////////////
-    audioButton.click(() => {
+    audioButton.click(function () {
         if (onOff === false) {
             if (audioOnOff === false) {
                 beep = $("#dummy")[0];
@@ -127,13 +131,17 @@ $(document).ready(() => {
     })
 
     //? HELP BUTTON
-    $("#help").click(() => alert(`KEYCOMMANDS: \nDel, Escape, 'C': clear all \nPageUp: Sound on/off \nPageDown: Power on/off \nEnter: Equals \n\n ver. 1.0 Ivan Jamandilovski`))
+    $("#help").click(function () {
+        alert(`KEYCOMMANDS: \nDel, Escape, 'C': clear all \nPageUp: Sound on/off \nPageDown: Power on/off \nEnter: Equals \n\n ver. 1.0 Ivan Jamandilovski
+        `);
+    })
 
     /////////////////////////////////////////////
     //THIS HANDLES ALL THE INPUTS FROM KEYBOARD//
     /////////////////////////////////////////////
 
-    window.addEventListener("keydown", event => {
+
+    window.addEventListener("keydown", function (event) {
         if (event.defaultPrevented) {
             return; // Do nothing if the event was already processed
         }
@@ -143,14 +151,14 @@ $(document).ready(() => {
             if (event.key === `${i}`) {
                 beep.play();
                 deleteZero();
-                val1.value += +(i);
+                val1.value += parseFloat(i);
             }
         }
 
         //THIS HANDLES ALL THE OPERATORS FROM KEYBOARD
         for (let i = 0; i < listOfPossibleOperators.length; i++) {
             if (event.key === `${listOfPossibleOperators[i]}` && equationEnded === false) {
-                numbersGlobal.push(+val1.value);
+                numbersGlobal.push(parseFloat(val1.value));
                 console.log('at operator push', val1.value);
                 operator.push(listOfPossibleOperators[i]);
                 val2.value += `${val1.value}${listOfPossibleOperators[i]}`;
@@ -173,9 +181,9 @@ $(document).ready(() => {
         }
 
         //EVENT KEYS FOR EQUALS, DOT, CLEAR, AND TOGGLE SOUND AND POWER
-        event.key === `PageUp` ? audioButton.click()
-            : event.key === `PageDown` ? powerButton.click()
-                : event.key === `Enter` ? equalsBut.click()
+        event.key === `PageUp` ? audioButton.click() 
+            :event.key === `PageDown` ? powerButton.click() 
+                :event.key === `Enter` ? equalsBut.click()
                     : event.key === '.' ? dotBut.click()
                         : event.key === `Delete` || event.key === `Escape` || event.key === `c` ? clearBut.click()
                             : result = result;
@@ -191,7 +199,7 @@ $(document).ready(() => {
             for (let each of toDelArray) {
                 val1.value += each;
             }
-            +val1.value;
+            parseFloat(val1.value);
         }
         // // Cancel the default action to avoid it being handled twice
         event.preventDefault();
@@ -200,7 +208,7 @@ $(document).ready(() => {
     /////////////////////////////////////
     //THIS HANDLES ALL THE MOUSE CLICKS//
     /////////////////////////////////////
-    window.addEventListener("click", event => {
+    window.addEventListener("click", function (event) {
         if (event.defaultPrevented) {
             return; // Do nothing if the event was already processed
         }
@@ -218,7 +226,7 @@ $(document).ready(() => {
 
             //ALL THE OPERATORS, IF EQUATION IS FIRST STARTED
             if (event.target.innerText === `${listOfPossibleOperators[i]}` && equationEnded === false) {
-                numbersGlobal.push(+val1.value);
+                numbersGlobal.push(parseFloat(val1.value));
                 operator.push(listOfPossibleOperators[i]);
                 val2.value += `${val1.value}${listOfPossibleOperators[i]}`;
                 val1.value = 0;
@@ -238,7 +246,7 @@ $(document).ready(() => {
             }
             //SQUARE ROOT BUTTON
             if (event.target.innerText === `√`) {
-                numbersGlobal.push(+val1.value);
+                numbersGlobal.push(parseFloat(val1.value));
                 operator.push(`√`);
                 val2.value += `√${val1.value}`;
                 val1.value = ``;
@@ -249,7 +257,7 @@ $(document).ready(() => {
 
             //SINUS BUTTON
             else if (event.target.innerText === `sin`) {
-                numbersGlobal.push(+val1.value);
+                numbersGlobal.push(parseFloat(val1.value));
                 operator.push(`sin`);
                 val2.value += `sin ${val1.value}`;
                 val1.value = 0;
@@ -264,7 +272,7 @@ $(document).ready(() => {
     });
 
     //CLEAR BUTTON, ALSO USED BY DELETE BUTTON, C AND ESCAPE
-    clearBut.click(() => {
+    clearBut.click(function () {
         numbersGlobal = [];
         operator = ['skip'];
         result = 0;
@@ -276,7 +284,7 @@ $(document).ready(() => {
         additonalArray = [0];
     });
 
-    dotBut.click(() => {
+    dotBut.click(function () {
         if (dotCounter === 0) {
             val1.value += '.';
             beep.play();
@@ -290,10 +298,10 @@ $(document).ready(() => {
     /// EQUALS ///
     //////////////
 
-    equalsBut.click(() => {
+    equalsBut.click(function () {
         // FIRST, TO CHECK IF EQUATION IS ENDED
         if (equationEnded === false) {
-            numbersGlobal.push(+val1.value);
+            numbersGlobal.push(parseFloat(val1.value));
             for (let i = 0; i < numbersGlobal.length; i++) {
                 //SKIP
                 if (operator[i] === `skip`) {
@@ -375,14 +383,19 @@ $(document).ready(() => {
                 }
             }
 
-            //LIMITING MORE DECIMAL PLACES ON SECOND DISPLAY TO ACCOMODATE MORE NUMBERS           
-
-            numbersGlobal.length > 1 ? val2.value += `${val1.value}=${Math.round(result * 1000) / 1000}`  //TO PRINT IN THE SECOND DISPLAY IF EQUATION IS BIGGER             
-                : val2.value += `=${Math.round(result * 1000) / 1000}`   //TO PRINT IN SECOND DISPLAY IF EQUATION IS SINGLE STATEMENT
+               //LIMITING MORE DECIMAL PLACES ON SECOND DISPLAY TO ACCOMODATE MORE NUMBERS
+            //TO PRINT IN THE SECOND DISPLAY IF EQUATION IS BIGGER  
+            if (numbersGlobal.length > 1) {
+                val2.value += `${val1.value}=${Math.round(result*1000)/1000}`
+            }
+            //TO PRINT IN SECOND DISPLAY IF EQUATION IS SINGLE STATEMENT
+            else {
+                val2.value += `=${Math.round(result*1000)/1000}`
+            }
 
             //GLOBAL RESULT
             //LIMITING LESS DECIMAL PLACES ON FIRST DISPLAY BECAUSE IT IS SHOWING ONLY RESULT
-            val1.value = Math.round(result * 10000000) / 10000000;
+            val1.value = Math.round(result*10000000)/10000000;
 
             //THESE PARAMETERS PREPARE THE CALCULATOR FOR STATEMENTS AFTER THE EQUALS IS PRESSED
             numbersGlobal = [];
