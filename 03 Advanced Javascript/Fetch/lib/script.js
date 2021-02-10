@@ -15,10 +15,31 @@ document.getElementById("firstButton").addEventListener('click', function () {
         .then(users => {
             for (let each of users) {
                 listToPrintUsers.innerHTML +=
-                    `<li>Name: ${each.name}</li>
+                    `
+                    <h2>${each.name}</h2>                    
+            <li>Name: ${each.name}</li>
             <li>Username: ${each.username}</li>
             <li>Email: ${each.email}</li>
+            <li>Address: <ul> 
+            <li>Stret: ${each.address.street}</li> 
+            <li>Suite: ${each.address.suite}</li>   
+            <li>City: ${each.address.city}</li>
+            <li>Zipcode: ${each.address.zipcode}</li>     
+            <li>Geo: <ul>
+            <li>Latitude: ${each.address.geo.lat}</li> 
+            <li>Longditude: ${each.address.geo.lng}</li>                  
+            </ul>
+            </ul>
+            <li>Phone: ${each.phone}</li>
+            <li>Website: ${each.website}</li>    
+            <li>Company:
+            <ul> 
+            <li>Name: ${each.company.name}</li>  
+            <li>catchPhrase: ${each.company.Catchphrase}</li>  
+            <li>bs: ${each.company.bs}</li> 
+            </ul>
             <br/>
+            <hr/>
             `
             }
         })
