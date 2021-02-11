@@ -49,7 +49,7 @@ let adminTableDiv = document.getElementById("adminTableDiv");
 let adminTable = document.getElementById("adminTable");
 
 //used to manipulate some validations
-signedIn = false;
+let signedIn = false;
 
 //HERE ARE ALL THE USERS STORED
 let usersArray = []
@@ -129,7 +129,7 @@ registerNewButton.addEventListener('click', function () {
 
     //USERNAME OR PASSWORD TOO SHORT
     if (registerUserName.value.length <= 2
-        && registerPassword.value <= 5
+        && registerPassword.value.length <= 5
         && verifyPassword.value === registerPassword.value
         && canCreate === true) {
         alert(`Ве молиме внесете корисничко име со повеќе од 2 карактери и лозинка со повеќе од 5 карактери`)
