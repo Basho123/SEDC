@@ -22,12 +22,12 @@ let columnDraw = (columns) => {
     return trArray;
 }
 
-let tableDraw = (rows, columns) => {
+let tableDraw = (rows) => {
     if (rows === 0) {
         return 0;
     }
     else {
-        tableDraw(rows - 1, columns);
+        tableDraw(rows - 1);
         return table.innerHTML += `<tr> ${trArray}</tr>`
     }
 }
@@ -37,7 +37,7 @@ submit.addEventListener('click', () => {
     columnDraw(columnsInput.value)
 
     table.innerHTML = '';
-    tableDraw(rowsInput.value, columnsInput.value);
+    tableDraw(rowsInput.value);
     rowsInput.value = ``
     columnsInput.value = ``
 })
