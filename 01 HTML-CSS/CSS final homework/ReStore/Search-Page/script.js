@@ -1,7 +1,9 @@
 //script.js
 //searchpage script
-
-
+document.cookie = "name=ReStore";
+document.cookie = "SameSite=None"
+document.cookie = "Secure";
+console.log(document.cookie);
 
 let searchInput = document.getElementById('search-input');
 let searchButton = document.getElementById('search-button');
@@ -19,18 +21,16 @@ let counter2 = 0;
 let oustideBody = ``;
 
 let electricGuitarData = link => functionForSearch(link, '../Electric-Guitars/');
-electricGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Electric-Guitars/Index.html`);
+electricGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Electric-Guitars/Index.html`)
 
 let acousticGuitarData = link => functionForSearch(link, '../Acoustic-Guitars/');
-acousticGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Acoustic-Guitars/Index.html`);
-
+acousticGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Acoustic-Guitars/Index.html`)
 let bassGuitarData = link => functionForSearch(link, '../Categories/Guit-Bass/Electric-Bass-Guitars/');
-bassGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Electric-Bass-Guitars/Index.html`);
-
+bassGuitarData(`http://127.0.0.1:5501/Categories/Guit-Bass/Electric-Bass-Guitars/Index.html`)
 //FUNCTION FOR MAKING A CALL, FIRST PARAMETER IS URL, SECOND IS THE PATH TO THE FOLDER
 
 async function functionForSearch(link, linkToClick = ``) {
-    let response = await fetch(link)
+    let response = await fetch(link);
     let data = await response.text();
     //Data comes in HTML syntax 
     arrayWithData.push(data);
