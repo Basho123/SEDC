@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Beer fetch</title>
-  </head>
-  <body>
-    <select name="beers" id="beers">
-      <option value="displayAll">Display all beers</option>
-    </select>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <button id="post">Post</button>
-   
+  <title>Beer fetch</title>
+</head>
+
+<body>
+  <style>
+    body {
+      text-align: center;
+    }
+
+    table {
+      margin: 0px auto;
+    }
+
+    th {
+      width: 250px;
+    }
+  </style>
+
+  <select name="beers" id="select">
+    <!-- <option disabled selected>Choose an option</option> -->
+    <option value="displayAll">Display all beers</option>
+  </select>
+
+  <button id="post">Post</button>
+
+  <table border="1px">
+    <tbody id="table">
+    </tbody>
+  </table>
   
-    <script src="https://code.jquery.com/jquery-3.5.1.js"
-      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-      crossorigin="anonymous"
-    ></script>
-    <script src="script.js"></script>
-  </body>
+  <div id="detailedShow">
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous"></script>
+  <script src="script.js"></script>
+</body>
+
 </html>
