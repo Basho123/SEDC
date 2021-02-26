@@ -118,6 +118,10 @@ let postButton = document.getElementById(`post`);
 let optionValue = document.getElementsByTagName(`option`);
 let select = document.getElementById(`select`);
 let detailedShow = document.getElementById(`detailedShow`)
+let searchBar = document.getElementById(`searchBar`);
+let searchButton = document.getElementById(`searchButton`);
+
+let querryParameters = [`beer_name`, `yeast`, `hops`, `malt`, `food`, `ids`]
 
 //this is a counter used to show/hide previous next buttons
 let globalPageCounter = 1;
@@ -191,7 +195,7 @@ async function listBeers(counter = 1) {
   //this targets the clicked a tag
   for (let i = 0; i < anchors.length; i++) {
     anchors[i].addEventListener(`click`, () => {
-      
+
       //this was used for debugging purposes, may be needed later
       window.sessionStorage.setItem(`anchors`, anchors[i].href)
 
@@ -213,7 +217,7 @@ async function listBeers(counter = 1) {
           <td><button id="nextButton">Next</button></td>
         </tr>
         `;
-        
+
         detailedShow.innerHTML = ``;
         //the data to be shown
         detailedShow.innerHTML += `        
@@ -228,8 +232,8 @@ async function listBeers(counter = 1) {
         `
 
         //separate function for the next and previous buttons to navigate from the page itself directly
-       //almost identical to the function above
-       //could've adjusted the function parameters, but maybe later.
+        //almost identical to the function above
+        //could've adjusted the function parameters, but maybe later.
         async function prevNextPage(number) {
           //the `number` parameter will be the session storage number actually
           let response = await fetch(`https://api.punkapi.com/v2/beers/${number}`)
@@ -245,7 +249,7 @@ async function listBeers(counter = 1) {
             <td><button id="previousButton">Previous</button></td>
             <td><button id="nextButton">Next</button></td>
           </tr>
-          `; 
+          `;
           detailedShow.innerHTML = ``;
           detailedShow.innerHTML += `        
           <h1>${data[0].name}</h1>
@@ -305,5 +309,42 @@ postButton.addEventListener(`click`, () => {
   }
 })
 
+
+searchButton.addEventListener(`click`, () => {
+  table.innerHTML = ``
+  detailedShow.innerHTML = `<h1>Search results for "${searchBar.value}"</h1>`;
+  async function searchEngine() {
+    for (let i = 0; i < querryParameters.length; i++) {
+      let data = await fetch(`https://api.punkapi.com/v2/beers?${querryParameters[i]}=${searchBar.value}`)
+      console.log(`https://api.punkapi.com/v2/beers?${querryParameters[i]}=${searchBar.value}`);
+      let searchResult = await data.json();
+      console.log(searchResult);
+      if (searchResult.length > 0) {
+        detailedShow.innerHTML += `
+        <h2>In category "${querryParameters[i]}"</h2>
+        `;
+        for (let g = 0; g < searchResult.length; g++) {
+          detailedShow.innerHTML += `<p><a href="https://api.punkapi.com/v2/beers/${searchResult[g].id}" onclick = "return false">${searchResult[g].name}</a></p>`
+        }
+        function navigateFromSearchEngine() {
+          let anchor = document.getElementsByTagName(`a`)
+          for (let g = 0; g < anchor.length; g++) {
+            anchor.addEventListener(`click`, () => {
+              async function navigateLinks() {
+                let data = await fetch(anchor[g].href);
+                let navigateUrl = await data(json);
+
+                //TREBA detailedBeerBrowse da ja izvadam nadvor za da ja reiskoristam tuka
+              }
+
+            })
+          }
+        }
+      }
+      else detailedShow.innerHTML = `<h1>No results found for "${searchBar.value}"</h1>`;
+    }
+  }
+  searchEngine();
+})
 
 
