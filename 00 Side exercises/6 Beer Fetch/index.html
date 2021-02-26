@@ -4,30 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" type="text/css">
 
   <title>Beer fetch</title>
 </head>
 
 <body>
-  <style>
-    body {
-      text-align: center;
-    }
-
-    table {
-      margin: 0px auto;
-    }
-
-    th {
-      width: 250px;
-    }
-  </style>
-
   <select name="beers" id="select">
     <!-- <option disabled selected>Choose an option</option> -->
     <option value="displayAll">Display all beers</option>
+    <option value="displayWeak">Display all beers with less than 4% alcohol</option>
+    <option value="displayStrong">Display all beers with more than 4% alcohol</option>
+    <option value="displayUltra">Display all beers with more than 30% alcohol</option>
   </select>
-  <button id="post">Post</button>
+  <button id="post">Show!</button>
 
   <br>
   <input type="text" id="searchBar">

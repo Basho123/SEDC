@@ -1,0 +1,105 @@
+*:focus{
+    outline: none;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    text-align: center;
+}
+a{
+    text-decoration: none;
+    color: blanchedalmond;
+}
+
+a:hover{
+    color: red;
+}
+
+body{
+    background-color: black;
+    color: blanchedalmond;
+}
+
+.tableId{
+    width: 20px;
+    background-color: rgb(75, 0, 0);
+}
+
+
+table{
+    margin: 0px auto;
+    margin-top: 25px;
+    font-size: 30px;
+    border-radius:10px;
+    outline: none;
+   
+}
+
+#next,
+#previous{
+    background-color: rgba(255, 255, 255, 0);
+    color: blanchedalmond;
+    font-size: 30px;
+    border-radius: 25px;
+    border: none; 
+    box-shadow: 0 0 25px;
+}
+
+#next:hover,
+#previous:hover{
+    color: red;
+}
+
+#nextButton,
+#previousButton{
+    background-color: rgba(255, 255, 255, 0);
+    color: blanchedalmond;
+    font-size: 30px;
+    border-radius: 5px;
+    border: none; 
+    box-shadow: 0 0 25px;
+    margin: 25px;
+}
+
+#nextButton:hover,
+#previousButton:hover{
+    background-color: rgba(255, 255, 255, 0);
+    color: rgb(255, 153, 0);
+    font-size: 30px;
+    border-radius: 5px;
+    border: none; 
+    box-shadow: 0 0 25px;
+    margin: 25px;
+}
+
+
+
+#searchBar,
+#searchButton,
+#post,
+#select{
+    margin-top: 25px;
+    background-color: blanchedalmond;
+    color:black;
+    font-size: 20px;
+    height: 50px;
+    border-radius: 10px;
+}
+
+#mainContainer{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#mainContainer > div:nth-of-type(1){
+    width: 25%;   
+    margin-left: 10%; 
+    text-align: left;
+}
+
+#mainContainer > div:nth-of-type(2){
+    width: 25%;
+    margin-right: 10%;
+   
+}

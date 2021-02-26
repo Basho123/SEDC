@@ -2,28 +2,27 @@
 
 // https://punkapi.com/documentation/v2?fbclid=IwAR0cH640GtgtbQ2U3BE_8P1f_hT-isFvPXQzGvr18w1tvUVgPZhb7OIqgbU
 
-/* Display functions
-abv_gt	number	Returns all beers with ABV greater than the supplied number
-abv_lt	number	Returns all beers with ABV less than the supplied number
-ibu_gt	number	Returns all beers with IBU greater than the supplied number
-ibu_lt	number	Returns all beers with IBU less than the supplied number
-ebc_gt	number	Returns all beers with EBC greater than the supplied number
-ebc_lt	number	Returns all beers with EBC less than the supplied number
-beer_name	string	Returns all beers matching the supplied name (this will match partial strings as well so e.g punk will return Punk IPA), if you need to add spaces just add an underscore (_).
-yeast	string	Returns all beers matching the supplied yeast name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
+/* # region Display querry parameter functions
+abv_gt      	number	Returns all beers with ABV greater than the supplied number
+abv_lt	      number	Returns all beers with ABV less than the supplied number
+ibu_gt	      number	Returns all beers with IBU greater than the supplied number
+ibu_lt	      number	Returns all beers with IBU less than the supplied number
+ebc_gt	      number	Returns all beers with EBC greater than the supplied number
+ebc_lt      	number	Returns all beers with EBC less than the supplied number
+beer_name   	string	Returns all beers matching the supplied name (this will match partial strings as well so e.g punk will return Punk IPA), if you need to add spaces just add an underscore (_).
+yeast	        string	Returns all beers matching the supplied yeast name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
 brewed_before	date	Returns all beers brewed before this date, the date format is mm-yyyy e.g 10-2011
 brewed_after	date	Returns all beers brewed after this date, the date format is mm-yyyy e.g 10-2011
-hops	string	Returns all beers matching the supplied hops name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
-malt	string	Returns all beers matching the supplied malt name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
-food	string	Returns all beers matching the supplied food string, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
-ids	string (id|id|...)	Returns all beers matching the supplied ID's. You can pass in multiple ID's by separating them with a | symbol.
+hops	        string	Returns all beers matching the supplied hops name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
+malt        	string	Returns all beers matching the supplied malt name, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
+food	        string	Returns all beers matching the supplied food string, this performs a fuzzy match, if you need to add spaces just add an underscore (_).
+ids	          string (id|id|...)	Returns all beers matching the supplied ID's. You can pass in multiple ID's by separating them with a | symbol.
 Get a Single Beer
 */
+// //#endregion
 
 // #region Display class properties
-
 /* 
-
 [
   {
     "id": 192,
@@ -109,7 +108,6 @@ Get a Single Beer
   }
 ]
 */
-
 // #end region
 
 
@@ -137,55 +135,180 @@ async function getBeers(pageNumber) {
 }
 
 
-//this is a function to make a list of all the beers
-async function listBeers(counter = 1) {
+
+// # region detailedBeerBrowse THIS FUNCTION PRINTS DETAILED BEER PAGE AND ALLOWS NAVIGATION, JUST PASS THE URL OF THE ELEMENT
+async function detailedBeerBrowse(url) {
+  let response = await fetch(url)
+  let data = await response.json()
+
+  //this saves to session storage the id number for later manipulation
+  window.sessionStorage.setItem(`pageNumber`, data[0].id)
+
+  //if there is no image present, use a local image
+  if (data[0].image_url == null) data[0].image_url = "noImg.jpg"
+
+  table.innerHTML = `
+
+  <tr>
+    <td><button id="previousButton">Previous</button></td>
+    <td><button id="nextButton">Next</button></td>
+  </tr>
+  `;
+
+  detailedShow.innerHTML = ``;
+  //the data to be shown
+  detailedShow.innerHTML += `        
+  <div id="mainContainer">  
+  <div>
+    <h1>${data[0].name}</h1>     
+    <p><i>#id ${data[0].id}</i></p>  
+    <p><i>${data[0].tagline}</i></p>
+    <h3>Alcohol: ${data[0].abv}%</h3>
+    <p><b>First brewed: ${data[0].first_brewed}</b></p>
+    <p>${data[0].description}</p>
+    <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
+    <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+  </div>
+  <div>
+   <img src=${data[0].image_url} height ="600px">
+  </div>      
+</div> 
+  `
+
+  //separate function for the next and previous buttons to navigate from the page itself directly
+  //almost identical to the function above
+  //could've adjusted the function parameters, but maybe later.
+  async function prevNextPage(number) {
+    //the `number` parameter will be the session storage number actually
+    let response = await fetch(`https://api.punkapi.com/v2/beers/${number}`)
+    let data = await response.json()
+
+    if (data[0].image_url == null) data[0].image_url = "noImg.jpg"
+
+    window.sessionStorage.setItem(`pageNumber`, data[0].id)
+
+    table.innerHTML = `
+  
+    <tr>
+      <td><button id="previousButton">Previous</button></td>
+      <td><button id="nextButton">Next</button></td>
+    </tr>
+    `;
+    detailedShow.innerHTML = ``;
+    detailedShow.innerHTML += `        
+    <div id="mainContainer">  
+    <div>
+      <h1>${data[0].name}</h1>       
+      <p><i>#id ${data[0].id}</i></p>  
+      <p><i>${data[0].tagline}</i></p>
+      <h3>Alcohol: ${data[0].abv}%</h3>
+      <p><b>First brewed: ${data[0].first_brewed}</b></p>
+      <p>${data[0].description}</p>
+      <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
+      <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+    </div>
+    <div>
+     <img src=${data[0].image_url} height ="600px">
+    </div>      
+  </div> 
+    `
+    document.getElementById(`previousButton`).addEventListener(`click`, () => {
+      if (window.sessionStorage.pageNumber == 1) {
+        window.sessionStorage.pageNumber = 325
+        prevNextPage(window.sessionStorage.pageNumber)
+      }
+      else prevNextPage(+window.sessionStorage.pageNumber - 1)
+    })
+
+    document.getElementById(`nextButton`).addEventListener(`click`, () => {
+      if (window.sessionStorage.pageNumber == 325) {
+        window.sessionStorage.pageNumber = 1
+        prevNextPage(+window.sessionStorage.pageNumber)
+      }
+      else prevNextPage(+window.sessionStorage.pageNumber + 1)
+    })
+  }
+
+  document.getElementById(`previousButton`).addEventListener(`click`, () => {
+    if (window.sessionStorage.pageNumber == 1) {
+      window.sessionStorage.pageNumber = 325
+      prevNextPage(window.sessionStorage.pageNumber)
+    }
+    else prevNextPage(+window.sessionStorage.pageNumber - 1)
+  })
+
+  document.getElementById(`nextButton`).addEventListener(`click`, () => {
+    if (window.sessionStorage.pageNumber == 325) {
+      window.sessionStorage.pageNumber = 1
+      prevNextPage(+window.sessionStorage.pageNumber)
+    }
+    else prevNextPage(+window.sessionStorage.pageNumber + 1)
+  })
+}
+// //#endregion
+
+
+
+//# region THIS MAKES THE MAIN PAGE TABLE
+async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=80`) {
   table.innerHTML = ``
   table.innerHTML = `
   <tr> 
-      <th><button id="previous">Previous Page</button></th>
+      <th><button id="previous"><</button></th>
       <th colspan=2>Page ${counter}</th>
-      <th><button id="next">Next Page</button></th>
+      <th><button id="next">></button></th>
   </tr>
   <tr>
-    <th style="width: 25px;">ID</th>    
+    <th>ID</th>    
     <th>Beer Name</th>
     <th>Alcohol Percentage</th>
     <th>Image of beer</th>
   </tr>`
 
   //all the beers in a page are fetched here
-  for (let i = 0; i < 20; i++) {
-    let result = await getBeers(counter);
-    if (result[i].image_url == null) result[i].image_url = "noImg.jpg"
-    table.innerHTML += `
-      <tr>
-          <td>${result[i].id}</td>
-          <td><a href="https://api.punkapi.com/v2/beers/${result[i].id}" onclick="return false";>${result[i].name}</a></td>
-          <td>${result[i].abv}%</td>
-          <td><img src=${result[i].image_url} height="150px"></td>
-      </tr>
-      `
-  }
-
-  //DOM targeting for newly created buttons
   let previous = document.getElementById(`previous`);
   let next = document.getElementById(`next`);
 
+  let result = await getBeers(counter + querySelector + perPage);
+  for (let i = 0; i < 80; i++) {
+    if (result[i] === undefined) {
+      next.hidden = true;
+      break;
+    }
+    else {
+      if (result[i].image_url == null) result[i].image_url = "noImg.jpg"
+      table.innerHTML += `
+        <tr>
+            <td class ="tableId">${result[i].id}</td>
+            <td><a href="https://api.punkapi.com/v2/beers/${result[i].id}" onclick="return false";>${result[i].name}</a></td>
+            <td>${result[i].abv}%</td>
+            <td><img src=${result[i].image_url} height="150px"></td>
+        </tr>
+        `
+
+    }
+
+  }
+
+  //DOM targeting for newly created buttons
+  previous = document.getElementById(`previous`);
+  next = document.getElementById(`next`);
+
   //validation for show/hide next and previous buttons
-  globalPageCounter == 13 ? next.hidden = true : next.hidden = false;
+  // globalPageCounter == 5 ? next.hidden = true : next.hidden = false;
   globalPageCounter == 1 ? previous.hidden = true : previous.hidden = false;
 
   //change to the next page
   next.addEventListener(`click`, () => {
     globalPageCounter < 13 ? globalPageCounter++ : false;
-    listBeers(globalPageCounter);
+    listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
 
   })
 
   //change to the previous page
   previous.addEventListener(`click`, () => {
     globalPageCounter > 1 ? globalPageCounter-- : false;
-    listBeers(globalPageCounter);
+    listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
   })
 
 
@@ -193,15 +316,16 @@ async function listBeers(counter = 1) {
   let anchors = document.getElementsByTagName(`a`)
 
   //this targets the clicked a tag
-  for (let i = 0; i < anchors.length; i++) {
-    anchors[i].addEventListener(`click`, () => {
+  for (let url of anchors) {
+    // for (let i = 0; i < anchors.length; i++) {
+    url.addEventListener(`click`, () => {
 
       //this was used for debugging purposes, may be needed later
-      window.sessionStorage.setItem(`anchors`, anchors[i].href)
+      window.sessionStorage.setItem(`anchors`, url.href)
 
       //this function opens a detailed page for a beer clicked
-      async function detailedBeerBrowse() {
-        let response = await fetch(anchors[i].href)
+      async function detailedBeerBrowse(url) {
+        let response = await fetch(url)
         let data = await response.json()
 
         //this saves to session storage the id number for later manipulation
@@ -210,6 +334,7 @@ async function listBeers(counter = 1) {
         //if there is no image present, use a local image
         if (data[0].image_url == null) data[0].image_url = "noImg.jpg"
 
+        table.parentElement.border = 0;
         table.innerHTML = `
 
         <tr>
@@ -220,15 +345,22 @@ async function listBeers(counter = 1) {
 
         detailedShow.innerHTML = ``;
         //the data to be shown
-        detailedShow.innerHTML += `        
-        <h1>${data[0].name}</h1>
-        <img src=${data[0].image_url} height ="600px">
-        <p><i>${data[0].tagline}</i></p>
-        <h3>Alcohol: ${data[0].abv}%</h3>
-        <p><b>First brewed: ${data[0].first_brewed}</b></p>
-        <p>${data[0].description}</p>
-        <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-        <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+        detailedShow.innerHTML += `      
+        <div id="mainContainer">  
+          <div>
+            <h1>${data[0].name}</h1>       
+            <p><i>#id ${data[0].id}</i></p>  
+            <p><i>${data[0].tagline}</i></p>
+            <h3>Alcohol: ${data[0].abv}%</h3>
+            <p><b>First brewed: ${data[0].first_brewed}</b></p>
+            <p>${data[0].description}</p>
+            <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
+            <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+          </div>
+          <div>
+           <img src=${data[0].image_url} height ="600px">
+          </div>      
+        </div> 
         `
 
         //separate function for the next and previous buttons to navigate from the page itself directly
@@ -252,14 +384,21 @@ async function listBeers(counter = 1) {
           `;
           detailedShow.innerHTML = ``;
           detailedShow.innerHTML += `        
-          <h1>${data[0].name}</h1>
-          <img src=${data[0].image_url} height ="600px">
-          <p><i>${data[0].tagline}</i></p>
-          <h3>Alcohol: ${data[0].abv}%</h3>
-          <p><b>First brewed: ${data[0].first_brewed}</b></p>
-          <p>${data[0].description}</p>
-          <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-          <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+          <div id="mainContainer">  
+          <div>
+            <h1>${data[0].name}</h1>      
+            <p><i>#id ${data[0].id}</i></p>  
+            <p><i>${data[0].tagline}</i></p>
+            <h3>Alcohol: ${data[0].abv}%</h3>
+            <p><b>First brewed: ${data[0].first_brewed}</b></p>
+            <p>${data[0].description}</p>
+            <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
+            <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
+          </div>
+          <div>
+           <img src=${data[0].image_url} height ="600px">
+          </div>      
+        </div> 
           `
           document.getElementById(`previousButton`).addEventListener(`click`, () => {
             if (window.sessionStorage.pageNumber == 1) {
@@ -294,57 +433,79 @@ async function listBeers(counter = 1) {
           else prevNextPage(+window.sessionStorage.pageNumber + 1)
         })
       }
-
-
-      detailedBeerBrowse();
+      detailedBeerBrowse(url);
     })
   }
 }
 
+// #endregion
+
 //what the post button will do when something from the drop down menu is chosen
 postButton.addEventListener(`click`, () => {
+  table.parentElement.border = 1;
+  detailedShow.innerHTML = ``;
   if (select[select.options.selectedIndex].value == `displayAll`) {
     globalPageCounter = 1;
+    window.sessionStorage.removeItem(`globalQuerySelector`)
+    window.sessionStorage.setItem(`globalQuerySelector`, ``)
     listBeers(globalPageCounter);
   }
+  if (select[select.options.selectedIndex].value == `displayStrong`) {
+    window.sessionStorage.removeItem(`globalQuerySelector`)
+    window.sessionStorage.setItem(`globalQuerySelector`, `&abv_gt=4`)
+    globalPageCounter = 1;
+    listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
+  }
+  if (select[select.options.selectedIndex].value == `displayWeak`) {
+    globalPageCounter = 1;
+    window.sessionStorage.removeItem(`globalQuerySelector`)
+    window.sessionStorage.setItem(`globalQuerySelector`, `&abv_lt=4`)
+    listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
+  }
+  if (select[select.options.selectedIndex].value == `displayUltra`) {
+    globalPageCounter = 1;
+    window.sessionStorage.removeItem(`globalQuerySelector`)
+    window.sessionStorage.setItem(`globalQuerySelector`, `&abv_gt=30`)
+    listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
+  }
+
 })
 
 
 searchButton.addEventListener(`click`, () => {
-  table.innerHTML = ``
-  detailedShow.innerHTML = `<h1>Search results for "${searchBar.value}"</h1>`;
-  async function searchEngine() {
-    for (let i = 0; i < querryParameters.length; i++) {
-      let data = await fetch(`https://api.punkapi.com/v2/beers?${querryParameters[i]}=${searchBar.value}`)
-      console.log(`https://api.punkapi.com/v2/beers?${querryParameters[i]}=${searchBar.value}`);
-      let searchResult = await data.json();
-      console.log(searchResult);
-      if (searchResult.length > 0) {
-        detailedShow.innerHTML += `
-        <h2>In category "${querryParameters[i]}"</h2>
-        `;
-        for (let g = 0; g < searchResult.length; g++) {
-          detailedShow.innerHTML += `<p><a href="https://api.punkapi.com/v2/beers/${searchResult[g].id}" onclick = "return false">${searchResult[g].name}</a></p>`
-        }
-        function navigateFromSearchEngine() {
-          let anchor = document.getElementsByTagName(`a`)
-          for (let g = 0; g < anchor.length; g++) {
-            anchor.addEventListener(`click`, () => {
-              async function navigateLinks() {
-                let data = await fetch(anchor[g].href);
-                let navigateUrl = await data(json);
-
-                //TREBA detailedBeerBrowse da ja izvadam nadvor za da ja reiskoristam tuka
-              }
-
-            })
+  if (searchBar.value.length != 0) {
+    table.innerHTML = ``
+    detailedShow.innerHTML = `<h1>Search results for "${searchBar.value}"</h1>`;
+    async function searchEngine() {
+      for (let querryParameter of querryParameters) {
+        let data = await fetch(`https://api.punkapi.com/v2/beers?${querryParameter}=${searchBar.value}`)
+        let searchResult = await data.json();
+        if (searchResult.length > 0) {
+          detailedShow.innerHTML += `
+          <h2>In category "${querryParameter}"</h2>
+          `;
+          for (let result of searchResult) {
+            detailedShow.innerHTML += `<p><a href="https://api.punkapi.com/v2/beers/${result.id}" onclick = "return false">${result.name}</a></p>`
           }
+          async function navigateFromSearchEngine() {
+            let anchor = document.getElementsByTagName(`a`)
+            for (let url of anchor) {
+              url.addEventListener(`click`, () => {
+                detailedBeerBrowse(url.href);
+              })
+            }
+          }
+          navigateFromSearchEngine();
         }
       }
-      else detailedShow.innerHTML = `<h1>No results found for "${searchBar.value}"</h1>`;
     }
+    searchEngine();
   }
-  searchEngine();
+
+
+
+  // navigateLinks();
+
 })
 
 
