@@ -118,25 +118,39 @@ let select = document.getElementById(`select`);
 let detailedShow = document.getElementById(`detailedShow`)
 let searchBar = document.getElementById(`searchBar`);
 let searchButton = document.getElementById(`searchButton`);
-
 let querryParameters = [`beer_name`, `yeast`, `hops`, `malt`, `food`, `ids`]
+let globalPageCounter = 1; //this is a counter used to show/hide previous buttons
+let baseUrl = `https://api.punkapi.com/v2/beers?page=`; //base url from where pages are fetched later
 
-//this is a counter used to show/hide previous next buttons
-let globalPageCounter = 1;
-
-//base url from where pages are fetched later
-let baseUrl = `https://api.punkapi.com/v2/beers?page=`;
-
-//function for fetching the data
+//FUNCTION FOR FETCHING THE DATA
 async function getBeers(pageNumber) {
   let data = await fetch(baseUrl + pageNumber);
   let parsedData = await data.json();
   return parsedData;
 }
 
+//FUNCTION TO PRINT ONE DETAILED BEER PAGE, SHORTCUT FUNCTION
+let printDiv = (data)=>{
+  detailedShow.innerHTML += `      
+  <div id="mainContainer">  
+    <div>
+      <h1>${data.name}</h1>       
+      <p><i>#id ${data.id}</i></p>  
+      <p><i>${data.tagline}</i></p>
+      <h3>Alcohol: ${data.abv}%</h3>
+      <p><b>First brewed: ${data.first_brewed}</b></p>
+      <p>${data.description}</p>
+      <p>Food that goes along well with this beer: ${data.food_pairing}</p>
+      <p>Brewer tips: <i>${data.brewers_tips}</i></p>
+    </div>
+    <div>
+     <img src=${data.image_url} height ="600px">
+    </div>      
+  </div> 
+  `
+}
 
-
-// # region detailedBeerBrowse THIS FUNCTION PRINTS DETAILED BEER PAGE AND ALLOWS NAVIGATION, JUST PASS THE URL OF THE ELEMENT
+//THIS FUNCTION PRINTS DETAILED BEER PAGE AND ALLOWS NAVIGATION, JUST PASS THE URL OF THE ELEMENT
 async function detailedBeerBrowse(url) {
   let response = await fetch(url)
   let data = await response.json()
@@ -157,23 +171,7 @@ async function detailedBeerBrowse(url) {
 
   detailedShow.innerHTML = ``;
   //the data to be shown
-  detailedShow.innerHTML += `        
-  <div id="mainContainer">  
-  <div>
-    <h1>${data[0].name}</h1>     
-    <p><i>#id ${data[0].id}</i></p>  
-    <p><i>${data[0].tagline}</i></p>
-    <h3>Alcohol: ${data[0].abv}%</h3>
-    <p><b>First brewed: ${data[0].first_brewed}</b></p>
-    <p>${data[0].description}</p>
-    <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-    <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
-  </div>
-  <div>
-   <img src=${data[0].image_url} height ="600px">
-  </div>      
-</div> 
-  `
+  printDiv(data[0]);
 
   //separate function for the next and previous buttons to navigate from the page itself directly
   //almost identical to the function above
@@ -195,23 +193,7 @@ async function detailedBeerBrowse(url) {
     </tr>
     `;
     detailedShow.innerHTML = ``;
-    detailedShow.innerHTML += `        
-    <div id="mainContainer">  
-    <div>
-      <h1>${data[0].name}</h1>       
-      <p><i>#id ${data[0].id}</i></p>  
-      <p><i>${data[0].tagline}</i></p>
-      <h3>Alcohol: ${data[0].abv}%</h3>
-      <p><b>First brewed: ${data[0].first_brewed}</b></p>
-      <p>${data[0].description}</p>
-      <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-      <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
-    </div>
-    <div>
-     <img src=${data[0].image_url} height ="600px">
-    </div>      
-  </div> 
-    `
+    printDiv(data[0]); 
     document.getElementById(`previousButton`).addEventListener(`click`, () => {
       if (window.sessionStorage.pageNumber == 1) {
         window.sessionStorage.pageNumber = 325
@@ -245,11 +227,8 @@ async function detailedBeerBrowse(url) {
     else prevNextPage(+window.sessionStorage.pageNumber + 1)
   })
 }
-// //#endregion
 
-
-
-//# region THIS MAKES THE MAIN PAGE TABLE
+//THIS PRINTS THE HOME PAGE TABLE
 async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=80`) {
   table.innerHTML = ``
   table.innerHTML = `
@@ -345,23 +324,7 @@ async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=8
 
         detailedShow.innerHTML = ``;
         //the data to be shown
-        detailedShow.innerHTML += `      
-        <div id="mainContainer">  
-          <div>
-            <h1>${data[0].name}</h1>       
-            <p><i>#id ${data[0].id}</i></p>  
-            <p><i>${data[0].tagline}</i></p>
-            <h3>Alcohol: ${data[0].abv}%</h3>
-            <p><b>First brewed: ${data[0].first_brewed}</b></p>
-            <p>${data[0].description}</p>
-            <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-            <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
-          </div>
-          <div>
-           <img src=${data[0].image_url} height ="600px">
-          </div>      
-        </div> 
-        `
+        printDiv(data[0]);
 
         //separate function for the next and previous buttons to navigate from the page itself directly
         //almost identical to the function above
@@ -382,24 +345,10 @@ async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=8
             <td><button id="nextButton">Next</button></td>
           </tr>
           `;
+
           detailedShow.innerHTML = ``;
-          detailedShow.innerHTML += `        
-          <div id="mainContainer">  
-          <div>
-            <h1>${data[0].name}</h1>      
-            <p><i>#id ${data[0].id}</i></p>  
-            <p><i>${data[0].tagline}</i></p>
-            <h3>Alcohol: ${data[0].abv}%</h3>
-            <p><b>First brewed: ${data[0].first_brewed}</b></p>
-            <p>${data[0].description}</p>
-            <p>Food that goes along well with this beer: ${data[0].food_pairing}</p>
-            <p>Brewer tips: <i>${data[0].brewers_tips}</i></p>
-          </div>
-          <div>
-           <img src=${data[0].image_url} height ="600px">
-          </div>      
-        </div> 
-          `
+          printDiv(data[0]);
+
           document.getElementById(`previousButton`).addEventListener(`click`, () => {
             if (window.sessionStorage.pageNumber == 1) {
               window.sessionStorage.pageNumber = 325
@@ -438,8 +387,6 @@ async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=8
   }
 }
 
-// #endregion
-
 //what the post button will do when something from the drop down menu is chosen
 postButton.addEventListener(`click`, () => {
   table.parentElement.border = 1;
@@ -471,7 +418,7 @@ postButton.addEventListener(`click`, () => {
 
 })
 
-
+//SEARCH BUTTON FUNCTION
 searchButton.addEventListener(`click`, () => {
   if (searchBar.value.length != 0) {
     table.innerHTML = ``
