@@ -122,6 +122,9 @@ let querryParameters = [`beer_name`, `yeast`, `hops`, `malt`, `food`, `ids`]
 let globalPageCounter = 1; //this is a counter used to show/hide previous buttons
 let baseUrl = `https://api.punkapi.com/v2/beers?page=`; //base url from where pages are fetched later
 
+//THIS IS USED TO DEBUG THE printDiv HTML APPENDING, weird things happen if the strings are appending directly to the innerHTML, so it is saved in another variable instead
+let variableWithHTMLString = ``;
+
 //FUNCTION FOR FETCHING THE DATA
 async function getBeers(pageNumber) {
   let data = await fetch(baseUrl + pageNumber);
@@ -130,10 +133,12 @@ async function getBeers(pageNumber) {
 }
 
 //FUNCTION TEMPLATE TO PRINT ONE DETAILED BEER PAGE, SHORTCUT FUNCTION
-let printDiv = (data)=>{
+let printDiv = (data) => {
+  variableWithHTMLString = ``
   table.parentElement.border = 0;
-  detailedShow.innerHTML += `      
+  variableWithHTMLString += `      
   <div id="mainContainer">  
+
     <div>
       <h1>${data.name}</h1>       
       <p><i>#id ${data.id}</i></p>  
@@ -142,40 +147,46 @@ let printDiv = (data)=>{
       <p><b>First brewed: ${data.first_brewed}</b></p>
       <p>${data.description}</p>
       <p>Brewer tips: <i>${data.brewers_tips}</i></p>
+      <p>Food that goes weel with this beer: ${data.food_pairing}</p>
     </div>
+
     <div>
      <img src=${data.image_url} height ="600px">
-    </div>   
+    </div>  
+
     <div>
      <h2>How to brew "${data.name}"</h2>
     <ul><h3>Ingredients:</h3>
+    <li>Malt:    
+    `
+  for (let eachMalt of data.ingredients.malt) {
+    variableWithHTMLString += `
+      <ul>
+        <li>Name: ${eachMalt.name}</li>
+        <li>Ammount: ${eachMalt.amount.value} ${eachMalt.amount.unit}</li>
+      </ul>      
+      `
+  }
 
-        <li>Malt:
-          <ul>
-            <li>Name: ${data.ingredients.malt[0].name}</li>
-            <li>Ammount: ${data.ingredients.malt[0].amount.value} ${data.ingredients.malt[0].amount.unit}</li>
-          </ul>
-        </li>
+  variableWithHTMLString += `    
+         </li>           
 
         <li>Hops:
-          <ul> 
-            <li>Name: ${data.ingredients.hops[0].name}
-             <ul>          
-                <li>Ammount: ${data.ingredients.hops[0].amount.value} ${data.ingredients.hops[0].amount.unit}</li>
-                <li>Add: ${data.ingredients.hops[0].add}</li>
-                <li>Attribute: ${data.ingredients.hops[0].attribute}</li>
-             </ul>
-            </li>
-          </ul>
-          <ul> 
-            <li>Name: ${data.ingredients.hops[1].name}
-             <ul>          
-                <li>Ammount: ${data.ingredients.hops[1].amount.value} ${data.ingredients.hops[1].amount.unit}</li>
-                <li>Add: ${data.ingredients.hops[1].add}</li>
-                <li>Attribute: ${data.ingredients.hops[1].attribute}</li>
-             </ul>
-            </li>
-          </ul>          
+          <ul>         
+          `
+  for (let eachHops of data.ingredients.hops) {
+    variableWithHTMLString += `
+            <li>Name: ${eachHops.name}
+            <ul>          
+               <li>Ammount: ${eachHops.amount.value} ${eachHops.amount.unit}</li>
+               <li>Add: ${eachHops.add}</li>
+               <li>Attribute: ${eachHops.attribute}</li>
+            </ul>
+           </li>
+            `
+  }
+  variableWithHTMLString += `
+         </ul>         
         </li>
 
         <li>Yeast:
@@ -183,10 +194,57 @@ let printDiv = (data)=>{
             <li>Name: ${data.ingredients.yeast}</li>
           </ul>
         </li>
+        </div>  
+        `
+        variableWithHTMLString += `
         
-    </div>       
+    <div>
+     <ul><h3>Additional parameters</h3>
+      <li>Bitterness: ${data.ibu} IBU</li>
+      <li>European standard color: ${data.ebc} EBC</li>
+      <li>American standard color: ${data.srm} SRM</li>
+      <li>pH value: ${data.ph}</li>
+      <li>Alcohol: ${data.abv}% abv</li>
+      <li>Fermentation Attenuation: ${data.attenuation_level}</li>
+      <li>Target Original Gravity: ${data.target_og}</li>
+      <li>Target Final Gravity: ${data.target_fg}</li>     
+     </ul>    
+     <ul><h3>Brewing methods</h3>
+       <li>Volume: ${data.volume.value} ${data.volume.unit}</li>
+       <li>Boil volume: ${data.boil_volume.value} ${data.boil_volume.unit}</li>
+       <li>Method:
+        <ul>
+          <li>Mash temp:
+          `
+  for (let eachMashTemp of data.method.mash_temp) {
+    variableWithHTMLString += `
+              <ul>
+                <li> Temp: ${eachMashTemp.temp.value} ${eachMashTemp.temp.unit}</li>
+                <li> Duration: ${eachMashTemp.duration}</li>
+              </ul>
+              `
+  }
+
+  variableWithHTMLString += `
+          </li>
+          <li>Fermentation:
+            <ul>
+              <li> Temp: ${data.method.fermentation.temp.value} ${data.method.fermentation.temp.unit}</li>
+            </ul>
+          </li>
+          <li>Twist:
+            <ul>
+              <li>${data.method.twist}</li>
+            </ul>
+          </li>
+        </ul>
+       </li>
+     </ul> 
+    </div>    
   </div> 
   `
+
+  detailedShow.innerHTML += variableWithHTMLString;
 }
 
 //THIS FUNCTION PRINTS DETAILED BEER PAGE AND ALLOWS NAVIGATION, JUST PASS THE URL OF THE ELEMENT
@@ -232,7 +290,7 @@ async function detailedBeerBrowse(url) {
     </tr>
     `;
     detailedShow.innerHTML = ``;
-    printDiv(data[0]); 
+    printDiv(data[0]);
     document.getElementById(`previousButton`).addEventListener(`click`, () => {
       if (window.sessionStorage.pageNumber == 1) {
         window.sessionStorage.pageNumber = 325
@@ -268,7 +326,7 @@ async function detailedBeerBrowse(url) {
 }
 
 //THIS PRINTS THE HOME PAGE TABLE
-async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=80`) {
+async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=20`) {
   table.parentElement.border = `1px`;
   table.innerHTML = ``
   table.innerHTML = `
@@ -288,10 +346,12 @@ async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=8
   let previous = document.getElementById(`previous`);
   let next = document.getElementById(`next`);
 
+
   let result = await getBeers(counter + querySelector + perPage);
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 20; i++) {
     if (result[i] === undefined) {
-      next.hidden = true;
+      
+      next.hidden = true;     
       break;
     }
     else {
@@ -308,28 +368,31 @@ async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=8
     }
 
   }
+ 
+  
 
   //DOM targeting for newly created buttons
   previous = document.getElementById(`previous`);
   next = document.getElementById(`next`);
 
+
+
   //validation for show/hide next and previous buttons
   // globalPageCounter == 5 ? next.hidden = true : next.hidden = false;
   globalPageCounter == 1 ? previous.hidden = true : previous.hidden = false;
 
+
   //change to the next page
   next.addEventListener(`click`, () => {
-    globalPageCounter < 13 ? globalPageCounter++ : false;
+    globalPageCounter++;
     listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
-
   })
-
+  
   //change to the previous page
   previous.addEventListener(`click`, () => {
     globalPageCounter > 1 ? globalPageCounter-- : false;
     listBeers(globalPageCounter, window.sessionStorage.getItem(`globalQuerySelector`));
-  })
-
+  })  
 
   //get all the <a> tags from the newly created html elements
   let anchors = document.getElementsByTagName(`a`)
@@ -494,5 +557,6 @@ searchButton.addEventListener(`click`, () => {
   // navigateLinks();
 
 })
+
 
 

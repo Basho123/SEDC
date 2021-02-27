@@ -8,7 +8,7 @@ body{
 }
 a{
     text-decoration: none;
-    color: blanchedalmond;
+    color: rgb(252, 246, 237);
 }
 
 a:hover{
@@ -17,7 +17,7 @@ a:hover{
 
 body{
     background-color: black;
-    color: blanchedalmond;
+    color: rgb(252, 246, 237);
 }
 
 .tableId{
@@ -35,25 +35,31 @@ table{
    
 }
 
+
 #next,
-#previous{
+#previous,
+#next2,
+#previous2{
     background-color: rgba(255, 255, 255, 0);
-    color: blanchedalmond;
+    color: rgb(252, 246, 237);
     font-size: 30px;
     border-radius: 25px;
     border: none; 
     box-shadow: 0 0 25px;
 }
 
+
 #next:hover,
-#previous:hover{
+#previous:hover,
+#next2:hover,
+#previous2:hover{
     color: red;
 }
 
 #nextButton,
 #previousButton{
     background-color: rgba(255, 255, 255, 0);
-    color: blanchedalmond;
+    color: rgb(252, 246, 237);
     font-size: 30px;
     border-radius: 5px;
     border: none; 
@@ -79,7 +85,7 @@ table{
 #post,
 #select{
     margin-top: 25px;
-    background-color: blanchedalmond;
+    color: rgb(252, 246, 237);
     color:black;
     font-size: 20px;
     height: 50px;
@@ -106,6 +112,13 @@ table{
 
 #mainContainer > div:nth-of-type(3){
     text-align: left;
-    width: 100%;
-    margin: 0 10% 0 10%;   
+    width: 30%;
+    margin: 5% 10% 0 10%;   
+
+}
+
+#mainContainer > div:nth-of-type(4){
+    text-align: left;
+    width: 30%;
+    margin: 5% 10% 0 10%;     
 }
