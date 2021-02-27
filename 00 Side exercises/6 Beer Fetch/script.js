@@ -129,8 +129,9 @@ async function getBeers(pageNumber) {
   return parsedData;
 }
 
-//FUNCTION TO PRINT ONE DETAILED BEER PAGE, SHORTCUT FUNCTION
+//FUNCTION TEMPLATE TO PRINT ONE DETAILED BEER PAGE, SHORTCUT FUNCTION
 let printDiv = (data)=>{
+  table.parentElement.border = 0;
   detailedShow.innerHTML += `      
   <div id="mainContainer">  
     <div>
@@ -140,12 +141,50 @@ let printDiv = (data)=>{
       <h3>Alcohol: ${data.abv}%</h3>
       <p><b>First brewed: ${data.first_brewed}</b></p>
       <p>${data.description}</p>
-      <p>Food that goes along well with this beer: ${data.food_pairing}</p>
       <p>Brewer tips: <i>${data.brewers_tips}</i></p>
     </div>
     <div>
      <img src=${data.image_url} height ="600px">
-    </div>      
+    </div>   
+    <div>
+     <h2>How to brew "${data.name}"</h2>
+    <ul><h3>Ingredients:</h3>
+
+        <li>Malt:
+          <ul>
+            <li>Name: ${data.ingredients.malt[0].name}</li>
+            <li>Ammount: ${data.ingredients.malt[0].amount.value} ${data.ingredients.malt[0].amount.unit}</li>
+          </ul>
+        </li>
+
+        <li>Hops:
+          <ul> 
+            <li>Name: ${data.ingredients.hops[0].name}
+             <ul>          
+                <li>Ammount: ${data.ingredients.hops[0].amount.value} ${data.ingredients.hops[0].amount.unit}</li>
+                <li>Add: ${data.ingredients.hops[0].add}</li>
+                <li>Attribute: ${data.ingredients.hops[0].attribute}</li>
+             </ul>
+            </li>
+          </ul>
+          <ul> 
+            <li>Name: ${data.ingredients.hops[1].name}
+             <ul>          
+                <li>Ammount: ${data.ingredients.hops[1].amount.value} ${data.ingredients.hops[1].amount.unit}</li>
+                <li>Add: ${data.ingredients.hops[1].add}</li>
+                <li>Attribute: ${data.ingredients.hops[1].attribute}</li>
+             </ul>
+            </li>
+          </ul>          
+        </li>
+
+        <li>Yeast:
+          <ul>
+            <li>Name: ${data.ingredients.yeast}</li>
+          </ul>
+        </li>
+        
+    </div>       
   </div> 
   `
 }
@@ -230,6 +269,7 @@ async function detailedBeerBrowse(url) {
 
 //THIS PRINTS THE HOME PAGE TABLE
 async function listBeers(counter = 1, querySelector = ``, perPage = `&per_page=80`) {
+  table.parentElement.border = `1px`;
   table.innerHTML = ``
   table.innerHTML = `
   <tr> 

@@ -103,3 +103,9 @@ table{
     margin-right: 10%;
    
 }
+
+#mainContainer > div:nth-of-type(3){
+    text-align: left;
+    width: 100%;
+    margin: 0 10% 0 10%;   
+}
