@@ -537,7 +537,7 @@ searchButton.addEventListener(`click`, () => {
           for (let result of searchResult) {
             detailedShow.innerHTML += `<p><a href="https://api.punkapi.com/v2/beers/${result.id}" onclick = "return false">${result.name}</a></p>`
           }
-          async function navigateFromSearchEngine() {
+          function navigateFromSearchEngine() {
             let anchor = document.getElementsByTagName(`a`)
             for (let url of anchor) {
               url.addEventListener(`click`, () => {
