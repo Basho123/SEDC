@@ -7,7 +7,7 @@ https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={par
 
 
 
-
+//THIS FUNCTION GETS THE CURRENT GPS DEVICE LOCATION
 function getLocation() {
     return new Promise((resolve, reject) => {
         if (navigator.geolocation) {
@@ -22,7 +22,7 @@ function getLocation() {
     })
 }
 
-
+// DOM TARGETING
 let page = {
     city: document.getElementById('cityValue'),
     button: document.getElementById('button'),
@@ -37,11 +37,13 @@ let page = {
     })
 }
 
+//FETCHING THE DATA
 let weatherFetch = {
     apiKey: "74e59f6374abe0d9b758877616ae444c",
     city: "skopje",
     apiUrl: "https://api.openweathermap.org/data/2.5/forecast",
 
+    //TEMPLATE TO BE USED IN BOTH GPS AND SEARCH INPUT DATA
     printTemplate: (city,list)=>{
         page.div.innerHTML =  `
             <h2>${city.name}</h2>
@@ -81,6 +83,8 @@ let weatherFetch = {
             </table>
             `
     },
+
+    //GET DATA FROM SEARCH BAR INPUTED CITY
     getData: () => {
         async function getTheData() {
             let data = await fetch(`${weatherFetch.apiUrl}?q=${weatherFetch.city}&units=metric&appid=${weatherFetch.apiKey}`)
@@ -91,9 +95,8 @@ let weatherFetch = {
         getTheData();
     },
 
-
+    //GET DATA FROM GEOLOCATION OF DEVICE
     getDataFromGPS: () => {
-
         async function getTheDataFromGPS() {
             let coordinates = await getLocation();
             let lat = await coordinates.coords.latitude;
@@ -103,8 +106,7 @@ let weatherFetch = {
 
             let { city, list } = await parsedData;
 
-            weatherFetch.printTemplate(city,list);          
-           // console.log(parsedData); 
+            weatherFetch.printTemplate(city,list);  
         }
         getTheDataFromGPS();
     }
