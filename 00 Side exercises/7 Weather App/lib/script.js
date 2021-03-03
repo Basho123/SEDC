@@ -38,7 +38,7 @@ let page = {
 }
 
 //FETCHING THE DATA
-let weatherFetch = {
+let weatherFetch = {   
     apiKey: "74e59f6374abe0d9b758877616ae444c",
     city: "skopje",
     apiUrl: "https://api.openweathermap.org/data/2.5/forecast",
@@ -112,5 +112,5 @@ let weatherFetch = {
     }
 }
 
-
+//call the gps device weather location by default
 weatherFetch.getDataFromGPS();
