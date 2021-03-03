@@ -28,20 +28,22 @@ let objectCreator = (morse) => {
     //create the class
     charArray.forEach((element, index) => {
         arrayToReturn.push({
-        capitalLetter: element,
-        lowercaseLetter: element.toLowerCase(),
-        morse: morse[index],
-      });
+            capitalLetter: element, 
+            lowercaseLetter: element.toLowerCase(),
+            morse: morse[index],
+        });
     });
+
     //return the value
     return arrayToReturn;
-  };
-  //SAVING THE VALUE IN A VARIABLE FOR EASIER MANIPULATION
-  let characterArray = objectCreator(morseCode); 
-
+};
+//SAVING THE VALUE IN A VARIABLE FOR EASIER MANIPULATION
+let characterArray = objectCreator(morseCode);
+console.log(characterArray);
 //THESE ARE IMBUED WITH WORDS OR SIGNS
 let wordsAnvil = [];
 let morseAnvil = [];
+
 
 button.addEventListener('click', function () {
     //LETTERS TO MORSE
@@ -93,7 +95,7 @@ button.addEventListener('click', function () {
          <p> ${wordsAnvil} </p>
         `
     }
-    
+
     else if (normalTextInput.value.length > 0 && morseCodeInput.value.length > 0) {
         alert(`Please enter either text or morse code, not both.`);
     }

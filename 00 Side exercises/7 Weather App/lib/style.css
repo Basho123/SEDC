@@ -1,0 +1,17 @@
+body{
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+
+table{
+    border: white solid 1px;
+    margin: 0px auto;
+}
+
+th,
+td{
+   
+    padding: 10px;
+}
