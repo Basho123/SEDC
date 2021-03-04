@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,13 +8,30 @@
     <link rel="stylesheet" href="lib/style.css" type="text/css">
     <title>Weather App</title>
 </head>
+
 <body>
     <h1>Weather forecast</h1>
     <input type="text" placeholder="enter city here" id="cityValue">
-    <button id="button">Search</button>
-    <div id="toShow"></div>
+    <button id="button">Search</button><br>
+    <button id="showHourly">Hourly Forecast</button>
+    <button id="showExtended">5-day extended forecast</button>
+    <!-- <button id="showDaily">Daily forecast</button> -->
+    <h2 id="headerToChange"></h2>
+    <div id="toShow">
+        <table>
+            <thead>
+                <tr id="tHeadRow">
+                    
+                </tr>
+            </thead>
+            <tbody id="tBody">
 
-    
-    <script src="lib/script.js"></script>    
+            </tbody>
+        </table>
+    </div>
+
+
+    <script src="lib/script.js"></script>
 </body>
+
 </html>
