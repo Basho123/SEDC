@@ -166,8 +166,7 @@ let printTemplates = {
         div5.innerHTML = `
             <span class = "currentUv">UV index: ${response.current.uvi}</span>
             <span class="sunrise">sun rises: ${sunriseTime}</span>
-            <span class="sunset">sun sets: ${sunsetTime}</span>
-            <span class="sunset">wind: ${sunsetTime}</span>
+            <span class="sunset">sun sets: ${sunsetTime}</span>           
         `
 
         let parentDiv2 = document.createElement("DIV");
