@@ -174,18 +174,40 @@ button:focus{
 
 .div4{
     min-width: 130px;  
+    justify-content: space-evenly;
 }
 
 .div5{  
     min-width: 150px;      
+    justify-content: space-evenly;
+  
 }
 
 .div6{    
     min-width: 150px;  
+    justify-content: space-evenly;
 }
 
 .imageElement{    
-  margin: -15px;
-  width: 100%;
+   width: 100%;
 }
+
+.tinyLetters{
+    font-size: 13px;
+}
+
+
+.smallLetters{
+    font-size: 18px;
+}
+
+.mediumLetters{
+    font-size: 45px;
+}
+
+.largeLetters{
+    font-size: 75px;
+}
+
+
 
