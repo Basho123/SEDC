@@ -166,7 +166,7 @@ let printTemplates = {
         div5.innerHTML = `
             <span class = "currentUv">UV index: ${response.current.uvi}</span>
             <span class="sunrise">sun rises: ${sunriseTime}</span>
-            <span class="sunset">sun sets: ${sunsetTime}</span>           
+            <span class="sunset">sun sets: ${sunsetTime}</span>            
         `
 
         let parentDiv2 = document.createElement("DIV");
@@ -233,12 +233,14 @@ let printTemplates = {
 
             div1.innerHTML = `<span class="hourlyHours">${hours}</span><br><span class="hourlyDays">${days}</span>`
             div2.innerHTML = `
-                <img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">
-                <span class = "hourlyWeatherDescription"style = "text-transform: capitalize;">${element.weather[0].description}</span>
-                `
+                <img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">`
+                element.pop > 0 ? div2.innerHTML += `<span class = "hourlyWeatherDescription">Prec. ${parseInt(element.pop * 100)}%</span>` : div2.innerHTML = div2.innerHTML
+
             div3.innerHTML = `<span class = "hourlyTemperature">${parseInt(element.temp)}°C</span>`
-            div4.innerHTML = `<span class = "hourlyFeelsLike">RealFeel ${parseInt(element.feels_like)}°C</span>`
-            element.pop > 0 ? div4.innerHTML += `<span class = "smallLetters">Prec. ${parseInt(element.pop * 100)}%</span>` : div3.innerHTML = div3.innerHTML
+            div4.innerHTML = `
+            <span class = "hourlyFeelsLike">RealFeel ${parseInt(element.feels_like)}°C</span>
+            <span class = "hourlyWeatherDescription"style = "text-transform: capitalize;">${element.weather[0].description}</span>          
+            `            
             div5.innerHTML = `<span class = "hourlyUV">UV index: ${element.uvi}</span>`
             div6.innerHTML = `
                 <span class="mediumLetters">${elementWindDirection}</span>
