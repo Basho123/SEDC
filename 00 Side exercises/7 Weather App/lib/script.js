@@ -201,7 +201,7 @@ let weatherFetch = {
             hourDate = new Date(+(`${element.dt}000`) + (timezone * 1000))
             let dateArray = hourDate.toString().split(` `);
             let hours = dateArray[4].substr(0, 5);
-            let days = dateArray[0];
+            // let days = dateArray[0];
 
             let dayOrNight = element.weather[0].icon[element.weather[0].icon.length - 1];
 
@@ -209,31 +209,30 @@ let weatherFetch = {
             parentDiv.classList.add(`parentDiv`)
             grandparentDiv.appendChild(parentDiv);
 
-            if (days != dayToCheck) {
-                {
-                    parentDiv.style.backgroundColor = `rgb(155,155,100)`
-                    parentDiv.style.color = `rgb(0,0,0)`
-                }
+            // if (days != dayToCheck) {
+            //     {
+            //         parentDiv.style.color = `rgb(255,0,0)`
+            //     }
 
-            }
-            else if (days === dayToCheck) {
+            // }
+            // if (days === dayToCheck) {
                 if (divStyleBackgroundColorSwitch === true && dayOrNight == `d`) {
-                    parentDiv.style.backgroundColor = `rgb(140,155,155)`
+                    parentDiv.style.backgroundColor = `rgb(155,155,155)`
                     parentDiv.style.color = `rgb(0,0,0)`
                 }
                 if (divStyleBackgroundColorSwitch === true && dayOrNight == `n`) {
-                    parentDiv.style.backgroundColor = `rgb(10,25,25)`
+                    parentDiv.style.backgroundColor = `rgb(25,25,25)`
                     parentDiv.style.color = `rgb(255,255,255)`
                 }
                 else if (divStyleBackgroundColorSwitch === false && dayOrNight == `d`) {
-                    parentDiv.style.backgroundColor = `rgb(110,125,125)`
+                    parentDiv.style.backgroundColor = `rgb(125,125,125)`
                     parentDiv.style.color = `rgb(0,0,0)`
                 }
                 else if (divStyleBackgroundColorSwitch === false && dayOrNight == `n`) {
-                    parentDiv.style.backgroundColor = `rgb(0,5,5)`;
+                    parentDiv.style.backgroundColor = `rgb(5,5,5)`;
                     parentDiv.style.color = `rgb(255,255,255)`
                 }
-            }
+            // }
 
             divStyleBackgroundColorSwitch = !divStyleBackgroundColorSwitch;
 
@@ -262,7 +261,7 @@ let weatherFetch = {
             div5.innerHTML = `<img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">`
 
             //THIS IS USED FOR THE PURPOSE OF PRINTING ONLY ONE DAY WHILE KEEPING THE LOOP IN PROGRESS
-            dayToCheck = days;
+            // dayToCheck = days;
         }
     },
 
@@ -438,57 +437,67 @@ let weatherFetch = {
             let hours = dateArray[4].substr(0, 5);
             let days = getDayName(element.dt * 1000);
 
-            let dayOrNight = element.weather[0].icon[element.weather[0].icon.length - 1];
-
             let parentDiv = document.createElement("DIV");
             parentDiv.classList.add(`parentDiv`)
             grandparentDiv.appendChild(parentDiv);
 
             let main = element.weather[0].main;
 
-            if (divStyleBackgroundColorSwitch === true) {
-                switch (main) {
-                    case `Clear`:
-                        parentDiv.style.backgroundColor = `rgb(200,240,255)`
-                        parentDiv.style.color = `rgb(0,0,0)`
-                        break;
-                    case `Rain`:
-                        parentDiv.style.backgroundColor = `rgb(70,70,70)`
-                        parentDiv.style.color = `rgb(255,255,255)`
-                        break;
-                    case `Clouds`:
-                        parentDiv.style.backgroundColor = `rgb(130,130,130)`
-                        parentDiv.style.color = `rgb(0,0,0)`
-                        break;
+            // if (divStyleBackgroundColorSwitch === true) {
+            //     switch (main) {
+            //         case `Clear`:
+            //             parentDiv.style.backgroundColor = `rgb(200,240,255)`
+            //             parentDiv.style.color = `rgb(0,0,0)`
+            //             break;
+            //         case `Rain`:
+            //             parentDiv.style.backgroundColor = `rgb(70,70,70)`
+            //             parentDiv.style.color = `rgb(255,255,255)`
+            //             break;
+            //         case `Clouds`:
+            //             parentDiv.style.backgroundColor = `rgb(130,130,130)`
+            //             parentDiv.style.color = `rgb(0,0,0)`
+            //             break;
 
-                    default:
-                        parentDiv.style.backgroundColor = `rgb(5,5,5)`
-                        parentDiv.style.color = `rgb(255,255,255)`
-                        break;
-                }
+            //         default:
+            //             parentDiv.style.backgroundColor = `rgb(5,5,5)`
+            //             parentDiv.style.color = `rgb(255,255,255)`
+            //             break;
+            //     }
+            // }
+
+            // else if (divStyleBackgroundColorSwitch === false) {
+            //     switch (main) {
+            //         case `Clear`:
+            //             parentDiv.style.backgroundColor = `rgb(200,240,250)`
+            //             parentDiv.style.color = `rgb(0,0,0)`
+            //             break;
+            //         case `Rain`:
+            //             parentDiv.style.backgroundColor = `rgb(65,65,65)`
+            //             parentDiv.style.color = `rgb(255,255,255)`
+            //             break;
+            //         case `Clouds`:
+            //             parentDiv.style.backgroundColor = `rgb(125,125,125)`
+            //             parentDiv.style.color = `rgb(0,0,0)`
+            //             break;
+
+            //         default:
+            //             parentDiv.style.backgroundColor = `rgb(25,25,25)`
+            //             parentDiv.style.color = `rgb(255,255,255)`
+            //             break;
+            //     }
+            // }   
+
+            if (divStyleBackgroundColorSwitch === true) {
+                parentDiv.style.backgroundColor = `rgb(15,15,15)`
+                parentDiv.style.color = `rgb(255,255,255)`
             }
 
             else if (divStyleBackgroundColorSwitch === false) {
-                switch (main) {
-                    case `Clear`:
-                        parentDiv.style.backgroundColor = `rgb(200,240,250)`
-                        parentDiv.style.color = `rgb(0,0,0)`
-                        break;
-                    case `Rain`:
-                        parentDiv.style.backgroundColor = `rgb(65,65,65)`
-                        parentDiv.style.color = `rgb(255,255,255)`
-                        break;
-                    case `Clouds`:
-                        parentDiv.style.backgroundColor = `rgb(125,125,125)`
-                        parentDiv.style.color = `rgb(0,0,0)`
-                        break;
+                parentDiv.style.backgroundColor = `rgb(35,35,35)`
+                parentDiv.style.color = `rgb(255,255,255)`
+            }
 
-                    default:
-                        parentDiv.style.backgroundColor = `rgb(25,25,25)`
-                        parentDiv.style.color = `rgb(255,255,255)`
-                        break;
-                }
-            }      
+
 
             divStyleBackgroundColorSwitch = !divStyleBackgroundColorSwitch;
 
