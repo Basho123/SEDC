@@ -1,64 +1,3 @@
-
-//#region GLOBAL CLASSES AND THEIR DESTRUCTURING
-let humans = {
-    all: 0,
-    workers: {
-        all: 0,
-        tractorDriver: 0,
-        haystackComber: 0,
-        farmer: 0,
-        animalHandler: 0,
-        apprentice: 0,
-    },
-    tourists: {
-        all: 0,
-    }
-}
-
-let animals = {
-    all: 0,
-    livestock: {
-        cows: 0,
-        horses: 0,
-        pigs: 0,
-    },
-    poultry: {}
-}
-
-let globalDwellings = {
-    beds: 0,
-    stables: 0,
-    waterTowerCapacity: 1000,
-    wells: 0,
-    surface: 0,
-    surfaceOccupied: 0,
-}
-
-let machines = {
-    all: 0,
-    tractor: 0,
-}
-
-let resources = {
-    meat: 100,
-    milk: 100,
-    water: 1000,
-    hay: 100,
-}
-
-let economy = {
-
-    totalBudget: parseInt(Math.random() * 1000) + 100000,
-    salariesPaid: 0,
-    workerRevenue: 0,
-    farmExpenses: 0,
-    workFactor: 0,
-    workFactorCalculated: () => {
-        return 1 + (economy.workFactor / 100)
-    }
-}
-
-
 let page = {
     table: document.getElementById(`tableBody`),
     log: document.getElementById(`log`),
@@ -79,11 +18,11 @@ let arrayOfMachines = [];
 let monthCounter = 1;
 
 //DESTRUCTURING
-let { workers } = humans
-let { tourists } = humans
+//  let { workers } = population
+//  let { tourists } = population
 
-let { livestock } = animals;
-let { poultry } = animals;
+// let { livestock } = animals;
+// let { poultry } = animals;
 
 let { random } = page;
 
@@ -104,7 +43,7 @@ class Mammal {
     }
 }
 
-class Avian {
+class Poultry {
     constructor(legs = 2, wings = 2, species = `species not defined`) {
         this.legs = legs;
         this.wings = wings;
@@ -139,7 +78,7 @@ class Machine {
             }
             else null;
 
-        }, 120000)
+        }, 240000)
         setInterval(() => {//INTERVAL
             console.log(`---------------------`);
             console.log(`this.isBroken`, this.isBroken);
@@ -169,7 +108,7 @@ class Machine {
                     newDivItem.innerHTML += `<h3 class = "divCardMain" style="color: black;background-color:yellow;">VEHICLE ${this.type} WITH LICENCE PLATES ${this.licensePlates} HAS WENT REPAIR SERVICE , ${servicePrice}$ HAVE BEEN DEDUCTED.</h3>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                }, 600000 / this.health)
+                }, 1200000 / this.health)
             }
 
             else null;
@@ -213,11 +152,13 @@ class Tractor extends Machine {
         })(this.type, this.licensePlates, this.price, this.economyFactor);
 
         setInterval(() => {
-            if (this.inService === true && this.isBroken === false) {
+            if (this.inService === true && !this.isBroken) {
                 let randomBreakdownChance = random(100)
+                console.log(`-----------------------------------`);
+                console.log(`random breakdown chance`, randomBreakdownChance);
+                console.log(`this.health`, this.health);
                 if (this.health < randomBreakdownChance) {
                     this.isBroken = true;
-                    economy.workFactor -= this.economyFactor;
 
                     let newDivItem = document.createElement('DIV');
                     newDivItem.innerHTML += ` <h3 class = "divCardMain" style = color:red; background-color: blue;" >VEHICLE  ${this.type} WITH LICENCE PLATES ${this.licensePlates} HAS BROKEN DOWN!</h3>`
@@ -226,7 +167,7 @@ class Tractor extends Machine {
                 }
                 else null;
 
-                this.health -= 3;
+                this.health -= 1;
             }
             else null;
         }, 10000)
@@ -254,38 +195,106 @@ let generateTractor = () => {
 
 //#region FARM
 class Farm {
-    constructor(surfaceArea = 50000, stablesCount = 1, sleepingQuarters = 1, waterTowerCapacity = 1000, numberOfWells = 1) {
+    constructor(surfaceArea = 5, stablesCount = 1, sleepingQuarters = 1, waterTowerCapacity = 1000, numberOfWells = 1, waterTowerCount = 1) {
         this.surfaceArea = surfaceArea;
         this.stablesCount = stablesCount;
         this.sleepingQuarters = sleepingQuarters;
         this.waterTowerCapacity = waterTowerCapacity;
+        this.waterTowerCount = waterTowerCount;
         this.numberOfWells = numberOfWells;
 
-        globalDwellings.beds = this.sleepingQuarters * 5;
-        globalDwellings.stables = this.stablesCount * 10;
+        this.machines = {
+            all: 0,
+            tractor: 0,
+        }
+
+        this.population = {
+            all: 0,
+            workers: {
+                all: 0,
+                tractorDriver: 0,
+                haystackComber: 0,
+                farmer: 0,
+                animalHandler: 0,
+                apprentice: 0,
+            },
+            tourists: {
+                all: 0,
+            }
+        }
+
+        this.animals = {
+            all: 0,
+            livestock: {
+                cows: 0,
+                horses: 0,
+                pigs: 0,
+            },
+            poultry: {}
+        }
+
+        this.globalDwellings = {
+            beds: 0,
+            stables: 0,
+            waterTowerCapacity: 1000,
+            wells: 0,
+            surface: 0,
+            surfaceOccupied: 0,
+        }
+
+
+        this.resources = {
+            meat: 100,
+            milk: 100,
+            water: 1000,
+            hay: 100,
+        }
+
+        this.economy = {
+            totalBudget: parseInt(Math.random() * 1000) + 100000,
+            salariesPaid: 0,
+            workerRevenue: 0,
+            farmExpenses: 0,
+            workFactor: 0,
+            workFactorCalculated: () => {
+                return 1 + (economy.workFactor / 100)
+            }
+        }
+
+
+
+        this.globalDwellings.beds = this.sleepingQuarters * 5;
+        this.globalDwellings.stables = this.stablesCount * 10;
 
         setInterval(() => {
-            globalDwellings.wells = this.numberOfWells;
-            if (resources.water < globalDwellings.waterTowerCapacity - this.numberOfWells * 10) {
-                resources.water += this.numberOfWells * 2
+            this.globalDwellings.wells = this.numberOfWells;
+            if (this.resources.water < this.globalDwellings.waterTowerCapacity - this.numberOfWells * 10) {
+                this.resources.water += this.numberOfWells * 2
             }
 
-            globalDwellings.surface = this.surfaceArea;
-            globalDwellings.surfaceOccupied = this.stablesCount * 10000 + this.sleepingQuarters * 10000;
-            globalDwellings.occupiedSurface = 0;
-            globalDwellings.beds = this.sleepingQuarters * 5;
-            globalDwellings.stables = this.stablesCount * 10;
-            globalDwellings.waterTowerCapacity = this.waterTowerCapacity;
+            this.globalDwellings.surface = this.surfaceArea;
+            this.globalDwellings.surfaceOccupied = this.stablesCount + this.sleepingQuarters + this.waterTowerCount / 2;
+            this.globalDwellings.occupiedSurface = 0;
+            this.globalDwellings.beds = this.sleepingQuarters * 5;
+            this.globalDwellings.stables = this.stablesCount * 10;
+            this.globalDwellings.waterTowerCapacity = this.waterTowerCapacity;
         }, 1000)
     }
-
 }
 let farm = new Farm();
+let { machines, population, globalDwellings, animals,resources,economy } = farm;
+let { workers, tourists } = population;
+let { livestock, poultry } = animals;
+
+
+
+console.log(machines);
+
 console.log(farm);
 
 
 page.upgradeSleepingHouseButton.addEventListener(`click`, () => {
-    if (globalDwellings.surface - globalDwellings.surfaceOccupied > 5000) {
+    if (globalDwellings.surface - globalDwellings.surfaceOccupied > 1) {
         if (economy.totalBudget >= 10000) {
             farm.sleepingQuarters++;
             economy.totalBudget -= 10000;
@@ -323,7 +332,7 @@ page.upgradeSleepingHouseButton.addEventListener(`click`, () => {
 })
 
 page.upgradeStablesButton.addEventListener(`click`, () => {
-    if (globalDwellings.surface - globalDwellings.surfaceOccupied > 5000) {
+    if (globalDwellings.surface - globalDwellings.surfaceOccupied > 1) {
         if (economy.totalBudget >= 5000) {
             farm.stablesCount++;
             economy.totalBudget -= 5000;
@@ -360,8 +369,9 @@ page.upgradeStablesButton.addEventListener(`click`, () => {
 })
 
 page.upgradeWaterTowerButton.addEventListener(`click`, () => {
-    if (economy.totalBudget >= 5000) {
+    if (economy.totalBudget >= 5000 && globalDwellings.surface - globalDwellings.surfaceOccupied >= 0.5) {
         farm.waterTowerCapacity += 500;
+        farm.waterTowerCount++;
         economy.totalBudget -= 5000;
         let newDivItem = document.createElement('DIV');
         newDivItem.innerHTML += `
@@ -391,7 +401,7 @@ page.upgradeWaterTowerButton.addEventListener(`click`, () => {
 
 page.buyMoreSurfaceButton.addEventListener(`click`, () => {
     if (economy.totalBudget >= 20000) {
-        farm.surfaceArea += 25000;
+        farm.surfaceArea += 2.5;
         economy.totalBudget -= 25000;
         let newDivItem = document.createElement('DIV');
         newDivItem.innerHTML += `
@@ -400,7 +410,7 @@ page.buyMoreSurfaceButton.addEventListener(`click`, () => {
                 <h3>FARM SURFACE AREA EXTENDED</h3>           
                 <ul>  
                     <li>COSTS: 20000$</li>
-                    <li>SURFACE AREA +25000</li>                                  
+                    <li>SURFACE AREA +2.5 ACRES</li>                                  
                 </ul>
             </div>
             <div class = "divCard2">
@@ -458,7 +468,7 @@ class Worker extends Human {
                 || workerWorkingPosition === `ANIMAL HANDLER`
                 || workerWorkingPosition === `APPRENTICE`
             ) {
-                humans.all++;
+                population.all++;
                 workers.all++;
 
                 addRemoveWorkerPositions(workerWorkingPosition, '++');
@@ -558,7 +568,7 @@ class Worker extends Human {
                         break;
                     case `APPRENTICE`:
                         resources.hay += parseInt((this.yearsOfService / 2) * 2 * economy.workFactorCalculated());
-                        resources.water += 1;                        
+                        resources.water += 1;
                         break;
                     default:
                         break;
@@ -579,7 +589,7 @@ class Tourist extends Human {
         this.touristBudgetThatCameWith = this.touristBudget;
 
         (function touristAI(touristName, touristGender, touristAge, touristReason) {
-            humans.all++;
+            population.all++;
             tourists.all++;
             if (touristReason === `SIGHT SEEING`
                 || (touristReason === `HORSE RIDING`)
@@ -694,7 +704,7 @@ let hireRandomWorker = () => {
         let arrayOfJobs = [`TRACTOR DRIVER`, `HAYSTACK COMBER`, `FARMER`, `ANIMAL HANDLER`, `APPRENTICE`]
 
         let gender = random(2);
-        let age = random(50) + 15       
+        let age = random(50) + 15
         let yearsOfService = 0;
         let job = arrayOfJobs[random(arrayOfJobs.length)]
 
@@ -855,12 +865,12 @@ class Horse extends Mammal {
                     return;
                 }
                 if (resources.hay > 0 && resources.water > 0) {
-                    this.weight += random(2)
+                    this.weight += random(10) + 5
                     resources.hay -= 2;
                     resources.water -= 2;
                 }
                 else {
-                    this.weight -= random(10)
+                    this.weight -= random(10) + 10
                 }
 
                 let sicknessRandomNumber = random(100)
@@ -879,7 +889,7 @@ class Horse extends Mammal {
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
                     }
                     else {
-                        this.weight -= random(5)
+                        this.weight -= random(20)
                     }
 
                 }
@@ -934,12 +944,12 @@ class Pig extends Mammal {
                     return;
                 }
                 if (resources.hay > 0 && resources.water > 0) {
-                    this.weight += random(20)
+                    this.weight += random(25) + 10
                     resources.hay--;
                     resources.water--;
                 }
                 else {
-                    this.weight -= random(20)
+                    this.weight -= random(40)
                 }
 
                 let sicknessRandomNumber = random(100);
@@ -958,7 +968,7 @@ class Pig extends Mammal {
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
                     }
                     else {
-                        this.weight -= random(10)
+                        this.weight -= random(20)
                     }
 
                 }
@@ -1015,13 +1025,13 @@ class Cow extends Mammal {
                     return;
                 }
                 if (resources.hay > 0 && resources.water > 0) {
-                    this.weight += random(10)
+                    this.weight += random(10) + 10
                     this.milkAmount++;
-                    resources.hay--;
+                    resources.hay -= 30;
                     resources.water--;
                 }
                 else {
-                    this.weight -= random(20)
+                    this.weight -= random(40)
                     this.milkAmount -= 2;
                 }
 
@@ -1147,7 +1157,7 @@ let inspection = () => {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                    humans.all--;
+                    population.all--;
                     workers.all--;
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
@@ -1159,7 +1169,7 @@ let inspection = () => {
                 else if (worker.age > 70) {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                    humans.all--;
+                    population.all--;
                     workers.all--;
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
@@ -1172,7 +1182,7 @@ let inspection = () => {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
                     economy.totalBudget -= 1000;
-                    humans.all--;
+                    population.all--;
                     workers.all--;
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
@@ -1286,7 +1296,7 @@ setInterval(() => {
                 newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith - tourist.touristBudget} $ and had a great time on your farm and left home</p>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                humans.all--;
+                population.all--;
                 tourists.all--;
                 tourist.isOnFarm = false;
                 arrayOfGuests.splice(tourist, 1)
@@ -1296,7 +1306,7 @@ setInterval(() => {
                 newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith} $ and had a great time on your farm</p>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                humans.all--;
+                population.all--;
                 tourists.all--;
                 tourist.isOnFarm = false;
                 arrayOfGuests.splice(tourist, 1)
@@ -1319,7 +1329,7 @@ setInterval(() => {
         page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
         for (let animal of arrayOfAnimals) {
-            if ((animal instanceof Cow) === true && (animal.age > 20 && animal.weight > 200) || animal.weight > 300) {
+            if ((animal instanceof Cow) === true && (animal.age > 25 && animal.weight > 100) || animal.weight > 300) {
                 let newDivItem = document.createElement('DIV');
                 newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN BUTCHERED AND GAVE ${Math.floor(animal.weight / 2)} KG MEAT</h3>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -1358,7 +1368,7 @@ setInterval(() => {
             else continue;
         }
     })();
-}, 80000)
+}, 60000)
 //#endregion
 
 
@@ -1379,25 +1389,18 @@ function months(number) {
 function tablePrint() {
     page.table.innerHTML = `
     <tr>
-        <td>${months(monthCounter)}</td>
-        <td>${globalDwellings.surfaceOccupied}/${globalDwellings.surface}</td>
-        <td>${machines.all}</td>
-        <td>${workers.all}/${globalDwellings.beds}</td>
-        <td>${animals.all}/${globalDwellings.stables}</td>
-        <td>${parseInt(resources.milk)}</td>
-        <td>${parseInt(resources.meat)}</td>
-        <td>${resources.hay}</td>
-        <td>${resources.water}/${globalDwellings.waterTowerCapacity}</td>       
-        <td>${workers.tractorDriver}</td>
-        <td>${workers.haystackComber}</td>
-        <td>${workers.farmer}</td>
-        <td>${workers.animalHandler}</td>
-        <td>${workers.apprentice}</td>  
-        <td>${Math.floor(economy.workFactor)}</td>
-        <td>${Math.floor(economy.salariesPaid)} $</td>
-        <td>${Math.floor(economy.workerRevenue)} $</td>        
-        <td>${Math.floor(economy.farmExpenses)} $</td>        
-        <td>${Math.floor(economy.totalBudget)} $</td>
+        <td><abbr customTitle ="Current Month">${months(monthCounter)}</abbr></td>
+        <td><abbr customTitle ="Surface Area Occupied, the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface}</abbr></td>
+        <td><abbr customTitle ="Number of tractors: ${machines.tractor}">${machines.all}</abbr></td>
+        <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all}/${globalDwellings.beds}</abbr></td>
+        <td><abbr customTitle ="Cows: ${livestock.cows}\nPigs: ${livestock.pigs} \nHorses: ${livestock.horses}">${animals.all}/${globalDwellings.stables}</abbr></td>            
+        <td><abbr customTitle ="Milk: ${resources.milk}">${parseInt(resources.milk)}</abbr></td>
+        <td><abbr customTitle ="Meat: ${resources.meat}">${parseInt(resources.meat)}</abbr></td>
+        <td><abbr customTitle ="Hay: ${resources.hay}">${resources.hay}</abbr></td>
+        <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>
+        <td><abbr customTitle ="Economy Factor">${economy.workFactor}</abbr></td>
+        <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}\n$Salaries Paid: ${parseInt(economy.salariesPaid)}\nFarm Expenses: ${parseInt(economy.farmExpenses)}">${parseInt(economy.totalBudget)} $</abbr></td>
+       
     </tr>
     `
 }
