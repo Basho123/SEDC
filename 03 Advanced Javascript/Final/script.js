@@ -171,7 +171,7 @@ let generateTractor = () => {
     let price = 10000;
 
     //ON EVERY 1 TRACTOR DRIVER, 1 TRACTOR CAN BE BOUGHT
-    if (machines.tractor < workers.tractorDriver && economy.totalBudget > price) {
+    if (machines.tractor.lengths < workers.tractorDriver && economy.totalBudget > price) {
         economy.totalBudget -= price;
         economy.farmExpenses -= price;
         machines.tractor.push(new Tractor(type, licensePlates, true, false, price));
@@ -498,7 +498,7 @@ class Worker extends Human {
             || this.workingPosition === `ANIMAL HANDLER`
             || this.workingPosition === `APPRENTICE`
         ) {
-
+                console.log(this.gender);
             addRemoveWorkerPositions(this.workingPosition, '++');
             let newDivItem = document.createElement('DIV');
             newDivItem.innerHTML = `
@@ -892,7 +892,7 @@ class Horse extends Mammal {
                     this.age = -1;
                     return;
                 }
-                if (resources.hay > 0 && resources.water > 0) {
+                if (resources.hay >= 2 && resources.water >= 2) {
                     this.weight += random(10) + 5
                     resources.hay -= 2;
                     resources.water -= 2;
@@ -1053,11 +1053,11 @@ class Cow extends Mammal {
                     this.age = -1;
                     return;
                 }
-                if (resources.hay > 0 && resources.water > 0) {
+                if (resources.hay >= 3 && resources.water >= 3) {
                     this.weight += random(10) + 10
                     this.milkAmount++;
-                    resources.hay -= 30;
-                    resources.water--;
+                    resources.hay -= 3;
+                    resources.water -= 3;
                 }
                 else {
                     this.weight -= random(40)
@@ -1535,8 +1535,8 @@ function tablePrint() {
         <td><abbr customTitle ="Surface Area Occupied, measured in hectares. the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface} ha</abbr></td>
         <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
         <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
-        <td><abbr customTitle ="Cows: ${livestock.cows.length}\nPigs: ${livestock.pigs.length} \nHorses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
-        <td><abbr customTitle ="Milk: ${resources.milk}\nMeat: ${resources.meat}\nEggs: ${resources.eggs}">${parseInt(resources.milk + resources.eggs + resources.meat)}</abbr></td>
+        <td><abbr customTitle ="Chicken: ${poultry.chicken.length}\r\nCows: ${livestock.cows.length} Pigs: ${livestock.pigs.length} Horses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
+        <td><abbr customTitle ="Milk: ${resources.milk} Meat: ${resources.meat} Eggs: ${resources.eggs}">${parseInt(resources.milk + resources.eggs + resources.meat)}</abbr></td>
         <td><abbr customTitle ="Corn: ${resources.corn}">${parseInt(resources.corn)}</abbr></td>
         <td><abbr customTitle ="Hay: ${resources.hay}">${resources.hay}</abbr></td>
         <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>

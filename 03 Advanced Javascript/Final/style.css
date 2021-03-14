@@ -48,6 +48,7 @@ abbr:hover:before {
      color:#fff;
      padding:5px 10px;
      margin:35px 0 0 0;
+     width: 100px;
      z-index: 9999;
  }
 
@@ -103,6 +104,8 @@ button{
 
 table{
     font-weight: bold;
+    border: 1px solid black;
+    border-radius: 25px;
 }
 
 #headline{
