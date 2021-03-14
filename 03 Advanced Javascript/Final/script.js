@@ -1,4 +1,4 @@
-let page = {
+const page = {
     table: document.getElementById(`tableBody`),
     log: document.getElementById(`log`),
     upgradeSleepingHouseButton: document.getElementById(`upgradeSleepingHouse`),
@@ -9,27 +9,9 @@ let page = {
         return Math.floor(Math.random() * number);
     }
 }
-
-let arrayOfWorkers = [];
-let arrayOfGuests = [];
-let arrayOfAnimals = [];
-let arrayOfMachines = [];
+const { random } = page;
 
 let monthCounter = 1;
-
-//DESTRUCTURING
-//  let { workers } = population
-//  let { tourists } = population
-
-// let { livestock } = animals;
-// let { poultry } = animals;
-
-let { random } = page;
-
-//#endregion
-
-
-
 
 //#region PROTOTYPE CLASSES
 
@@ -43,9 +25,11 @@ class Mammal {
     }
 }
 
-class Poultry {
-    constructor(legs = 2, wings = 2, species = `species not defined`) {
+class Bird {
+    constructor(age = 1, legs = 2, wings = 2, species = `species not defined`, weight) {
         this.legs = legs;
+        this.weight = weight;
+        this.age = age;
         this.wings = wings;
         this.laysEggs = true;
         this.hasFeathers = true;
@@ -79,11 +63,7 @@ class Machine {
             else null;
 
         }, 240000)
-        setInterval(() => {//INTERVAL
-            console.log(`---------------------`);
-            console.log(`this.isBroken`, this.isBroken);
-            console.log(`this.economyFactor`, this.economyFactor);
-            console.log(`this.economyFactor`, this.health);
+        setInterval(() => {//INTERVAL           
             if (this.isBroken === true) {
                 economy.workFactor -= this.economyFactor;
 
@@ -92,12 +72,6 @@ class Machine {
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
                 setTimeout(() => {
-                    console.log(`------TIMEOUT-----------`);
-                    console.log(`this.isBroken`, this.isBroken);
-                    console.log(`this.economyFactor`, this.economyFactor);
-                    console.log(`this.health`, this.health);
-
-
                     let servicePrice = Math.floor(10000 / this.health) + this.economyFactor;
                     this.health = 100;
                     this.isBroken = false;
@@ -130,17 +104,17 @@ class Tractor extends Machine {
         this.price = price;
         this.economyFactor = 500;
 
-        (function tractorAI(tractorType, tractorlicencePlates, tractorPrice, economyFactor) {
-            economy.workFactor += economyFactor;
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `
+        economy.workFactor += this.economyFactor;
+
+        let newDivItem = document.createElement('DIV');
+        newDivItem.innerHTML += `
             <div class = "divCardMain">
                 <div class = "divCard1">
                     <h3>NEW TRACTOR BOUGHT</h3>           
                     <ul>  
-                        <li>MODEL: ${tractorType}</li>
-                        <li>LICENSE PLATES: ${tractorlicencePlates}</li>                                  
-                        <li>TRACTOR PRICE: ${tractorPrice}$</li>                                  
+                        <li>MODEL: ${this.type}</li>
+                        <li>LICENSE PLATES: ${this.licensePlates}</li>                                  
+                        <li>TRACTOR PRICE: ${this.price}$</li>                                  
                     </ul>
                 </div>
                 <div class = "divCard2">
@@ -148,15 +122,12 @@ class Tractor extends Machine {
                 </div>
             </div>
             `
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-        })(this.type, this.licensePlates, this.price, this.economyFactor);
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
 
         setInterval(() => {
             if (this.inService === true && !this.isBroken) {
                 let randomBreakdownChance = random(100)
-                console.log(`-----------------------------------`);
-                console.log(`random breakdown chance`, randomBreakdownChance);
-                console.log(`this.health`, this.health);
                 if (this.health < randomBreakdownChance) {
                     this.isBroken = true;
 
@@ -186,9 +157,9 @@ let generateTractor = () => {
         economy.totalBudget -= price;
         economy.farmExpenses -= price;
 
-        machines.all++;
-        machines.tractor++;
-        arrayOfMachines.push(new Tractor(type, licensePlates, true, false, price));
+        // machines.all++;
+        // machines.tractor++;
+        machines.tractor.push(new Tractor(type, licensePlates, true, false, price));
     }
 }
 //#endregion
@@ -204,14 +175,14 @@ class Farm {
         this.numberOfWells = numberOfWells;
 
         this.machines = {
+            tractor: [],
             all: 0,
-            tractor: 0,
         }
 
         this.population = {
             all: 0,
             workers: {
-                all: 0,
+                all: [],
                 tractorDriver: 0,
                 haystackComber: 0,
                 farmer: 0,
@@ -219,18 +190,20 @@ class Farm {
                 apprentice: 0,
             },
             tourists: {
-                all: 0,
+                all: [],
             }
         }
 
         this.animals = {
             all: 0,
             livestock: {
-                cows: 0,
-                horses: 0,
-                pigs: 0,
+                cows: [],
+                horses: [],
+                pigs: [],
             },
-            poultry: {}
+            poultry: {
+                chicken: [],
+            }
         }
 
         this.globalDwellings = {
@@ -248,6 +221,8 @@ class Farm {
             milk: 100,
             water: 1000,
             hay: 100,
+            corn: 100,
+            eggs: 0,
         }
 
         this.economy = {
@@ -278,17 +253,50 @@ class Farm {
             this.globalDwellings.beds = this.sleepingQuarters * 5;
             this.globalDwellings.stables = this.stablesCount * 10;
             this.globalDwellings.waterTowerCapacity = this.waterTowerCapacity;
+
+            this.machines.all = this.machines.tractor.length;
+
+            this.animals.all =
+                this.animals.livestock.horses.length +
+                this.animals.livestock.pigs.length +
+                this.animals.livestock.cows.length +
+                this.animals.poultry.chicken.length
+
+            this.population.workers.tractorDriver = 0;
+            this.population.workers.haystackComber = 0;
+            this.population.workers.farmer = 0;
+            this.population.workers.animalHandler = 0;
+            this.population.workers.apprentice = 0;
+
+            for (let worker of this.population.workers.all) {
+                switch (worker.workingPosition) {
+                    case `TRACTOR DRIVER`:
+                        this.population.workers.tractorDriver++
+                        break;
+                    case `HAYSTACK COMBER`:
+                        this.population.workers.haystackComber++
+                        break;
+                    case `FARMER`:
+                        this.population.workers.farmer++;
+                        break;
+                    case `ANIMAL HANDLER`:
+                        this.population.workers.animalHandler++;
+                        break;
+                    case `APPRENTICE`:
+                        this.population.workers.apprentice++;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }, 1000)
     }
 }
 let farm = new Farm();
-let { machines, population, globalDwellings, animals,resources,economy } = farm;
+let { machines, population, globalDwellings, animals, resources, economy } = farm;
 let { workers, tourists } = population;
 let { livestock, poultry } = animals;
 
-
-
-console.log(machines);
 
 console.log(farm);
 
@@ -461,46 +469,44 @@ class Worker extends Human {
                 break;
         }
 
-        (function workerAI(workerName, workerGender, workerAge, workerWorkingPosition, workerYearsOfService, workerSalary, workerSalaryBonus, workerBaseSalary) {
-            if (workerWorkingPosition === `TRACTOR DRIVER`
-                || workerWorkingPosition === `HAYSTACK COMBER`
-                || workerWorkingPosition === `FARMER`
-                || workerWorkingPosition === `ANIMAL HANDLER`
-                || workerWorkingPosition === `APPRENTICE`
-            ) {
-                population.all++;
-                workers.all++;
 
-                addRemoveWorkerPositions(workerWorkingPosition, '++');
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML = `
+        if (this.workingPosition === `TRACTOR DRIVER`
+            || this.workingPosition === `HAYSTACK COMBER`
+            || this.workingPosition === `FARMER`
+            || this.workingPosition === `ANIMAL HANDLER`
+            || this.workingPosition === `APPRENTICE`
+        ) {
+
+            addRemoveWorkerPositions(this.workingPosition, '++');
+            let newDivItem = document.createElement('DIV');
+            newDivItem.innerHTML = `
                 <div class = "divCardMain">
                     <div class = "divCard1">
                         <h3>NEW WORKER HIRED</h3>
                         <ul>
-                            <li>FARM WORKER NUMBER: ${workers.all}</li>
-                            <li>NAME: ${workerName}</li>
-                            <li>AGE: ${workerAge}</li>
-                            <li>GENDER: ${workerGender}</li>
-                            <li>WORKING POSITION: ${workerWorkingPosition}</li>
-                            <li>YEARS OF SERVICE: ${workerYearsOfService}</li>
-                            <li>BASE SALARY: ${workerBaseSalary}$</li>
-                            <li>BONUSES: ${workerSalaryBonus}$</li>
+                            <li>FARM WORKER NUMBER: ${workers.all.length}</li>
+                            <li>NAME: ${this.name}</li>
+                            <li>AGE: ${this, age}</li>
+                            <li>GENDER: ${this.gender}</li>
+                            <li>WORKING POSITION: ${this.workingPosition}</li>
+                            <li>YEARS OF SERVICE: ${this.yearsOfService}</li>
+                            <li>BASE SALARY: ${this.baseSalary}$</li>
+                            <li>BONUSES: ${this.salaryBonus}$</li>
                         </ul>
                     </div>
                     <div class = "divCard2">
-                    <img src="images/${gender}${(Math.ceil(Math.random() * 4))}.jpg" height="100%">
+                    <img src="images/${this.gender}${(Math.ceil(Math.random() * 4))}.jpg" height="100%">
                     </div>
                 </div>
                     `
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+            page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-            }
-            else {
-                console.log(`SERVICE IS NOT REQUIRED`)
-            }
+        }
+        else {
+            console.log(`SERVICE IS NOT REQUIRED`)
+        }
 
-        })(this.name, this.gender, this.age, this.workingPosition, this.yearsOfService, this.salary, this.salaryBonus, this.baseSalary);
+
 
 
         //SALARY, REVENUE, AGE AND YEARS OF SERVICE ARE UPDATED HERE
@@ -519,7 +525,7 @@ class Worker extends Human {
                     resources.meat--;
                     if (resources.meat < 1) {
                         this.works = false;
-                        arrayOfWorkers.splice(this, 1);
+                        workers.all.splice(this, 1);
                         let newDivItem = document.createElement('DIV');
                         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 25px;color:red; background-color: black;">${this.name} has left the farm because there was no food!</h3>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -528,14 +534,12 @@ class Worker extends Human {
                 }
                 else resources.milk--;
 
-                //console.log(`worker name and salary`, this.name, this.salary);
-
                 if (resources.water > 1) {
                     resources.water--;
                 }
                 else {
                     this.works = false;
-                    arrayOfWorkers.splice(this, 1);
+                    workers.all.splice(this, 1);
                     let newDivItem = document.createElement('DIV');
                     newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 25px;color:red; background-color: black;">${this.name} has left the farm because there was no water!</h3>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -557,17 +561,18 @@ class Worker extends Human {
                         break;
                     case `HAYSTACK COMBER`:
                         resources.hay += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated());
-
                         break;
                     case `FARMER`:
                         resources.hay += parseInt((this.yearsOfService / 2) * 5 * economy.workFactorCalculated());
                         resources.water += 1;
+                        resources.corn += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated());
                         break;
                     case `ANIMAL HANDLER`:
                         null;
                         break;
                     case `APPRENTICE`:
                         resources.hay += parseInt((this.yearsOfService / 2) * 2 * economy.workFactorCalculated());
+                        resources.corn += parseInt((this.yearsOfService / 2) * 4 * economy.workFactorCalculated());
                         resources.water += 1;
                         break;
                     default:
@@ -588,38 +593,36 @@ class Tourist extends Human {
         this.isOnFarm = true;
         this.touristBudgetThatCameWith = this.touristBudget;
 
-        (function touristAI(touristName, touristGender, touristAge, touristReason) {
-            population.all++;
-            tourists.all++;
-            if (touristReason === `SIGHT SEEING`
-                || (touristReason === `HORSE RIDING`)
-                || (touristReason === `FOOD SHOPPING`)
-            ) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `           
+
+        if (this.reason === `SIGHT SEEING`
+            || (this.reason === `HORSE RIDING`)
+            || (this.reason === `FOOD SHOPPING`)
+        ) {
+            let newDivItem = document.createElement('DIV');
+            newDivItem.innerHTML += `           
             <div class = "divCardMain">
                 <div class = "divCard1">
                     <h3>NEW TOURIST VISIT LOGGED</h3>           
                     <ul>                
-                        <li>NAME: ${touristName}</li>
-                        <li>AGE: ${touristAge}</li>
-                        <li>GENDER: ${touristGender}</li>               
-                        <li>REASON OF VISIT: ${touristReason}</li>
+                        <li>NAME: ${this.name}</li>
+                        <li>AGE: ${this.age}</li>
+                        <li>GENDER: ${this.gender}</li>               
+                        <li>REASON OF VISIT: ${this.reason}</li>
                     </ul>
                 </div>
                 <div class = "divCard2">
-                    <img src="images/${touristGender}${(Math.ceil(Math.random() * 4))}.jpg" height="100%">
+                    <img src="images/${this.gender}${(Math.ceil(Math.random() * 4))}.jpg" height="100%">
                 </div>
             </div>
             `
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+            page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-            }
-            else {
-                page.log.innerHTML += `TOURIST ${touristName} VISITED THE FARM FOR ${touristReason}, BUT FOUND NOTHING OF INTEREST`
-            }
+        }
+        else {
+            page.log.innerHTML += `TOURIST ${this.name} VISITED THE FARM FOR ${this.reason}, BUT FOUND NOTHING OF INTEREST`
+        }
 
-        })(this.name, this.gender, this.age, this.reason);
+
 
         setInterval(() => {
             if (this.isOnFarm === true) {
@@ -630,7 +633,7 @@ class Tourist extends Human {
                         this.touristBudget -= 100;
                         break;
                     case `HORSE RIDING`:
-                        if (livestock.horses > 0) {
+                        if (livestock.horses.length > 0) {
                             economy.totalBudget += 500;
                             this.touristBudget -= 500;
                         }
@@ -639,15 +642,14 @@ class Tourist extends Human {
                             newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:purple; background-color: black;">Tourist ${this.name} came for ${this.reason} and has left the farm because there were no horses</p>`
                             page.log.insertBefore(newDivItem, page.log.childNodes[0])
                             this.isOnFarm = false;
-                            arrayOfGuests.splice(this, 1)
-                            return;
+                            tourists.all.splice(this, 1)
                         }
+                        break;
 
                     case `FOOD SHOPPING`:
                         let shopAmmountMilk = random(20);
                         let shopAmmountMeat = random(20);
-                        console.log(random(20));
-                        console.log(shopAmmountMilk, shopAmmountMeat, `||`, resources.milk, resources.meat);
+
                         if (resources.meat > shopAmmountMeat) {
                             resources.meat -= shopAmmountMeat
                             economy.totalBudget += shopAmmountMeat * 20;
@@ -659,14 +661,13 @@ class Tourist extends Human {
                             this.touristBudget -= shopAmmountMilk * 20;
                         }
                         else if (resources.milk < shopAmmountMeat && resources.milk < shopAmmountMeat) {
-                            arrayOfGuests.splice(this, 1);
+                            tourists.all.splice(this, 1);
                             this.isOnFarm = false
                             let newDivItem = document.createElement('DIV');
                             newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:purple; background-color: pink;">Tourist ${this.name} came for ${this.reason} and has left the farm because there was nothing to shop</p>`
                             page.log.insertBefore(newDivItem, page.log.childNodes[0])
                         }
                         else null;
-
                         break;
                     default:
                         break;
@@ -699,8 +700,9 @@ let randomName = (gender) => {
     }
     else return;
 }
+
 let hireRandomWorker = () => {
-    if (workers.all < globalDwellings.beds) {
+    if (workers.all.length < globalDwellings.beds) {
         let arrayOfJobs = [`TRACTOR DRIVER`, `HAYSTACK COMBER`, `FARMER`, `ANIMAL HANDLER`, `APPRENTICE`]
 
         let gender = random(2);
@@ -742,10 +744,10 @@ let hireRandomWorker = () => {
 
 
         if (gender === 1) {//MALE
-            arrayOfWorkers.push(new Worker(`${randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
+            workers.all.push(new Worker(`${randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
         }
         else if (gender === 0) {//FEMALE
-            arrayOfWorkers.push(new Worker(`${randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
+            workers.all.push(new Worker(`${randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
         }
     }
     else null;
@@ -761,12 +763,13 @@ let generateRandomTourist = () => {
 
 
     if (gender === 1) {//MALE
-        arrayOfGuests.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
+        tourists.all.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
     }
     else if (gender === 0) {//FEMALE
-        arrayOfGuests.push(new Tourist(`${randomName(`female`)}`, `Female`, age, activity));
+        tourists.all.push(new Tourist(`${randomName(`female`)}`, `Female`, age, activity));
     }
 }
+
 function addRemoveWorkerPositions(parameter, operator) {
     if (operator === `--`) {
         switch (parameter) {
@@ -829,33 +832,33 @@ class Horse extends Mammal {
 
         this.color.toUpperCase();
 
-        (function horseAI(horseAge, horseColor, horseWeight, horsePrice) {
-            economy.workFactor += parseInt((horseWeight + 300 / horseAge + 15) / 30)
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `
+        economy.workFactor += parseInt((this.weight + 300 / this.age + 15) / 30)
+
+        let newDivItem = document.createElement('DIV');
+        newDivItem.innerHTML += `
             <div class = "divCardMain">
             <div class = "divCard1">
-                <h3>A ${horseColor} HORSE HAS BEEN BOUGHT</h3>           
+                <h3>A ${this.color} HORSE HAS BEEN BOUGHT</h3>           
                 <ul>  
-                    <li>AGE: ${horseAge}</li>                   
-                    <li>WEIGHT: ${horseWeight} KG</li>          
-                    <li>HORSE PRICE: ${Math.floor(horsePrice)} $</li>
+                    <li>AGE: ${this.age}</li>                   
+                    <li>WEIGHT: ${this.weight} KG</li>          
+                    <li>HORSE PRICE: ${Math.floor(this.price)} $</li>
                 </ul>
             </div>
             <div class = "divCard2">
-                <img src="images/${horseColor}horse.png" height="100%">
+                <img src="images/${this.color}horse.png" height="100%">
             </div>
         </div>
             `
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-        })(this.age, this.color, this.weight, this.price);
+
 
         setInterval(() => {
             if (this.age != -1) {
                 this.age++;
                 if (this.age > 45 || this.weight < 100) {
-                    arrayOfAnimals.splice(this, 1)
+                    livestock.horses.splice(this, 1)
 
                     let newDivItem = document.createElement('DIV');
                     newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A ${this.color} HORSE HAS JUST DIED ON YOUR FARM BECAUSE OF OLD AGE, AND THE MEAT HAD TO BE THROWN OUT</h3>`
@@ -882,8 +885,7 @@ class Horse extends Mammal {
                 if (this.sick === true) {
                     if (terminalSicknessRandomNumber < 3) {
                         this.age = -1;
-                        animals.all--;
-                        livestock.horses--;
+                        livestock.horses.splice(this, 1)
                         let newDivItem = document.createElement('DIV');
                         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A ${this.color} HORSE HAS DIED FROM SICKNESS</h3>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -899,7 +901,6 @@ class Horse extends Mammal {
         }, 10000)
     }
 }
-
 class Pig extends Mammal {
     constructor(age = 1, weight = 50, price = 100) {
         super(4, 0, `Pig`)
@@ -909,16 +910,16 @@ class Pig extends Mammal {
         this.eats = `Hay`;
         this.sick = false;
 
-        (function pigAI(pigAge, pigWeight, pigPrice) {
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `
+
+        let newDivItem = document.createElement('DIV');
+        newDivItem.innerHTML += `
             <div class = "divCardMain">
             <div class = "divCard1">
                 <h3>A PIG HAS BEEN BOUGHT</h3>           
                 <ul>  
-                    <li>AGE: ${pigAge}</li>
-                    <li>WEIGHT: ${pigWeight} KG</li>          
-                    <li>PIG PRICE: ${Math.floor(pigPrice)} $</li>
+                    <li>AGE: ${this.age}</li>
+                    <li>WEIGHT: ${this.weight} KG</li>          
+                    <li>PIG PRICE: ${Math.floor(this.price)} $</li>
                 </ul>
             </div>
             <div class = "divCard2">
@@ -926,15 +927,13 @@ class Pig extends Mammal {
             </div>
         </div>
             `
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-        })(this.age, this.weight, this.price);
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
         setInterval(() => {
             if (this.age != -1) {
                 this.age++;
                 if (this.age > 25 || this.weight < 20) {
-                    arrayOfAnimals.splice(this, 1)
+                    livestock.pigs.splice(this, 1)
 
                     let newDivItem = document.createElement('DIV');
                     newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A PIG HAS JUST DIED ON YOUR FARM BECAUSE OF OLD AGE, AND THE MEAT HAD TO BE THROWN OUT</h3>`
@@ -961,8 +960,8 @@ class Pig extends Mammal {
                 if (this.sick === true) {
                     if (terminalSicknessRandomNumber < 5) {
                         this.age = -1;
-                        animals.all--;
-                        livestock.pigs--;
+                        livestock.pigs.splice(this, 1)
+
                         let newDivItem = document.createElement('DIV');
                         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS DIED FROM SICKNESS</h3>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -989,17 +988,17 @@ class Cow extends Mammal {
         this.eats = `Hay`;
         this.sick = false;
 
-        (function cowAI(cowAge, cowMilkAmount, cowWeight, cowPrice) {
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `
+
+        let newDivItem = document.createElement('DIV');
+        newDivItem.innerHTML += `
             <div class = "divCardMain">
             <div class = "divCard1">
                 <h3>A COW HAS BEEN BOUGHT</h3>           
                 <ul>  
-                    <li>AGE: ${cowAge}</li>
-                    <li>WEIGHT: ${cowWeight} KG</li>               
-                    <li>MILK PER MONTH: ${cowMilkAmount} LITERS</li>
-                    <li>COW PRICE: ${Math.floor(cowPrice)} $</li>
+                    <li>AGE: ${this.age}</li>
+                    <li>WEIGHT: ${this.weight} KG</li>               
+                    <li>MILK PER MONTH: ${this.milkAmount} LITERS</li>
+                    <li>COW PRICE: ${Math.floor(this.price)} $</li>
                 </ul>
             </div>
             <div class = "divCard2">
@@ -1007,15 +1006,15 @@ class Cow extends Mammal {
          </div>
         </div>
             `
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-        })(this.age, this.milkAmount, this.weight, this.price);
+
 
         setInterval(() => {
             if (this.age != -1) {
                 this.age++;
                 if (this.age > 30 || this.weight < 80) {
-                    arrayOfAnimals.splice(this, 1)
+                    livestock.cows.splice(this, 1)
 
                     let newDivItem = document.createElement('DIV');
                     newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A COW HAS JUST DIED ON YOUR FARM BECAUSE OF OLD AGE, AND THE MEAT HAD TO BE THROWN OUT</h3>`
@@ -1055,8 +1054,7 @@ class Cow extends Mammal {
                 if (this.sick === true) {
                     if (terminalSicknessRandomNumber < 5) {
                         this.age = -1;
-                        animals.all--;
-                        livestock.cows--;
+                        livestock.cows.splice(this, 1)
                         let newDivItem = document.createElement('DIV');
                         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS DIED FROM SICKNESS</h3>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
@@ -1076,6 +1074,88 @@ class Cow extends Mammal {
         }, 10000)
     }
 }
+
+class Chicken extends Bird {
+    constructor(age, weight, price, gender = `HEN`) {
+        super();
+
+        this.age = age;
+        this.weight = weight;
+        this.price = price;
+
+        this.gender = gender;
+
+        let newDivItem = document.createElement('DIV');
+        newDivItem.innerHTML += `
+            <div class = "divCardMain">
+            <div class = "divCard1">
+                <h3>A ${this.gender} HAS BEEN BOUGHT</h3>           
+                <ul>  
+                    <li>AGE: ${this.age}</li>
+                    <li>WEIGHT: ${this.weight} KG</li>          
+                    <li>${this.gender} PRICE: ${Math.floor(this.price)} $</li>
+                </ul>
+            </div>
+            <div class = "divCard2">
+                <img src="images/${this.gender}.png" height="100%">
+            </div>
+        </div>
+            `
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+        setInterval(() => {
+            if (this.age != -1) {
+                this.age++;
+                if (this.age > 12 || this.weight < 1) {
+                    poultry.chicken.splice(this, 1)
+
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A ${this.gender} HAS JUST DIED ON YOUR FARM BECAUSE OF OLD AGE, AND THE MEAT HAD TO BE THROWN OUT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    this.age = -1;
+                    return;
+                }
+                if (resources.corn > 0 && resources.water > 0) {
+                    this.weight += random(300) / 100                  
+                    resources.corn--;
+                    resources.water--;
+                    if(this.gender === `HEN`){
+                        resources.eggs++;
+                    }
+                }
+                else {
+                    this.weight -= random(200) / 100
+                }
+
+                let sicknessRandomNumber = random(100);
+                let terminalSicknessRandomNumber = random(100);
+
+                if (sicknessRandomNumber < 5) {
+                    this.sick = true;
+                }
+                if (this.sick === true) {
+                    if (terminalSicknessRandomNumber < 5) {
+                        this.age = -1;
+                        poultry.chicken.splice(this, 1)
+
+                        let newDivItem = document.createElement('DIV');
+                        newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A ${this.gender} HAS DIED FROM SICKNESS</h3>`
+                        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    }
+                    else {
+                        this.weight -= random(200) / 100
+                    }
+
+                }
+            }
+            else null;
+
+        }, 10000)
+    }
+}
+
+
 let generateCow = () => {
     if (animals.all < globalDwellings.stables) {
         let age = random(3) + 1;
@@ -1085,13 +1165,11 @@ let generateCow = () => {
         let price = (milkAmount * weight) / age / 10
 
         //ON EVERY 1 ANIMAL HANDLER, 3 COWS CAN BE BOUGHT
-        if (livestock.cows < workers.animalHandler * 3 && economy.totalBudget > price) {
+        if (livestock.cows.length < workers.animalHandler * 3 && economy.totalBudget > price) {
             economy.totalBudget -= price;
             economy.farmExpenses -= price;
 
-            animals.all++;
-            livestock.cows++;
-            arrayOfAnimals.push(new Cow(age, milkAmount, weight, price));
+            livestock.cows.push(new Cow(age, milkAmount, weight, price));
         }
     }
 }
@@ -1104,13 +1182,11 @@ let generatePig = () => {
         let price = weight / age
 
         //ON EVERY 1 ANIMAL HANDLER, 6 PIGS CAN BE BOUGHT
-        if (livestock.pigs < workers.animalHandler * 6 && economy.totalBudget > price) {
+        if (livestock.pigs.length < workers.animalHandler * 6 && economy.totalBudget > price) {
             economy.totalBudget -= price;
             economy.farmExpenses -= price;
 
-            animals.all++;
-            livestock.pigs++;
-            arrayOfAnimals.push(new Pig(age, weight, price));
+            livestock.pigs.push(new Pig(age, weight, price));
         }
     }
 }
@@ -1125,20 +1201,36 @@ let generateHorse = () => {
         let color = colors[random(3)]
 
         //ON EVERY 1 FARMER, 3 HORSES CAN BE BOUGHT
-        if (livestock.horses < workers.farmer * 3 && economy.totalBudget > price) {
+        if (livestock.horses.length < workers.farmer * 3 && economy.totalBudget > price) {
             economy.totalBudget -= price;
             economy.farmExpenses -= price;
 
-            animals.all++;
-            livestock.horses++;
-            arrayOfAnimals.push(new Horse(age, color, weight, price));
+            livestock.horses.push(new Horse(age, color, weight, price));
+        }
+    }
+}
+console.log(random(2));
+
+let generateChicken = () => {
+    if (animals.all < globalDwellings.stables) {
+        let age = random(2) + 1;
+        let weight = random(2) + 1;
+
+        let price = weight / age * 2
+
+        let genderType = [`HEN`, `ROOSTER`]
+        let gender = genderType[random(2)]
+
+        //ON EVERY 1 FARMER, 20 CHICKENS CAN BE BOUGHT
+        if (poultry.chicken.length < workers.farmer * 20 && economy.totalBudget > price) {
+            economy.totalBudget -= price;
+            economy.farmExpenses -= price;
+
+            poultry.chicken.push(new Chicken(age, weight, price, gender));
         }
     }
 }
 //#endregion
-
-
-hireRandomWorker();
 
 //INSPECTION AND AI CHECKS
 
@@ -1151,30 +1243,25 @@ let inspection = () => {
 
     setTimeout(() => {
         (function trudovaInspekcija() {
-            for (let worker of arrayOfWorkers) {
+            for (let worker of workers.all) {
                 let newDivItem = document.createElement('DIV');
                 if (worker.age < 18) {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                    population.all--;
-                    workers.all--;
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
-                    console.log(`after kick`, worker.works);
-                    arrayOfWorkers.splice(worker, 1)
+                    workers.all.splice(worker, 1)
                     fines++;
                     continue;
                 }
                 else if (worker.age > 70) {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                    population.all--;
-                    workers.all--;
+
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
-                    console.log(`after kick`, worker.works);
-                    arrayOfWorkers.splice(worker, 1)
+                    workers.all.splice(worker, 1)
                     fines++;
                     continue;
                 }
@@ -1182,12 +1269,10 @@ let inspection = () => {
                     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
                     economy.totalBudget -= 1000;
-                    population.all--;
-                    workers.all--;
+
                     addRemoveWorkerPositions(worker.workingPosition, '--');
                     worker.works = false;
-                    console.log(`after kick`, worker.works);
-                    arrayOfWorkers.splice(worker, 1)
+                    workers.all.splice(worker, 1)
                     continue;
                 }
             }
@@ -1243,33 +1328,40 @@ setInterval(() => {
         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:WHITE; background-color: darkred;">A VERERINARY HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED ${veterinaryCost} $</h3>`
         page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-        for (let animal of arrayOfAnimals) {
-            if ((animal instanceof Cow) === true && animal.sick === true) {
+        for (let cow of livestock.cows) {
+            if (cow.sick) {
                 numberOFsickAnimalsFound++;
                 let newDivItem = document.createElement('DIV');
                 newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                animal.sick = false;
-                continue;
-            }
-            if ((animal instanceof Pig) === true && animal.sick === true) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                animal.sick = false;
-                continue;
-            }
-            if ((animal instanceof Horse) === true && animal.sick === true) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A HORSE HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                animal.sick = false;
+                cow.sick = false;
                 continue;
             }
             else continue;
         }
+        for (let pig of livestock.pigs) {
+            if (pig.sick) {
+                numberOFsickAnimalsFound++;
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                pig.sick = false;
+                continue;
+            }
+            else continue;
+        }
+        for (let horse of livestock.horses) {
+            if (horse.sick) {
+                numberOFsickAnimalsFound++;
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A HORSE HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                horse.sick = false;
+                continue;
+            }
+            else continue;
+        }
+
         setTimeout(() => {
             if (numberOFsickAnimalsFound === 0) {
                 let newDivItem = document.createElement('DIV');
@@ -1290,26 +1382,22 @@ setInterval(() => {
 //#region AI CHECK FOR TOURIST
 setInterval(() => {
     (function touristInspector() {
-        for (let tourist of arrayOfGuests) {
+        for (let tourist of tourists.all) {
             let newDivItem = document.createElement('DIV');
             if (tourist.touristTimeSpent > 10) {
                 newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith - tourist.touristBudget} $ and had a great time on your farm and left home</p>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                population.all--;
-                tourists.all--;
                 tourist.isOnFarm = false;
-                arrayOfGuests.splice(tourist, 1)
+                tourists.all.splice(tourist, 1)
                 continue;
             }
             else if (tourist.touristBudget < 100) {
                 newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith} $ and had a great time on your farm</p>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                population.all--;
-                tourists.all--;
                 tourist.isOnFarm = false;
-                arrayOfGuests.splice(tourist, 1)
+                tourists.all.splice(tourist, 1)
                 continue;
             }
             else continue;
@@ -1328,45 +1416,61 @@ setInterval(() => {
         newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;">A BUTCHER HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED 200$</h3>`
         page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-        for (let animal of arrayOfAnimals) {
-            if ((animal instanceof Cow) === true && (animal.age > 25 && animal.weight > 100) || animal.weight > 300) {
+        for (let cow of livestock.cows) {
+            if ((cow.age > 25 && cow.weight > 100) || cow.weight > 300) {
                 let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN BUTCHERED AND GAVE ${Math.floor(animal.weight / 2)} KG MEAT</h3>`
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN BUTCHERED AND GAVE ${Math.floor(cow.weight / 2)} KG MEAT</h3>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                animals.all--;
-                livestock.cows--;
-                resources.meat += animal.weight / 2
-                animal.age = -1;
-                arrayOfAnimals.splice(animal, 1)
-                continue;
-            }
-            if ((animal instanceof Pig) === true && (animal.age > 10 && animal.weight > 80) || animal.weight > 200) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN BUTCHERED AND GAVE ${parseInt(animal.weight / 1.2)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                animals.all--;
-                livestock.pigs--;
-                resources.meat += animal.weight / 1.2
-                animal.age = -1;
-                arrayOfAnimals.splice(animal, 1)
-                continue;
-            }
-            if ((animal instanceof Horse) === true && animal.age > 30 && animal.weight > 100) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> AN OLD HORSE HAS BEEN BUTCHERED AND GAVE ${parseInt(animal.weight / 3)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                animals.all--;
-                livestock.horses--;
-                resources.meat += animal.weight / 3
-                animal.age = -1;
-                arrayOfAnimals.splice(animal, 1)
+                resources.meat += cow.weight / 2
+                cow.age = -1;
+                livestock.cows.splice(cow, 1)
                 continue;
             }
             else continue;
         }
+        for (let pig of livestock.pigs) {
+            if ((pig.age > 5 && pig.weight > 250) || pig.weight > 500) {
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN BUTCHERED AND GAVE ${parseInt(pig.weight / 1.2)} KG MEAT</h3>`
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                resources.meat += pig.weight / 1.2
+                pig.age = -1;
+                livestock.pigs.splice(pig, 1)
+                continue;
+            }
+            else continue;
+        }
+        for (let horse of livestock.horses) {
+            if (horse.age > 35 && horse.weight > 150) {
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> AN OLD HORSE HAS BEEN BUTCHERED AND GAVE ${parseInt(horse.weight / 3)} KG MEAT</h3>`
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                resources.meat += horse.weight / 3
+                horse.age = -1;
+                livestock.horses.splice(horse, 1)
+                continue;
+            }
+            else continue;
+        }
+        for (let hen of poultry.chicken) {
+            if (hen.age > 2 && hen.weight > 2) {
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> ${hen.gender} HAS BEEN BUTCHERED AND GAVE ${parseInt(hen.weight)} KG MEAT</h3>`
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                resources.meat += hen.weight
+                hen.age = -1;
+                poultry.chicken.splice(hen, 1)
+                continue;
+            }
+            else continue;
+        }
+
+
+
     })();
 }, 60000)
 //#endregion
@@ -1391,19 +1495,20 @@ function tablePrint() {
     <tr>
         <td><abbr customTitle ="Current Month">${months(monthCounter)}</abbr></td>
         <td><abbr customTitle ="Surface Area Occupied, the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface}</abbr></td>
-        <td><abbr customTitle ="Number of tractors: ${machines.tractor}">${machines.all}</abbr></td>
-        <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all}/${globalDwellings.beds}</abbr></td>
-        <td><abbr customTitle ="Cows: ${livestock.cows}\nPigs: ${livestock.pigs} \nHorses: ${livestock.horses}">${animals.all}/${globalDwellings.stables}</abbr></td>            
-        <td><abbr customTitle ="Milk: ${resources.milk}">${parseInt(resources.milk)}</abbr></td>
-        <td><abbr customTitle ="Meat: ${resources.meat}">${parseInt(resources.meat)}</abbr></td>
+        <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
+        <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
+        <td><abbr customTitle ="Cows: ${livestock.cows.length}\nPigs: ${livestock.pigs.length} \nHorses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
+        <td><abbr customTitle ="Milk: ${resources.milk}\nMeat: ${resources.meat}\nEggs: ${resources.eggs}">${parseInt(resources.milk+resources.eggs+resources.meat)}</abbr></td>
+        <td><abbr customTitle ="Corn: ${resources.corn}">${parseInt(resources.corn)}</abbr></td>
         <td><abbr customTitle ="Hay: ${resources.hay}">${resources.hay}</abbr></td>
         <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>
         <td><abbr customTitle ="Economy Factor">${economy.workFactor}</abbr></td>
-        <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}\n$Salaries Paid: ${parseInt(economy.salariesPaid)}\nFarm Expenses: ${parseInt(economy.farmExpenses)}">${parseInt(economy.totalBudget)} $</abbr></td>
+        <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}$\nSalaries Paid: ${parseInt(economy.salariesPaid)}$\nFarm Expenses: ${parseInt(economy.farmExpenses)}$">${parseInt(economy.totalBudget)}$</abbr></td>
        
     </tr>
     `
 }
+;
 tablePrint();
 setInterval(() => {
     tablePrint();
@@ -1414,7 +1519,6 @@ setInterval(() => {
 //#endregion
 
 //#region INTERVALS
-
 //WORKER INTERVAL
 setInterval(() => {
     if (economy.totalBudget > 1000) {
@@ -1425,8 +1529,7 @@ setInterval(() => {
 
 //TOURIST INTERVAL
 setInterval(() => {
-    let randomNumberWithDependancy = Math.floor(Math.random() * 1000 / (((resources.meat + resources.milk + livestock.horses) + 2000) / 1000))
-    console.log(randomNumberWithDependancy);
+    let randomNumberWithDependancy = Math.floor(Math.random() * 1000 / (((resources.meat + resources.milk + livestock.horses.length) + 2000) / 1000))
     if (randomNumberWithDependancy < 100) {
         generateRandomTourist();
     }
@@ -1446,6 +1549,11 @@ setInterval(() => {
 setInterval(() => {
     generateHorse();
 }, 20000)
+
+//CHICKEN INTERVAL
+setInterval(() => {
+    generateChicken();
+}, 2000)
 
 
 //TRACTOR INTERVAL
