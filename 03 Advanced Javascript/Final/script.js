@@ -1,3 +1,13 @@
+//script.js for title "Farm", index.js
+//PAGE DOM TARGETING
+
+//10000 MILISECONDS IS 1 CYCLE
+
+// 1 CYCLE IS 1 MONTH
+
+// ANIMAL CYCLES ARE 12 TIMES SHORTER THAN REAL LIFE, SO HORSE LIVES 30 MONTHS, HEN 10 MONTHS AND SO ON...
+
+
 const page = {
     table: document.getElementById(`tableBody`),
     log: document.getElementById(`log`),
@@ -5,6 +15,8 @@ const page = {
     upgradeStablesButton: document.getElementById(`upgradeStables`),
     upgradeWaterTowerButton: document.getElementById(`upgradeWaterTower`),
     buyMoreSurfaceButton: document.getElementById(`buyMoreSurface`),
+
+    //FUNCTION FOR RANDOM WHOLE NUMBER, USED A LOT
     random: (number) => {
         return Math.floor(Math.random() * number);
     }
@@ -50,6 +62,7 @@ class Machine {
         this.isBroken = isBroken;
         this.economyFactor = economyFactor;
 
+        //TECHNICAL REGISTRATION CHECK FOR ANY MACHINE INHERITED
         setInterval(() => {
             if (this.inService === true) {
                 let checkPrice = 1000;
@@ -63,14 +76,18 @@ class Machine {
             else null;
 
         }, 240000)
-        setInterval(() => {//INTERVAL           
+
+        //INTERVAL FOR SERVICE CHECKING IF THE VEHICLE IS BROKEN
+        setInterval(() => {
             if (this.isBroken === true) {
+                //SET THE ECONOMY WORK FACTOR TO NULL FOR THIS VEHICLE, BECAUSE IT IS SERVICING
                 economy.workFactor -= this.economyFactor;
 
                 let newDivItem = document.createElement('DIV');
                 newDivItem.innerHTML += `<h3 class = "divCardMain" style="color: white;background-color:black;">VEHICLE OF ${this.type} WITH LICENCE PLATES ${this.licensePlates} IS UNDERGOING SERVICE, PLEASE WAIT...</h3>`
                 page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
+                //WHEN SERVICE IS FINISHED
                 setTimeout(() => {
                     let servicePrice = Math.floor(10000 / this.health) + this.economyFactor;
                     this.health = 100;
@@ -82,6 +99,7 @@ class Machine {
                     newDivItem.innerHTML += `<h3 class = "divCardMain" style="color: black;background-color:yellow;">VEHICLE ${this.type} WITH LICENCE PLATES ${this.licensePlates} HAS WENT REPAIR SERVICE , ${servicePrice}$ HAVE BEEN DEDUCTED.</h3>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
+                    //IF VEHICLE IS NOT BROKEN SO MUCH, SERVICE TIME IS SHORTER
                 }, 1200000 / this.health)
             }
 
@@ -102,8 +120,8 @@ class Tractor extends Machine {
         this.inService = inService;
         this.isBroken = isBroken;
         this.price = price;
+        //USED TO CALCULATE PRODUCTION OF RESOURCES
         this.economyFactor = 500;
-
         economy.workFactor += this.economyFactor;
 
         let newDivItem = document.createElement('DIV');
@@ -124,7 +142,7 @@ class Tractor extends Machine {
             `
         page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-
+        //RANDOM CHANCE FOR EVERY CYCLE FOR THE VEHICLE TO BREAK DOWN WHEN HEALTH DROPS SLOWLY
         setInterval(() => {
             if (this.inService === true && !this.isBroken) {
                 let randomBreakdownChance = random(100)
@@ -156,9 +174,6 @@ let generateTractor = () => {
     if (machines.tractor < workers.tractorDriver && economy.totalBudget > price) {
         economy.totalBudget -= price;
         economy.farmExpenses -= price;
-
-        // machines.all++;
-        // machines.tractor++;
         machines.tractor.push(new Tractor(type, licensePlates, true, false, price));
     }
 }
@@ -231,16 +246,23 @@ class Farm {
             workerRevenue: 0,
             farmExpenses: 0,
             workFactor: 0,
+
+            //FERTILE LANDS COEFFICIENT MEANS IF MORE LAND IS BUILT, THE LESS THE LANDS ARE FOR CORN OR HAY
+            fertileLandsCoefficient: () => {
+                return (this.globalDwellings.surface / this.globalDwellings.surfaceOccupied) / 4
+            },
+            //THIS FORMULA IS USED TO CALCULATE THE WORK FACTOR FOR A WORKER
             workFactorCalculated: () => {
-                return 1 + (economy.workFactor / 100)
+                return 1 + (this.economy.workFactor / 100)
             }
         }
 
-
-
+        //ONE SLEEPING QUARTER HAS 5 BEDS    
+        //ONE STABLE CAN ACCOMODATE 20 ANIMALS    
         this.globalDwellings.beds = this.sleepingQuarters * 5;
-        this.globalDwellings.stables = this.stablesCount * 10;
+        this.globalDwellings.stables = this.stablesCount * 20;
 
+        //INTERVAL IS USED FOR UPDATING THE DATA
         setInterval(() => {
             this.globalDwellings.wells = this.numberOfWells;
             if (this.resources.water < this.globalDwellings.waterTowerCapacity - this.numberOfWells * 10) {
@@ -251,7 +273,7 @@ class Farm {
             this.globalDwellings.surfaceOccupied = this.stablesCount + this.sleepingQuarters + this.waterTowerCount / 2;
             this.globalDwellings.occupiedSurface = 0;
             this.globalDwellings.beds = this.sleepingQuarters * 5;
-            this.globalDwellings.stables = this.stablesCount * 10;
+            this.globalDwellings.stables = this.stablesCount * 20;
             this.globalDwellings.waterTowerCapacity = this.waterTowerCapacity;
 
             this.machines.all = this.machines.tractor.length;
@@ -292,15 +314,16 @@ class Farm {
         }, 1000)
     }
 }
+
+//FARM IS CALLED ONLY ONCE
 let farm = new Farm();
 let { machines, population, globalDwellings, animals, resources, economy } = farm;
 let { workers, tourists } = population;
 let { livestock, poultry } = animals;
 
-
 console.log(farm);
 
-
+//UPGRADE BUTTONS
 page.upgradeSleepingHouseButton.addEventListener(`click`, () => {
     if (globalDwellings.surface - globalDwellings.surfaceOccupied > 1) {
         if (economy.totalBudget >= 10000) {
@@ -322,7 +345,6 @@ page.upgradeSleepingHouseButton.addEventListener(`click`, () => {
             </div>
             `
             page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
 
         }
         else {
@@ -444,7 +466,7 @@ class Human extends Mammal {
         super(2, 2, `Human`)
         this.name = name;
         this.gender = gender;
-        this.age = age;
+        this.age = age;      
     }
 }
 class Worker extends Human {
@@ -506,9 +528,6 @@ class Worker extends Human {
             console.log(`SERVICE IS NOT REQUIRED`)
         }
 
-
-
-
         //SALARY, REVENUE, AGE AND YEARS OF SERVICE ARE UPDATED HERE
         setInterval(() => {
             if (this.works == true) {
@@ -560,19 +579,19 @@ class Worker extends Human {
                         null;
                         break;
                     case `HAYSTACK COMBER`:
-                        resources.hay += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated());
+                        resources.hay += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated()) * economy.fertileLandsCoefficient();
                         break;
                     case `FARMER`:
-                        resources.hay += parseInt((this.yearsOfService / 2) * 5 * economy.workFactorCalculated());
+                        resources.hay += parseInt((this.yearsOfService / 2) * 5 * economy.workFactorCalculated()) * economy.fertileLandsCoefficient();
                         resources.water += 1;
-                        resources.corn += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated());
+                        resources.corn += parseInt((this.yearsOfService / 2) * 10 * economy.workFactorCalculated()) * economy.fertileLandsCoefficient();
                         break;
                     case `ANIMAL HANDLER`:
                         null;
                         break;
                     case `APPRENTICE`:
-                        resources.hay += parseInt((this.yearsOfService / 2) * 2 * economy.workFactorCalculated());
-                        resources.corn += parseInt((this.yearsOfService / 2) * 4 * economy.workFactorCalculated());
+                        resources.hay += parseInt((this.yearsOfService / 2) * 2 * economy.workFactorCalculated()) * economy.fertileLandsCoefficient();
+                        resources.corn += parseInt((this.yearsOfService / 2) * 4 * economy.workFactorCalculated()) * economy.fertileLandsCoefficient();
                         resources.water += 1;
                         break;
                     default:
@@ -593,7 +612,7 @@ class Tourist extends Human {
         this.isOnFarm = true;
         this.touristBudgetThatCameWith = this.touristBudget;
 
-
+        //TOURIST ACTIVITIES
         if (this.reason === `SIGHT SEEING`
             || (this.reason === `HORSE RIDING`)
             || (this.reason === `FOOD SHOPPING`)
@@ -623,7 +642,7 @@ class Tourist extends Human {
         }
 
 
-
+        //TOURIST STAYS TO SPEND ALL MONEY, OR LEAVES WHEN LONG TIME PASSES EVEN IF THE TOURIST STILL HAS MONEY
         setInterval(() => {
             if (this.isOnFarm === true) {
                 this.touristTimeSpent++;
@@ -660,7 +679,7 @@ class Tourist extends Human {
                             economy.totalBudget += shopAmmountMilk * 20;
                             this.touristBudget -= shopAmmountMilk * 20;
                         }
-                        else if (resources.milk < shopAmmountMeat && resources.milk < shopAmmountMeat) {
+                        else if (resources.milk < shopAmmountMilk && resources.meat < shopAmmountMeat) {
                             tourists.all.splice(this, 1);
                             this.isOnFarm = false
                             let newDivItem = document.createElement('DIV');
@@ -678,6 +697,8 @@ class Tourist extends Human {
     }
 
 }
+
+//RANDOM NAME WITH RANDOM LAST NAME GENERATOR
 let randomName = (gender) => {
     if (gender === `male`) {
         let arrayOfMaleNames = [`Trajko`, `Petko`, `Mitko`, `Ratko`, `Zoran`, `Goran`, `Simeon`, `Aleksandar`, `Fenjir`, `Fuat`, `Onur`]
@@ -738,6 +759,7 @@ let hireRandomWorker = () => {
                 break;
         }
 
+        //IF WORKER HAS MORE YEARS OF SERVICE, HIS SALARY IS HIGHER
         yearsOfService < 10
             ? workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 50) / 150)
             : workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 25) / 150)
@@ -753,14 +775,14 @@ let hireRandomWorker = () => {
     else null;
 
 }
+
 let generateRandomTourist = () => {
     let arrayOfActivities = [`SIGHT SEEING`, `HORSE RIDING`, `FOOD SHOPPING`]
 
     let gender = random(2);
     let age = random(50) + 15;
 
-    let activity = arrayOfActivities[Math.floor(Math.random() * arrayOfActivities.length)]
-
+    let activity = arrayOfActivities[random(arrayOfActivities.length)]
 
     if (gender === 1) {//MALE
         tourists.all.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
@@ -770,6 +792,7 @@ let generateRandomTourist = () => {
     }
 }
 
+//USED TO SHORTEN CODE A LOT IN SOME PLACES
 function addRemoveWorkerPositions(parameter, operator) {
     if (operator === `--`) {
         switch (parameter) {
@@ -853,15 +876,17 @@ class Horse extends Mammal {
         page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
 
-
+        // SCRIPT FOR THE ANIMAL
+        // AGE -1 MEANS THE ANIMAL IS DEAD
         setInterval(() => {
             if (this.age != -1) {
+
                 this.age++;
                 if (this.age > 45 || this.weight < 100) {
                     livestock.horses.splice(this, 1)
-
+                    //HORSE DIES OF OLD AGE OR OF WEAKNESS
                     let newDivItem = document.createElement('DIV');
-                    newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A ${this.color} HORSE HAS JUST DIED ON YOUR FARM BECAUSE OF OLD AGE, AND THE MEAT HAD TO BE THROWN OUT</h3>`
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style="color: white; background-color:black">A ${this.color} HORSE HAS JUST DIED ON YOUR FARM, AND THE MEAT HAD TO BE THROWN OUT</h3>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
                     this.age = -1;
@@ -872,10 +897,12 @@ class Horse extends Mammal {
                     resources.hay -= 2;
                     resources.water -= 2;
                 }
+                //ANIMAL LOSES WEIGHT IF NO FOOD IS PRESENT
                 else {
                     this.weight -= random(10) + 10
                 }
 
+                //RANDOM CHANCE FOR THE ANIMAL TO GET SICK
                 let sicknessRandomNumber = random(100)
                 let terminalSicknessRandomNumber = random(100)
 
@@ -883,6 +910,7 @@ class Horse extends Mammal {
                     this.sick = true;
                 }
                 if (this.sick === true) {
+                    //IF TERMINAL SICKNESS NUMBER CHECKS ROLL NUMBER WITH THIS NUMBER, THE ANIMAL DIES
                     if (terminalSicknessRandomNumber < 3) {
                         this.age = -1;
                         livestock.horses.splice(this, 1)
@@ -902,6 +930,7 @@ class Horse extends Mammal {
     }
 }
 class Pig extends Mammal {
+    //NEARLY SAME AS THE HORSE
     constructor(age = 1, weight = 50, price = 100) {
         super(4, 0, `Pig`)
         this.age = age;
@@ -979,6 +1008,7 @@ class Pig extends Mammal {
 }
 
 class Cow extends Mammal {
+    //NEARLY SAME AS HORSE
     constructor(age, milkAmount, weight, price) {
         super(4, 0, `Cow`)
         this.age = age;
@@ -1076,6 +1106,7 @@ class Cow extends Mammal {
 }
 
 class Chicken extends Bird {
+    //SAME AS ANY OTHER ANIMAL, EXCEPT IT EATS CORN INSTEAD OF HAY, AND HENS GIVE EGGS, ROOSTERS DONT
     constructor(age, weight, price, gender = `HEN`) {
         super();
 
@@ -1117,10 +1148,10 @@ class Chicken extends Bird {
                     return;
                 }
                 if (resources.corn > 0 && resources.water > 0) {
-                    this.weight += random(300) / 100                  
+                    this.weight += random(300) / 100
                     resources.corn--;
                     resources.water--;
-                    if(this.gender === `HEN`){
+                    if (this.gender === `HEN`) {
                         resources.eggs++;
                     }
                 }
@@ -1236,12 +1267,14 @@ let generateChicken = () => {
 
 //#region INSPECTION FOR IREGULARITIES
 let inspection = () => {
+    //INSPECTOR CHECKS ON RANDOM INTERVALS IF THERE IS SOMEONE ON THE FARM OLDER OR YOUNGER THAN THE PROPOSED AGE, OR IF THE WORKER HAS TO BE SENT TO RETIREMENT
     let newDivItem = document.createElement('DIV');
     newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:red; background-color: black;">An inspection is conducting on the farm...</p>`
     page.log.insertBefore(newDivItem, page.log.childNodes[0])
     let fines = 0;
 
     setTimeout(() => {
+        //TRUDOVA INSPEKCIJA :))))
         (function trudovaInspekcija() {
             for (let worker of workers.all) {
                 let newDivItem = document.createElement('DIV');
@@ -1319,6 +1352,7 @@ setInterval(() => {
 
 //#region VETERINARY INSPECTOR
 setInterval(() => {
+    //VETERINARY INSPECTOR CHECKS ON REGULAR INTERVALS IF THERE ARE SICK ANIMALS, AND CURES THE SICK IF HE FOUNDS THEM,
     (function veterinaryInspector() {
         let veterinaryCost = 100;
         economy.totalBudget -= veterinaryCost;
@@ -1381,6 +1415,7 @@ setInterval(() => {
 
 //#region AI CHECK FOR TOURIST
 setInterval(() => {
+    //CHECKS FOR TOURIST IF IS TO LEFT THE FARM OR NOT
     (function touristInspector() {
         for (let tourist of tourists.all) {
             let newDivItem = document.createElement('DIV');
@@ -1409,6 +1444,8 @@ setInterval(() => {
 
 //#region REGULAR BUTCHER VISIT
 setInterval(() => {
+    //BUTCHER VISITS THE FARM ON REGULAR INTERVALS, AND IF THE ANIMAL IS VERY FAT, OR IS AT APROPRIATE AGE WITH GOOD WEIGHT, IS BEING SLAUGHTERED
+    //KEEP IN MIND THAT PIGS GIVE MORE MEAT THAN COWS, AND HORSES GIVE LEAST. CHICKEN IS ALSO GOOD FOR MEAT, BUT THEY CAN DIE BEFORE THE BUTCHER ARRIVES
     (function butcherInspector() {
         economy.totalBudget -= 200;
         let newDivItem = document.createElement('DIV');
@@ -1479,6 +1516,7 @@ setInterval(() => {
 //INTERVAL REGIONS
 
 //#region TOP PAGE TABLE AND IT'S INTERVALS
+//TOP TABLE PRINTS
 function months(number) {
     let months = ['', "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"];
@@ -1494,15 +1532,15 @@ function tablePrint() {
     page.table.innerHTML = `
     <tr>
         <td><abbr customTitle ="Current Month">${months(monthCounter)}</abbr></td>
-        <td><abbr customTitle ="Surface Area Occupied, the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface}</abbr></td>
+        <td><abbr customTitle ="Surface Area Occupied, measured in hectares. the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface} ha</abbr></td>
         <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
         <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
         <td><abbr customTitle ="Cows: ${livestock.cows.length}\nPigs: ${livestock.pigs.length} \nHorses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
-        <td><abbr customTitle ="Milk: ${resources.milk}\nMeat: ${resources.meat}\nEggs: ${resources.eggs}">${parseInt(resources.milk+resources.eggs+resources.meat)}</abbr></td>
+        <td><abbr customTitle ="Milk: ${resources.milk}\nMeat: ${resources.meat}\nEggs: ${resources.eggs}">${parseInt(resources.milk + resources.eggs + resources.meat)}</abbr></td>
         <td><abbr customTitle ="Corn: ${resources.corn}">${parseInt(resources.corn)}</abbr></td>
         <td><abbr customTitle ="Hay: ${resources.hay}">${resources.hay}</abbr></td>
         <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>
-        <td><abbr customTitle ="Economy Factor">${economy.workFactor}</abbr></td>
+        <td><abbr customTitle ="Economy Work Factor:${economy.workFactor}\n Fertile Lands Coefficient: ${economy.fertileLandsCoefficient()}">${economy.workFactor + economy.fertileLandsCoefficient()}</abbr></td>
         <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}$\nSalaries Paid: ${parseInt(economy.salariesPaid)}$\nFarm Expenses: ${parseInt(economy.farmExpenses)}$">${parseInt(economy.totalBudget)}$</abbr></td>
        
     </tr>
@@ -1519,6 +1557,7 @@ setInterval(() => {
 //#endregion
 
 //#region INTERVALS
+//INTERVALS ARE SET DIFFERENTLY FOR DIFFERENT THINGS, 
 //WORKER INTERVAL
 setInterval(() => {
     if (economy.totalBudget > 1000) {
