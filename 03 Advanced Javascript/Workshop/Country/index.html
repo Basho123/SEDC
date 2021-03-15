@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country search</title>
+</head>
+
+<body>
+    <input type="text" id="countryValue" value="united">
+    
+    <div id="loader"><img src="loader.gif" alt=""></div>
+
+    <button id="searchButton">Search Button</button>
+    <table border="1px">
+        <thead>
+            <tr>
+                <th>Flag</th>
+                <th>Name</th>
+                <th>Population</th>
+                <th>CountryArea</th>
+                <th>Capital</th>
+                <th>Languages</th>
+                <th>Currency</th>
+            </tr>
+        </thead>
+        <tbody id="tBody">
+           
+        </tbody>
+
+        <select id="filter1">
+            <option value="ascending" selected>Ascending</option>
+            <option value="descending">Descending</option>
+        </select>
+
+        <select id="filter2">
+            <option value="name" selected>Name</option>
+            <option value="area">Area</option>
+            <option value="population">Population</option>
+        </select>
+    </table>
+    <script src="script.js"></script>
+</body>
+
+</html>

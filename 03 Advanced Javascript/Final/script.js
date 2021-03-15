@@ -23,7 +23,33 @@ const page = {
 }
 const { random } = page;
 
-let monthCounter = 1;
+
+let time = {
+    year: 120000,
+    month: 10000,
+    week: 2500,
+    day: 350,
+    currentMonth: `January`,
+
+    counterForMonths: 0,
+    monthCounter: () => {
+        const months = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"];
+
+        let monthName = months[time.counterForMonths];
+        currentMonth = monthName;
+        time.counterForMonths++;
+
+        time.counterForMonths === 12 ? time.counterForMonths = 0 : null;
+
+        return currentMonth;
+    }
+}
+let { day, week, year, month, currentMonth } = time;
+setInterval(() => { currentMonth = time.monthCounter() }, month)
+
+
+// console.log(time.monthCounter(););
 
 //#region PROTOTYPE CLASSES
 
@@ -160,21 +186,20 @@ class Tractor extends Machine {
             }
             else null;
         }, 10000)
-
     }
+    static generate = (interval) => {
+        setInterval(() => {
+            let type = `IMT 560 TRACTOR`
+            let licensePlates = `SK-${random(10)}${random(10)}${random(10)}${random(10)}-${random(10)}${random(10)}`
+            let price = 10000;
 
-}
-
-let generateTractor = () => {
-    let type = `IMT 560 TRACTOR`
-    let licensePlates = `SK-${random(10)}${random(10)}${random(10)}${random(10)}-${random(10)}${random(10)}`
-    let price = 10000;
-
-    //ON EVERY 1 TRACTOR DRIVER, 1 TRACTOR CAN BE BOUGHT
-    if (machines.tractor.length < workers.tractorDriver && economy.totalBudget > price) {
-        economy.totalBudget -= price;
-        economy.farmExpenses -= price;
-        machines.tractor.push(new Tractor(type, licensePlates, true, false, price));
+            //ON EVERY 1 TRACTOR DRIVER, 1 TRACTOR CAN BE BOUGHT
+            if (machines.tractor.length < workers.tractorDriver && economy.totalBudget > price) {
+                economy.totalBudget -= price;
+                economy.farmExpenses -= price;
+                machines.tractor.push(new Tractor(type, licensePlates, true, false, price));
+            }
+        }, interval)
     }
 }
 //#endregion
@@ -206,6 +231,9 @@ class Farm {
             },
             tourists: {
                 all: [],
+            },
+            inspection: {
+                finance: [],
             }
         }
 
@@ -283,8 +311,8 @@ class Farm {
                 this.animals.livestock.horses.length +
                 this.animals.livestock.pigs.length +
                 this.animals.livestock.cows.length +
-                Math.floor(this.animals.poultry.chicken.length/10)+
-                Math.floor(this.animals.poultry.turkey.length/7)
+                Math.floor(this.animals.poultry.chicken.length / 10) +
+                Math.floor(this.animals.poultry.turkey.length / 7)
 
             this.population.workers.tractorDriver = 0;
             this.population.workers.haystackComber = 0;
@@ -468,9 +496,9 @@ class Human extends Mammal {
         super(2, 2, `Human`)
         this.name = name;
         this.gender = gender;
-        this.age = age;         
+        this.age = age;
     }
-    
+
 }
 class Worker extends Human {
     constructor(name, gender, age, workingPosition = `apprentice`, yearsOfService = 0, salary = 0, salaryBonus = 0, baseSalary = 0) {
@@ -501,7 +529,7 @@ class Worker extends Human {
             || this.workingPosition === `ANIMAL HANDLER`
             || this.workingPosition === `APPRENTICE`
         ) {
-                console.log(this.gender);
+            console.log(this.gender);
             addRemoveWorkerPositions(this.workingPosition, '++');
             let newDivItem = document.createElement('DIV');
             newDivItem.innerHTML = `
@@ -543,7 +571,7 @@ class Worker extends Human {
                 this.salary = (this.baseSalary + this.salaryBonus)
 
                 //IF THERE IS NO FOOD OR WATER WORKER LEAVES WORK
-                if(resources.eggs < 1){
+                if (resources.eggs < 1) {
                     if (resources.milk < 1) {
                         resources.meat--;
                         if (resources.meat < 1) {
@@ -556,16 +584,16 @@ class Worker extends Human {
                         else null;
                     }
                     else {
-                        resources.milk--;                    
+                        resources.milk--;
                     }
                 }
                 else resources.eggs--;
-               
+
 
                 if (resources.water > 1) {
                     resources.water--;
                 }
-                
+
                 else {
                     this.works = false;
                     workers.all.splice(this, 1);
@@ -610,7 +638,62 @@ class Worker extends Human {
             }
             else null;
 
-        }, random(1000) + 9000)
+        }, month)
+    }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            if (workers.all.length < globalDwellings.beds) {
+                let arrayOfJobs = [`TRACTOR DRIVER`, `HAYSTACK COMBER`, `FARMER`, `ANIMAL HANDLER`, `APPRENTICE`]
+
+                let gender = random(2);
+                let age = random(50) + 15
+                let yearsOfService = 0;
+                let job = arrayOfJobs[random(arrayOfJobs.length)]
+
+                let workerSalary = 0;
+                let workerSalaryBonus = 0;
+                let workerSalaryBase = 0;
+
+                switch (job) {
+                    case `OVERSEER`:
+                        workerSalaryBase = 1200;
+                        break;
+                    case `TRACTOR DRIVER`:
+                        workerSalaryBase = 500;
+                        break;
+                    case `HAYSTACK COMBER`:
+                        workerSalaryBase = 230;
+                        break;
+                    case `FARMER`:
+                        workerSalaryBase = 250;
+                        break;
+                    case `ANIMAL HANDLER`:
+                        workerSalaryBase = 400;
+                        break;
+                    case `APPRENTICE`:
+                        workerSalaryBase = 30;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                //IF WORKER HAS MORE YEARS OF SERVICE, HIS SALARY IS HIGHER
+                yearsOfService < 10
+                    ? workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 50) / 150)
+                    : workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 25) / 150)
+
+
+                if (gender === 1) {//MALE
+                    workers.all.push(new Worker(`${randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
+                }
+                else if (gender === 0) {//FEMALE
+                    workers.all.push(new Worker(`${randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
+                }
+            }
+            else null;
+        }, interval)
     }
 }
 class Tourist extends Human {
@@ -712,7 +795,130 @@ class Tourist extends Human {
         }, 10000)
     }
 
+    static generate = (interval) => {
+        setInterval(() => {
+            let randomNumberWithDependancy = Math.floor(Math.random() * 1000 / (((resources.meat + resources.milk + livestock.horses.length) + 2000) / 1000))
+
+            if (randomNumberWithDependancy < 100) {
+                let arrayOfActivities = [`SIGHT SEEING`, `HORSE RIDING`, `FOOD SHOPPING`]
+                let gender = random(2);
+                let age = random(50) + 15;
+
+                let activity = arrayOfActivities[random(arrayOfActivities.length)]
+
+                if (gender === 1) {//MALE
+                    tourists.all.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
+                }
+                else if (gender === 0) {//FEMALE
+                    tourists.all.push(new Tourist(`${randomName(`female`)}`, `Female`, age, activity));
+                }
+            }
+        }, interval)
+    }
+
+
 }
+class Inspector extends Human {
+    constructor(hasFinished = false) {
+        super();
+        this.hasFinished = hasFinished;
+
+        let newDivItem = document.createElement('DIV')
+        
+        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:red; background-color: black;">An inspection is conducting on the farm...</p>`
+        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+        let fines = 0;
+
+        if (this.hasFinished === false) {
+            setTimeout(() => {
+                //TRUDOVA INSPEKCIJA :))))
+                (function trudovaInspekcija() {
+                    for (let worker of workers.all) {
+                        let newDivItem = document.createElement('DIV');
+                        if (worker.age < 18) {
+                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
+                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                            addRemoveWorkerPositions(worker.workingPosition, '--');
+                            worker.works = false;
+                            workers.all.splice(worker, 1)
+                            fines++;
+                            continue;
+                        }
+                        else if (worker.age > 70) {
+                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
+                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                            addRemoveWorkerPositions(worker.workingPosition, '--');
+                            worker.works = false;
+                            workers.all.splice(worker, 1)
+                            fines++;
+                            continue;
+                        }
+                        else if (worker.yearsOfService > 20) {
+                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
+                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                            economy.totalBudget -= 1000;
+
+                            addRemoveWorkerPositions(worker.workingPosition, '--');
+                            worker.works = false;
+                            workers.all.splice(worker, 1)
+                            continue;
+                        }
+                    }
+                    if (fines === 0) {
+                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:green; background-color: yellow;">Everythings seems to be in order</p>`
+                        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    }
+                    else {
+                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: red;">Some irregularities were found on your farm</p>`
+                        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    }
+                })();
+            }, 10000)
+
+            //INSPECTION FINISHED
+            setTimeout(() => {
+                if (fines !== 0) {
+                    economy.totalBudget -= (fines * 500);
+
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:black; background-color: red;">Inspection has finished. You have been charged ${fines * 500}$ for ${fines} found irregularities.</p>`
+                    fines = 0;
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+
+                }
+                else {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: Green;">Inspection has finished. Everything seems to be in order. Thank you for your cooperation.</p>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
+                //INSPECTOR LEAVES THE FARM
+                farm.population.inspection.finance.splice(this, 1);
+
+                this.hasFinished = true;
+                console.log(`inspector leaves`, farm.population.inspection.finance);
+            }, 2500)
+        }
+        else null;
+    }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            let randomNumber = random(100);
+            if (randomNumber < 5) {
+                farm.population.inspection.finance.push(new Inspector());          
+                console.log(`inspector comes`, farm.population.inspection.finance);   
+            }
+        }, interval)
+        //INSPECTOR CHECKS ON RANDOM INTERVALS IF THERE IS SOMEONE ON THE FARM OLDER OR YOUNGER THAN THE PROPOSED AGE, OR IF THE WORKER HAS TO BE SENT TO RETIREMENT
+    }
+}
+
+
+
+
 
 //RANDOM NAME WITH RANDOM LAST NAME GENERATOR
 let randomName = (gender) => {
@@ -738,59 +944,7 @@ let randomName = (gender) => {
     else return;
 }
 
-let hireRandomWorker = () => {
-    if (workers.all.length < globalDwellings.beds) {
-        let arrayOfJobs = [`TRACTOR DRIVER`, `HAYSTACK COMBER`, `FARMER`, `ANIMAL HANDLER`, `APPRENTICE`]
 
-        let gender = random(2);
-        let age = random(50) + 15
-        let yearsOfService = 0;
-        let job = arrayOfJobs[random(arrayOfJobs.length)]
-
-        let workerSalary = 0;
-        let workerSalaryBonus = 0;
-        let workerSalaryBase = 0;
-
-        switch (job) {
-            case `OVERSEER`:
-                workerSalaryBase = 1200;
-                break;
-            case `TRACTOR DRIVER`:
-                workerSalaryBase = 500;
-                break;
-            case `HAYSTACK COMBER`:
-                workerSalaryBase = 230;
-                break;
-            case `FARMER`:
-                workerSalaryBase = 250;
-                break;
-            case `ANIMAL HANDLER`:
-                workerSalaryBase = 400;
-                break;
-            case `APPRENTICE`:
-                workerSalaryBase = 30;
-                break;
-
-            default:
-                break;
-        }
-
-        //IF WORKER HAS MORE YEARS OF SERVICE, HIS SALARY IS HIGHER
-        yearsOfService < 10
-            ? workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 50) / 150)
-            : workerSalaryBonus = parseInt((workerSalaryBase * yearsOfService * 25) / 150)
-
-
-        if (gender === 1) {//MALE
-            workers.all.push(new Worker(`${randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
-        }
-        else if (gender === 0) {//FEMALE
-            workers.all.push(new Worker(`${randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
-        }
-    }
-    else null;
-
-}
 
 let generateRandomTourist = () => {
     let arrayOfActivities = [`SIGHT SEEING`, `HORSE RIDING`, `FOOD SHOPPING`]
@@ -944,6 +1098,28 @@ class Horse extends Mammal {
 
         }, 10000)
     }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            if (animals.all < globalDwellings.stables) {
+                let age = random(5) + 1;
+                let weight = random(200) + 200;
+
+                let price = weight / age * 10
+
+                let colors = [`BLACK`, `WHITE`, `BROWN`, `ALBINO`]
+                let color = colors[random(3)]
+
+                //ON EVERY 1 FARMER, 3 HORSES CAN BE BOUGHT
+                if (livestock.horses.length < workers.farmer * 3 && economy.totalBudget > price) {
+                    economy.totalBudget -= price;
+                    economy.farmExpenses -= price;
+
+                    livestock.horses.push(new Horse(age, color, weight, price));
+                }
+            }
+        }, interval)
+    }
 }
 class Pig extends Mammal {
     //NEARLY SAME AS THE HORSE
@@ -1021,8 +1197,26 @@ class Pig extends Mammal {
 
         }, 10000)
     }
-}
 
+    static generate = (interval) => {
+        setInterval(() => {
+            if (animals.all < globalDwellings.stables) {
+                let age = 1;
+                let weight = random(100) + 100
+
+                let price = weight / age
+
+                //ON EVERY 1 ANIMAL HANDLER, 6 PIGS CAN BE BOUGHT
+                if (livestock.pigs.length < workers.animalHandler * 6 && economy.totalBudget > price) {
+                    economy.totalBudget -= price;
+                    economy.farmExpenses -= price;
+
+                    livestock.pigs.push(new Pig(age, weight, price));
+                }
+            }
+        }, interval)
+    }
+}
 class Cow extends Mammal {
     //NEARLY SAME AS HORSE
     constructor(age, milkAmount, weight, price) {
@@ -1119,6 +1313,26 @@ class Cow extends Mammal {
 
         }, 10000)
     }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            if (animals.all < globalDwellings.stables) {
+                let age = random(3) + 1;
+                let milkAmount = random(20) + 5;
+                let weight = random(100) + 100;
+
+                let price = (milkAmount * weight) / age / 10
+
+                //ON EVERY 1 ANIMAL HANDLER, 3 COWS CAN BE BOUGHT
+                if (livestock.cows.length < workers.animalHandler * 3 && economy.totalBudget > price) {
+                    economy.totalBudget -= price;
+                    economy.farmExpenses -= price;
+
+                    livestock.cows.push(new Cow(age, milkAmount, weight, price));
+                }
+            }
+        }, interval)
+    }
 }
 
 class Chicken extends Bird {
@@ -1200,6 +1414,29 @@ class Chicken extends Bird {
 
         }, 10000)
     }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            if (animals.all < globalDwellings.stables && poultry.chicken.length < workers.farmer * 6) {
+                let age = random(2) + 1;
+                let weight = random(2) + 1;
+
+                let price = weight / age * 2
+
+                let genderType = [`HEN`, `ROOSTER`]
+                let gender = genderType[random(2)]
+
+                //ON EVERY 1 FARMER, 6 CHICKENS CAN BE BOUGHT
+
+                if (economy.totalBudget > price) {
+                    economy.totalBudget -= price;
+                    economy.farmExpenses -= price;
+
+                    poultry.chicken.push(new Chicken(age, weight, price, gender));
+                }
+            }
+        }, interval)
+    }
 }
 class Turkey extends Bird {
     //SAME AS ANY OTHER ANIMAL, EXCEPT IT EATS CORN INSTEAD OF HAY
@@ -1208,7 +1445,7 @@ class Turkey extends Bird {
 
         this.age = age;
         this.weight = weight;
-        this.price = price;        
+        this.price = price;
 
         let newDivItem = document.createElement('DIV');
         newDivItem.innerHTML += `
@@ -1244,7 +1481,7 @@ class Turkey extends Bird {
                 if (resources.corn > 0 && resources.water > 0) {
                     this.weight += random(700) / 100
                     resources.corn--;
-                    resources.water--;                   
+                    resources.water--;
                 }
                 else {
                     this.weight -= random(300) / 100
@@ -1275,192 +1512,31 @@ class Turkey extends Bird {
 
         }, 10000)
     }
-}
+    static generate = (interval) => {
+        setInterval(() => {
+            if (animals.all < globalDwellings.stables && poultry.turkey.length < workers.farmer * 3) {
+                let age = random(2) + 1;
+                let weight = random(2) + 1;
+
+                let price = weight / age * 2
 
 
-let generateCow = () => {
-    if (animals.all < globalDwellings.stables) {
-        let age = random(3) + 1;
-        let milkAmount = random(20) + 5;
-        let weight = random(100) + 100;
+                //ON EVERY 1 FARMER, 3 TURKEYS CAN BE BOUGHT
 
-        let price = (milkAmount * weight) / age / 10
+                if (economy.totalBudget > price) {
+                    economy.totalBudget -= price;
+                    economy.farmExpenses -= price;
 
-        //ON EVERY 1 ANIMAL HANDLER, 3 COWS CAN BE BOUGHT
-        if (livestock.cows.length < workers.animalHandler * 3 && economy.totalBudget > price) {
-            economy.totalBudget -= price;
-            economy.farmExpenses -= price;
-
-            livestock.cows.push(new Cow(age, milkAmount, weight, price));
-        }
-    }
-}
-
-let generatePig = () => {
-    if (animals.all < globalDwellings.stables) {
-        let age = 1;
-        let weight = random(100) + 100
-
-        let price = weight / age
-
-        //ON EVERY 1 ANIMAL HANDLER, 6 PIGS CAN BE BOUGHT
-        if (livestock.pigs.length < workers.animalHandler * 6 && economy.totalBudget > price) {
-            economy.totalBudget -= price;
-            economy.farmExpenses -= price;
-
-            livestock.pigs.push(new Pig(age, weight, price));
-        }
-    }
-}
-let generateHorse = () => {
-    if (animals.all < globalDwellings.stables) {
-        let age = random(5) + 1;
-        let weight = random(200) + 200;
-
-        let price = weight / age * 10
-
-        let colors = [`BLACK`, `WHITE`, `BROWN`, `ALBINO`]
-        let color = colors[random(3)]
-
-        //ON EVERY 1 FARMER, 3 HORSES CAN BE BOUGHT
-        if (livestock.horses.length < workers.farmer * 3 && economy.totalBudget > price) {
-            economy.totalBudget -= price;
-            economy.farmExpenses -= price;
-
-            livestock.horses.push(new Horse(age, color, weight, price));
-        }
-    }
-}
-console.log(random(2));
-
-let generateChicken = () => {
-    if (animals.all < globalDwellings.stables && poultry.chicken.length < workers.farmer * 6) {
-        let age = random(2) + 1;
-        let weight = random(2) + 1;
-
-        let price = weight / age * 2
-
-        let genderType = [`HEN`, `ROOSTER`]
-        let gender = genderType[random(2)]
-
-        //ON EVERY 1 FARMER, 6 CHICKENS CAN BE BOUGHT
-
-        if (economy.totalBudget > price) {
-            economy.totalBudget -= price;
-            economy.farmExpenses -= price;
-
-            poultry.chicken.push(new Chicken(age, weight, price, gender));
-        }
-    }
-}
-
-let generateTurkey = () => {
-    if (animals.all < globalDwellings.stables && poultry.turkey.length < workers.farmer * 3) {
-        let age = random(2) + 1;
-        let weight = random(2) + 1;
-
-        let price = weight / age * 2
-
-        
-        //ON EVERY 1 FARMER, 3 TURKEYS CAN BE BOUGHT
-
-        if (economy.totalBudget > price) {
-            economy.totalBudget -= price;
-            economy.farmExpenses -= price;
-
-            poultry.turkey.push(new Turkey(age, weight, price));
-        }
+                    poultry.turkey.push(new Turkey(age, weight, price));
+                }
+            }
+        }, interval)
     }
 }
 
 //#endregion
 
 //INSPECTION AND AI CHECKS
-
-//#region INSPECTION FOR IREGULARITIES
-let inspection = () => {
-    //INSPECTOR CHECKS ON RANDOM INTERVALS IF THERE IS SOMEONE ON THE FARM OLDER OR YOUNGER THAN THE PROPOSED AGE, OR IF THE WORKER HAS TO BE SENT TO RETIREMENT
-    let newDivItem = document.createElement('DIV');
-    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:red; background-color: black;">An inspection is conducting on the farm...</p>`
-    page.log.insertBefore(newDivItem, page.log.childNodes[0])
-    let fines = 0;
-
-    setTimeout(() => {
-        //TRUDOVA INSPEKCIJA :))))
-        (function trudovaInspekcija() {
-            for (let worker of workers.all) {
-                let newDivItem = document.createElement('DIV');
-                if (worker.age < 18) {
-                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
-                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                    addRemoveWorkerPositions(worker.workingPosition, '--');
-                    worker.works = false;
-                    workers.all.splice(worker, 1)
-                    fines++;
-                    continue;
-                }
-                else if (worker.age > 70) {
-                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
-                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                    addRemoveWorkerPositions(worker.workingPosition, '--');
-                    worker.works = false;
-                    workers.all.splice(worker, 1)
-                    fines++;
-                    continue;
-                }
-                else if (worker.yearsOfService > 20) {
-                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
-                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                    economy.totalBudget -= 1000;
-
-                    addRemoveWorkerPositions(worker.workingPosition, '--');
-                    worker.works = false;
-                    workers.all.splice(worker, 1)
-                    continue;
-                }
-            }
-            if (fines === 0) {
-                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:green; background-color: yellow;">Everythings seems to be in order</p>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-            }
-            else {
-                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: red;">Some irregularities were found on your farm</p>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-            }
-        })();
-    }, 10000)
-
-    //INSPECTION FINISHED
-    setTimeout(() => {
-        if (fines !== 0) {
-            economy.totalBudget -= (fines * 500);
-
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:black; background-color: red;">Inspection has finished. You have been charged ${fines * 500}$ for ${fines} found irregularities.</p>`
-            fines = 0;
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-
-        }
-        else {
-            let newDivItem = document.createElement('DIV');
-            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: Green;">Inspection has finished. Everything seems to be in order. Thank you for your cooperation.</p>`
-            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-        }
-
-    }, 2500)
-}
-
-//INSPECTION INTERVAL
-setInterval(() => {
-    let randomNumber = random(100)
-    if (randomNumber < 6) {
-        inspection();
-    }
-}, 10000)
-//#endregion
 
 //#region VETERINARY INSPECTOR
 setInterval(() => {
@@ -1647,7 +1723,7 @@ setInterval(() => {
 
                 resources.meat += turkey.weight
                 turkey.age = -1;
-                poultry.turkey.splice(hen, 1)
+                poultry.turkey.splice(turkey, 1)
                 continue;
             }
             else continue;
@@ -1664,21 +1740,21 @@ setInterval(() => {
 
 //#region TOP PAGE TABLE AND IT'S INTERVALS
 //TOP TABLE PRINTS
-function months(number) {
-    let months = ['', "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
+// function months(number) {
+//     let months = ['', "January", "February", "March", "April", "May", "June",
+//         "July", "August", "September", "October", "November", "December"];
 
-    if (monthCounter === 12) {
-        monthCounter = 0;
-    }
+//     if (monthCounter === 12) {
+//         monthCounter = 0;
+//     }
 
-    return months[number];
+//     return months[number];
 
-}
+// }
 function tablePrint() {
     page.table.innerHTML = `
     <tr>
-        <td><abbr customTitle ="Current Month">${months(monthCounter)}</abbr></td>
+        <td><abbr customTitle ="Current Month">${currentMonth}</abbr></td>
         <td><abbr customTitle ="Surface Area Occupied, measured in hectares. the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface} ha</abbr></td>
         <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
         <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
@@ -1698,63 +1774,37 @@ tablePrint();
 setInterval(() => {
     tablePrint();
 }, 1000)
-setInterval(() => {
-    monthCounter++;
-}, 10000)
-//#endregion
-
-//#region INTERVALS
-//INTERVALS ARE SET DIFFERENTLY FOR DIFFERENT THINGS, 
-//WORKER INTERVAL
-setInterval(() => {
-    if (economy.totalBudget > 1000) {
-        hireRandomWorker();
-        economy.totalBudget -= 1000;
-    };
-}, 8000)
 
 //TOURIST INTERVAL
-setInterval(() => {
-    let randomNumberWithDependancy = Math.floor(Math.random() * 1000 / (((resources.meat + resources.milk + livestock.horses.length) + 2000) / 1000))
-    if (randomNumberWithDependancy < 100) {
-        generateRandomTourist();
-    }
-}, 10000)
+
 
 //COW INTERVAL
-setInterval(() => {
-    generateCow();
-}, 12000)
 
-//PIG INTERVAL
-setInterval(() => {
-    generatePig();
-}, 10000)
+Cow.generate(month * 2);
+Horse.generate(month * 3);
+Pig.generate(month);
 
-//HORSE INTERVAL
-setInterval(() => {
-    generateHorse();
-}, 20000)
-
-//CHICKEN INTERVAL
-setInterval(() => {
-    generateChicken();
-}, 2000)
-
-//TURKEY INTERVAL
-setInterval(() => {
-    generateTurkey();
-}, 4000)
+Chicken.generate(week);
+Turkey.generate(week * 2);
 
 
-//TRACTOR INTERVAL
-setInterval(() => {
-    generateTractor();
-}, 1000)
+Tractor.generate(month);
+
+
+Tourist.generate(month);
+Worker.generate(week);
+
+Inspector.generate(month);
+
+
+
+
+
+
 
 //RANDOM WATER SPRING IS FOUND
 setInterval(() => {
-    if(random(100)<5){
+    if (random(100) < 5) {
         farm.numberOfWells++;
         let newDivItem = document.createElement('DIV');
         newDivItem.innerHTML += `
