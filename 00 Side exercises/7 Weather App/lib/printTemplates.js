@@ -12,7 +12,8 @@ let printTemplates = {
         grandparentDiv.innerHTML = ``;
 
         let divStyleBackgroundColorSwitch = true;
-        for (let element of list) {
+        
+        list.forEach(element => {
             //TIME AND DATE STRING ARE FETCHED HERE, 2 SEPARATE API LINKS ARE USED AND INTERTWINED, TIMEZONE SET ACCORDINGLY
             dayName = getDayName(element.dt_txt, `en-US`)
             let dateTimeArray = element.dt_txt.split(` `);
@@ -78,10 +79,12 @@ let printTemplates = {
             div5.innerHTML = `<img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">`
             element.pop > 0 ? div5.innerHTML += `<span class = "hourlyWeatherDescription">Prec. ${parseInt(element.pop * 100)}%</span>` : div5.innerHTML = div5.innerHTML
             div6.innerHTML = `
-                <span class="mediumLetters">${windDirection}</span>
-                <span class="tinyLetters">Wind speed: ${element.wind.speed}m/s</span>
-            `
-        }
+                    <span class="mediumLetters">${windDirection}</span>
+                    <span class="tinyLetters">Wind speed: ${element.wind.speed}m/s</span>
+                `
+        })
+
+
     },
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +182,7 @@ let printTemplates = {
 
         let divStyleBackgroundColorSwitch = true;
 
-        for (let element of response.hourly) {
+        response.hourly.forEach(element => {
             //TIME AND DATE ARE ADJUSTED HERE, AND TIMEZONE IS CORRECTED ACCORDINGLY
             let date = new Date(+(`${element.dt}000`) + (response.timezone_offset * 1000))
             let dateArray = date.toString().split(` `);
@@ -234,19 +237,21 @@ let printTemplates = {
             div1.innerHTML = `<span class="hourlyHours">${hours}</span><br><span class="hourlyDays">${days}</span>`
             div2.innerHTML = `
                 <img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">`
-                element.pop > 0 ? div2.innerHTML += `<span class = "hourlyWeatherDescription">Prec. ${parseInt(element.pop * 100)}%</span>` : div2.innerHTML = div2.innerHTML
+            element.pop > 0 ? div2.innerHTML += `<span class = "hourlyWeatherDescription">Prec. ${parseInt(element.pop * 100)}%</span>` : div2.innerHTML = div2.innerHTML
 
             div3.innerHTML = `<span class = "hourlyTemperature">${parseInt(element.temp)}°C</span>`
             div4.innerHTML = `
             <span class = "hourlyFeelsLike">RealFeel ${parseInt(element.feels_like)}°C</span>
             <span class = "hourlyWeatherDescription"style = "text-transform: capitalize;">${element.weather[0].description}</span>          
-            `            
+            `
             div5.innerHTML = `<span class = "hourlyUV">UV index: ${element.uvi}</span>`
             div6.innerHTML = `
                 <span class="mediumLetters">${elementWindDirection}</span>
                 <span class="tinyLetters">Wind speed: ${element.wind_speed}m/s</span>
                 `
-        }
+
+        })
+
     },
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +266,7 @@ let printTemplates = {
 
         let divStyleBackgroundColorSwitch = true;
 
-        for (let element of response.daily) {
+        response.daily.forEach(element => {
             //TIME AND DATE ARE ADJUSTED HERE, AND TIMEZONE IS CORRECTED ACCORDINGLY            
             date = new Date(+(`${element.dt}000`) + (response.timezone_offset * 1000))
 
@@ -313,10 +318,12 @@ let printTemplates = {
             div5.innerHTML = `<img class="imageElement" src="${apiParameters.imgUrl}${element.weather[0].icon}@2x.png">`
             element.pop > 0 ? div5.innerHTML += `<span class = "hourlyWeatherDescription">Precipitation ${parseInt(element.pop * 100)}%</span>` : div2.innerHTML = div2.innerHTML
             div6.innerHTML = `
-            <span class="mediumLetters">${elementWindDirection}</span>
-            <span class="tinyLetters">Wind speed: ${element.wind_speed}m/s</span>            
-            `
-        }
+       <span class="mediumLetters">${elementWindDirection}</span>
+       <span class="tinyLetters">Wind speed: ${element.wind_speed}m/s</span>            
+       `
+        })
+
+
     },
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

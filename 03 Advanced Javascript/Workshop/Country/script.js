@@ -26,8 +26,8 @@ let page = {
     ascendingFilter: document.getElementById(`filter1`),
     precisionFilter: document.getElementById(`filter2`),
     loader: document.getElementById(`loader`),
-
 }
+
 page.loader.style.display = `none`;
 
 let apiData = {
@@ -37,10 +37,13 @@ let apiData = {
 page.button.addEventListener(`click`, () => {
     page.table.innerHTML = ``
     if (page.input.value != undefined) {
+
         page.loader.style.display = `block`;
+
         (async function getData() {
             let data = await fetch(`${apiData.apiUrl}name/${page.input.value}`);
             let countries = await data.json();
+
             page.loader.style.display = `none`;
 
             sortByNameAsc = (a, b) => (a.name).localeCompare(b.name);
@@ -49,46 +52,43 @@ page.button.addEventListener(`click`, () => {
             sortByAreaAsc = (a, b) => a.area - b.area;
             sortByAreaDesc = (a, b) => b.area - a.area;
 
-
             sortByNumberAsc = (a, b) => a.population - b.population;
             sortByNumbersDesc = (a, b) => b.population - a.population;
 
+
             if (page.ascendingFilter.value === `ascending`) {
-                if (page.precisionFilter.value === `name`) {
-                    countries.sort(sortByNameAsc)
-                }
-                if (page.precisionFilter.value === `area`) {
-                    countries.sort(sortByAreaAsc)
-                }
-                if (page.precisionFilter.value === `population`) {
-                    countries.sort(sortByNumberAsc)
+                switch (page.precisionFilter.value) {
+                    case `name`:
+                        countries.sort(sortByNameAsc)
+                        break;
+                    case `area`:
+                        countries.sort(sortByAreaAsc)
+                        break;
+                    case `population`:
+                        countries.sort(sortByNumberAsc)
+                        break;
+                    default:
+                        break;
                 }
             }
             else if (page.ascendingFilter.value === `descending`) {
-                if (page.precisionFilter.value === `name`) {
-                    countries.sort(sortByNameDesc)
-                }
-                if (page.precisionFilter.value === `area`) {
-                    countries.sort(sortByAreaDesc)
-                }
-                if (page.precisionFilter.value === `population`) {
-                    countries.sort(sortByNumbersDesc)
+                switch (page.precisionFilter.value) {
+                    case `name`:
+                        countries.sort(sortByNameDesc)
+                        break;
+                    case `area`:
+                        countries.sort(sortByAreaDesc)
+                        break;
+                    case `population`:
+                        countries.sort(sortByNumberDesc)
+                        break;
+                    default:
+                        break;
                 }
             }
+            else null;
 
-            console.log(countries);
-            for (let country of countries) {
-                let countryLanguages = [];
-                let countryCurrencies = [];
-                console.log(country);
-
-                for (let language of country.languages) {
-                    countryLanguages.push(language.name)
-                }
-                for (let currency of country.currencies) {
-                    countryCurrencies.push(currency.name)
-                }
-
+            countries.forEach(country => {
                 page.table.innerHTML += `
                 <tr>
                     <td> <img src="${country.flag}" alt="" width="100px"></td>
@@ -96,11 +96,11 @@ page.button.addEventListener(`click`, () => {
                     <td>${country.population}</td>
                     <td>${country.area}</td>
                     <td>${country.capital}</td>
-                    <td>${countryLanguages}</td>
-                    <td>${countryCurrencies}</td>
+                    <td>${country.languages.map(language => language.name)}</td>
+                    <td>${country.currencies.map(currency => currency.name)}</td>
                 </tr>            
             `
-            }
+            })
         })()
     }
 
