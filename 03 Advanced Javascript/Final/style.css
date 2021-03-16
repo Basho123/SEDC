@@ -37,9 +37,10 @@ abbr{
     cursor:pointer;
 }
 
-abbr:hover:before {
-    animation: fadeIn;
+abbr:hover:after {
+    /* animation: fadeIn;
     animation-duration: 0.5s;   
+    animation-direction: reverse; */
 
     content: attr(customTitle);
     position:absolute;
@@ -48,7 +49,7 @@ abbr:hover:before {
      color:#fff;
      padding:5px 10px;
      margin:35px 0 0 0;
-     width: 100px;
+     width: 130px;
      z-index: 9999;
  }
 

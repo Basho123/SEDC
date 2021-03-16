@@ -1,13 +1,6 @@
 //script.js for title "Farm", index.js
-//PAGE DOM TARGETING
-
-//10000 MILISECONDS IS 1 CYCLE
-
-// 1 CYCLE IS 1 MONTH
 
 // ANIMAL CYCLES ARE 12 TIMES SHORTER THAN REAL LIFE, SO HORSE LIVES 30 MONTHS, HEN 10 MONTHS AND SO ON...
-
-
 const page = {
     table: document.getElementById(`tableBody`),
     log: document.getElementById(`log`),
@@ -15,6 +8,24 @@ const page = {
     upgradeStablesButton: document.getElementById(`upgradeStables`),
     upgradeWaterTowerButton: document.getElementById(`upgradeWaterTower`),
     buyMoreSurfaceButton: document.getElementById(`buyMoreSurface`),
+    tablePrint() {
+        page.table.innerHTML = `
+        <tr>
+            <td><abbr customTitle ="Current Month">${currentMonth}</abbr></td>
+            <td><abbr customTitle ="Surface Area Occupied, measured in hectares. the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface} ha</abbr></td>
+            <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
+            <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
+            <td><abbr customTitle ="Chicken: ${poultry.chicken.length}\r\nCows: ${livestock.cows.length} Pigs: ${livestock.pigs.length} Horses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
+            <td><abbr customTitle ="Milk: ${resources.milk} Meat: ${resources.meat} Eggs: ${resources.eggs}">${Math.floor(resources.milk + resources.eggs + resources.meat)}</abbr></td>
+            <td><abbr customTitle ="Corn: ${resources.corn}">${Math.floor(resources.corn)}</abbr></td>
+            <td><abbr customTitle ="Hay: ${resources.hay}">${Math.floor(resources.hay)}</abbr></td>
+            <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>
+            <td><abbr customTitle ="Economy Work Factor:${economy.workFactor}\n Fertile Lands Coefficient: ${economy.fertileLandsCoefficient()}">${Math.floor(economy.workFactor + economy.fertileLandsCoefficient())}</abbr></td>
+            <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}$\nSalaries Paid: ${parseInt(economy.salariesPaid)}$\nFarm Expenses: ${Math.floor(economy.farmExpenses)}$">${parseInt(economy.totalBudget)}$</abbr></td>
+           
+        </tr>
+        `
+    },
 
     //FUNCTION FOR RANDOM WHOLE NUMBER, USED A LOT
     random: (number) => {
@@ -22,7 +33,6 @@ const page = {
     }
 }
 const { random } = page;
-
 
 let time = {
     year: 120000,
@@ -48,8 +58,6 @@ let time = {
 let { day, week, year, month, currentMonth } = time;
 setInterval(() => { currentMonth = time.monthCounter() }, month)
 
-
-// console.log(time.monthCounter(););
 
 //#region PROTOTYPE CLASSES
 
@@ -234,6 +242,8 @@ class Farm {
             },
             inspection: {
                 finance: [],
+                veterinary: [],
+                butcher: [],
             }
         }
 
@@ -341,7 +351,29 @@ class Farm {
                         break;
                 }
             }
-        }, 1000)
+        }, day)
+
+        //RANDOM WATER SPRING IS FOUND
+        setInterval(() => {
+            if (random(100) < 5) {
+                farm.numberOfWells++;
+                let newDivItem = document.createElement('DIV');
+                newDivItem.innerHTML += `
+                <div class = "divCardMain">
+                <div class = "divCard1">
+                    <h3>WATER SPRING HAS BEEN FOUND</h3>           
+                    <ul>  
+                        <li>WATER WELLS ON FARM NOW: ${farm.numberOfWells}</li>          
+                    </ul>
+                </div>
+                <div class = "divCard2">
+                    <img src="images/geyser.png" height="100%">
+                </div>
+                </div>
+                `
+                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+            };
+        }, year)
     }
 }
 
@@ -498,6 +530,28 @@ class Human extends Mammal {
         this.gender = gender;
         this.age = age;
     }
+    static randomName = (gender) => {
+        if (gender === `male`) {
+            let arrayOfMaleNames = [`Trajko`, `Petko`, `Mitko`, `Ratko`, `Zoran`, `Goran`, `Simeon`, `Aleksandar`, `Fenjir`, `Fuat`, `Onur`]
+            let arrayOfMaleLastNames = [`Acevski`, `Petkovski`, `Mitkov`, `Ratkovski`, `Zogravski`, `Goranovski`, `Simonovski`, `Spasevski`, `Nikolovski`, `Mehmed`, `Kishov`]
+
+            let randomMaleName = arrayOfMaleNames[random(arrayOfMaleNames.length)]
+            let randomMaleLastName = arrayOfMaleLastNames[random(arrayOfMaleLastNames.length)]
+
+            return `${randomMaleName.toUpperCase()} ${randomMaleLastName.toUpperCase()}`
+        }
+        else if (gender === `female`) {
+
+            let arrayOfFemaleNames = [`Martina`, `Sara`, `Elena`, `Aleksandra`, `Ana`, `Renata`, `Bojana`, `Kristina`, `Sonja`, `Ivana`, `Tina`]
+            let arrayOfFemaleLastNames = [`Martinovska`, `Spasevska`, `Ilajzovska`, `Skenderovska`, `Nikolovska`, `Ristevska`, `Ugrinovska`, `Kralevic`, `Markovska`, `Vrvenovska`, `Manojlovska`]
+
+            let randomFemaleName = arrayOfFemaleNames[random(arrayOfFemaleNames.length)]
+            let randomFemaleLastNames = arrayOfFemaleLastNames[random(arrayOfFemaleLastNames.length)]
+
+            return `${randomFemaleName.toUpperCase()} ${randomFemaleLastNames.toUpperCase()}`;
+        }
+        else return;
+    }
 
 }
 class Worker extends Human {
@@ -530,7 +584,7 @@ class Worker extends Human {
             || this.workingPosition === `APPRENTICE`
         ) {
             console.log(this.gender);
-            addRemoveWorkerPositions(this.workingPosition, '++');
+            Worker.addRemoveWorkerPositions(this.workingPosition, '++');
             let newDivItem = document.createElement('DIV');
             newDivItem.innerHTML = `
                 <div class = "divCardMain">
@@ -686,14 +740,59 @@ class Worker extends Human {
 
 
                 if (gender === 1) {//MALE
-                    workers.all.push(new Worker(`${randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
+                    workers.all.push(new Worker(`${Human.randomName(`male`)}`, `Male`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase))
                 }
                 else if (gender === 0) {//FEMALE
-                    workers.all.push(new Worker(`${randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
+                    workers.all.push(new Worker(`${Human.randomName(`female`)}`, `Female`, age, job, yearsOfService, workerSalary, workerSalaryBonus, workerSalaryBase));
                 }
             }
             else null;
         }, interval)
+    }
+    static addRemoveWorkerPositions(parameter, operator) {
+        if (operator === `--`) {
+            switch (parameter) {
+                case `TRACTOR DRIVER`:
+                    workers.tractorDriver--
+                    break;
+                case `HAYSTACK COMBER`:
+                    workers.haystackComber--
+                    break;
+                case `FARMER`:
+                    workers.farmer--;
+                    break;
+                case `ANIMAL HANDLER`:
+                    workers.animalHandler--;
+                    break;
+                case `APPRENTICE`:
+                    workers.apprentice--;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (operator === `++`) {
+            switch (parameter) {
+                case `TRACTOR DRIVER`:
+                    workers.tractorDriver++
+                    break;
+                case `HAYSTACK COMBER`:
+                    workers.haystackComber++
+                    break;
+                case `FARMER`:
+                    workers.farmer++;
+                    break;
+                case `ANIMAL HANDLER`:
+                    workers.animalHandler++;
+                    break;
+                case `APPRENTICE`:
+                    workers.apprentice++;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else console.warn(`please type '++' or '--' in the operator fields`);
     }
 }
 class Tourist extends Human {
@@ -807,10 +906,10 @@ class Tourist extends Human {
                 let activity = arrayOfActivities[random(arrayOfActivities.length)]
 
                 if (gender === 1) {//MALE
-                    tourists.all.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
+                    tourists.all.push(new Tourist(`${Human.randomName(`male`)}`, `Male`, age, activity))
                 }
                 else if (gender === 0) {//FEMALE
-                    tourists.all.push(new Tourist(`${randomName(`female`)}`, `Female`, age, activity));
+                    tourists.all.push(new Tourist(`${Human.randomName(`female`)}`, `Female`, age, activity));
                 }
             }
         }, interval)
@@ -819,67 +918,67 @@ class Tourist extends Human {
 
 }
 class Inspector extends Human {
-    constructor(hasFinished = false) {
+    constructor(name) {
         super();
-        this.hasFinished = hasFinished;
+        this.name = name;
+        this.hasFinished = false;
+        this.fines = 0;
 
-        let newDivItem = document.createElement('DIV')
-        
-        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:red; background-color: black;">An inspection is conducting on the farm...</p>`
-        page.log.insertBefore(newDivItem, page.log.childNodes[0])
-        let fines = 0;
+        //TRUDOVA INSPEKCIJA :))))
 
         if (this.hasFinished === false) {
+            let newDivItem = document.createElement('DIV')
+            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:red; background-color: black;">An inspection is conducting on the farm...</p>`
+            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
             setTimeout(() => {
-                //TRUDOVA INSPEKCIJA :))))
-                (function trudovaInspekcija() {
-                    for (let worker of workers.all) {
-                        let newDivItem = document.createElement('DIV');
-                        if (worker.age < 18) {
-                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
-                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
-                            addRemoveWorkerPositions(worker.workingPosition, '--');
-                            worker.works = false;
-                            workers.all.splice(worker, 1)
-                            fines++;
-                            continue;
-                        }
-                        else if (worker.age > 70) {
-                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
-                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                            addRemoveWorkerPositions(worker.workingPosition, '--');
-                            worker.works = false;
-                            workers.all.splice(worker, 1)
-                            fines++;
-                            continue;
-                        }
-                        else if (worker.yearsOfService > 20) {
-                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
-                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                            economy.totalBudget -= 1000;
-
-                            addRemoveWorkerPositions(worker.workingPosition, '--');
-                            worker.works = false;
-                            workers.all.splice(worker, 1)
-                            continue;
-                        }
-                    }
-                    if (fines === 0) {
-                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:green; background-color: yellow;">Everythings seems to be in order</p>`
+                for (let worker of workers.all) {
+                    let newDivItem = document.createElement('DIV');
+                    if (worker.age < 18) {
+                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: black;">worker ${worker.name} was sent home because of young age</p>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                        Worker.addRemoveWorkerPositions(worker.workingPosition, '--');
+                        worker.works = false;
+                        workers.all.splice(worker, 1)
+                        this.fines++;
+                        continue;
                     }
-                    else {
-                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: red;">Some irregularities were found on your farm</p>`
+                    else if (worker.age > 70) {
+                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: black;">worker ${worker.name} was retired due to old age</p>`
                         page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                        Worker.addRemoveWorkerPositions(worker.workingPosition, '--');
+                        worker.works = false;
+                        workers.all.splice(worker, 1)
+                        this.fines++;
+                        continue;
                     }
-                })();
+                    else if (worker.yearsOfService > 20) {
+                        newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: cyan;">worker ${worker.name} was retired and was granted bonus money</p>`
+                        page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                        economy.totalBudget -= 1000;
+
+                        Worker.addRemoveWorkerPositions(worker.workingPosition, '--');
+                        worker.works = false;
+                        workers.all.splice(worker, 1)
+                        continue;
+                    }
+                }
+                if (this.fines === 0) {
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:green; background-color: yellow;">Everythings seems to be in order</p>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
+                else {
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: red;">Some irregularities were found on your farm</p>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
             }, 10000)
 
             //INSPECTION FINISHED
             setTimeout(() => {
-                if (fines !== 0) {
+                if (this.fines !== 0) {
                     economy.totalBudget -= (fines * 500);
 
                     let newDivItem = document.createElement('DIV');
@@ -908,108 +1007,210 @@ class Inspector extends Human {
         setInterval(() => {
             let randomNumber = random(100);
             if (randomNumber < 5) {
-                farm.population.inspection.finance.push(new Inspector());          
-                console.log(`inspector comes`, farm.population.inspection.finance);   
+                farm.population.inspection.finance.push(new Inspector(Human.randomName(`male`)));
+                console.log(`inspector comes`, farm.population.inspection.finance);
             }
         }, interval)
         //INSPECTOR CHECKS ON RANDOM INTERVALS IF THERE IS SOMEONE ON THE FARM OLDER OR YOUNGER THAN THE PROPOSED AGE, OR IF THE WORKER HAS TO BE SENT TO RETIREMENT
     }
 }
+class Veterinary extends Human {
+    constructor(name) {
+        super();
+        this.name = name;
+        this.hasFinished = false;
+        this.numberOFsickAnimalsFound = 0;
+        this.numberOFsickPoultryFound = 0;
+        this.cost = 100;
 
+        if (this.hasFinished === false) {
 
+            economy.totalBudget -= this.cost;
 
+            let newDivItem = document.createElement('DIV');
+            newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:WHITE; background-color: darkred;">A VETERINARY HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED ${this.cost} $</h3>`
+            page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
+            for (let cow of livestock.cows) {
+                if (cow.sick) {
+                    this.numberOFsickAnimalsFound++;
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    cow.sick = false;
+                    continue;
+                }
+                else continue;
+            }
+            for (let pig of livestock.pigs) {
+                if (pig.sick) {
+                    this.numberOFsickAnimalsFound++;
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    pig.sick = false;
+                    continue;
+                }
+                else continue;
+            }
+            for (let horse of livestock.horses) {
+                if (horse.sick) {
+                    this.numberOFsickAnimalsFound++;
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A HORSE HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    horse.sick = false;
+                    continue;
+                }
+                else continue;
+            }
+            for (let hen of poultry.chicken) {
+                if (hen.sick) {
+                    this.numberOFsickPoultryFound++;
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A ${this.gender} HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    hen.sick = false;
+                    continue;
+                }
+                else continue;
+            }
+            for (let turkey of poultry.turkey) {
+                if (turkey.sick) {
+                    this.numberOFsickPoultryFound++;
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A TURKEY HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    turkey.sick = false;
+                    continue;
+                }
+                else continue;
+            }
 
-//RANDOM NAME WITH RANDOM LAST NAME GENERATOR
-let randomName = (gender) => {
-    if (gender === `male`) {
-        let arrayOfMaleNames = [`Trajko`, `Petko`, `Mitko`, `Ratko`, `Zoran`, `Goran`, `Simeon`, `Aleksandar`, `Fenjir`, `Fuat`, `Onur`]
-        let arrayOfMaleLastNames = [`Acevski`, `Petkovski`, `Mitkov`, `Ratkovski`, `Zogravski`, `Goranovski`, `Simonovski`, `Spasevski`, `Nikolovski`, `Mehmed`, `Kishov`]
+            setTimeout(() => {
+                if (this.numberOFsickAnimalsFound === 0 && this.numberOFsickPoultryFound === 0) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: pink;"> NO SICK ANIMALS WERE FOUND ON THE FARM</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
 
-        let randomMaleName = arrayOfMaleNames[random(arrayOfMaleNames.length)]
-        let randomMaleLastName = arrayOfMaleLastNames[random(arrayOfMaleLastNames.length)]
-
-        return `${randomMaleName.toUpperCase()} ${randomMaleLastName.toUpperCase()}`
-    }
-    else if (gender === `female`) {
-
-        let arrayOfFemaleNames = [`Martina`, `Sara`, `Elena`, `Aleksandra`, `Ana`, `Renata`, `Bojana`, `Kristina`, `Sonja`, `Ivana`, `Tina`]
-        let arrayOfFemaleLastNames = [`Martinovska`, `Spasevska`, `Ilajzovska`, `Skenderovska`, `Nikolovska`, `Ristevska`, `Ugrinovska`, `Kralevic`, `Markovska`, `Vrvenovska`, `Manojlovska`]
-
-        let randomFemaleName = arrayOfFemaleNames[random(arrayOfFemaleNames.length)]
-        let randomFemaleLastNames = arrayOfFemaleLastNames[random(arrayOfFemaleLastNames.length)]
-
-        return `${randomFemaleName.toUpperCase()} ${randomFemaleLastNames.toUpperCase()}`;
-    }
-    else return;
-}
-
-
-
-let generateRandomTourist = () => {
-    let arrayOfActivities = [`SIGHT SEEING`, `HORSE RIDING`, `FOOD SHOPPING`]
-
-    let gender = random(2);
-    let age = random(50) + 15;
-
-    let activity = arrayOfActivities[random(arrayOfActivities.length)]
-
-    if (gender === 1) {//MALE
-        tourists.all.push(new Tourist(`${randomName(`male`)}`, `Male`, age, activity))
-    }
-    else if (gender === 0) {//FEMALE
-        tourists.all.push(new Tourist(`${randomName(`female`)}`, `Female`, age, activity));
-    }
-}
-
-//USED TO SHORTEN CODE A LOT IN SOME PLACES
-function addRemoveWorkerPositions(parameter, operator) {
-    if (operator === `--`) {
-        switch (parameter) {
-            case `TRACTOR DRIVER`:
-                workers.tractorDriver--
-                break;
-            case `HAYSTACK COMBER`:
-                workers.haystackComber--
-                break;
-            case `FARMER`:
-                workers.farmer--;
-                break;
-            case `ANIMAL HANDLER`:
-                workers.animalHandler--;
-                break;
-            case `APPRENTICE`:
-                workers.apprentice--;
-                break;
-            default:
-                break;
+                else if (this.numberOFsickPoultryFound === 0 && this.numberOFsickAnimalsFound != 0) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:white; background-color: darkred;"> ${this.numberOFsickAnimalsFound} SICK ANIMALS WERE FOUND, AND THE VET CHARGED ${this.numberOFsickAnimalsFound * this.cost} $</h3>`
+                    economy.totalBudget -= numberOFsickAnimalsFound * this.cost
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
+                else {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:white; background-color: red;"> ${this.numberOFsickPoultryFound} SICK BIRDS WERE FOUND, AND THE VET CHARGED ${this.numberOFsickPoultryFound * this.cost / 4} $</h3>`
+                    economy.totalBudget -= numberOFsickAnimalsFound * this.cost
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                }
+                this.hasFinished = true;
+                farm.population.inspection.veterinary.splice(this, 1);
+            }, 10000)
         }
-    }
-    else if (operator === `++`) {
-        switch (parameter) {
-            case `TRACTOR DRIVER`:
-                workers.tractorDriver++
-                break;
-            case `HAYSTACK COMBER`:
-                workers.haystackComber++
-                break;
-            case `FARMER`:
-                workers.farmer++;
-                break;
-            case `ANIMAL HANDLER`:
-                workers.animalHandler++;
-                break;
-            case `APPRENTICE`:
-                workers.apprentice++;
-                break;
-            default:
-                break;
-        }
-    }
-    else console.warn(`please type '++' or '--' in the operator fields`);
 
-
+    }
+    static generate = (interval) => {
+        setInterval(() => {
+            farm.population.inspection.veterinary.push(new Veterinary(Human.randomName(`female`)));
+        }, interval)
+        //INSPECTOR CHECKS ON RANDOM INTERVALS IF THERE IS SOMEONE ON THE FARM OLDER OR YOUNGER THAN THE PROPOSED AGE, OR IF THE WORKER HAS TO BE SENT TO RETIREMENT
+    }
 }
+class Butcher extends Human {
+    constructor(name) {
+        super();
+        this.name = name
+
+        this.hasFinished = false;
+
+        if (this.hasFinished === false) {
+            economy.totalBudget -= 200;
+            let newDivItem = document.createElement('DIV');
+            newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;">A BUTCHER HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED 200$</h3>`
+            page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+            for (let cow of livestock.cows) {
+                if ((cow.age > 25 && cow.weight > 100) || cow.weight > 300) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN BUTCHERED AND GAVE ${Math.floor(cow.weight / 2)} KG MEAT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    resources.meat += cow.weight / 2
+                    cow.age = -1;
+                    livestock.cows.splice(cow, 1)
+                    continue;
+                }
+                else continue;
+            }
+            for (let pig of livestock.pigs) {
+                if ((pig.age > 5 && pig.weight > 250) || pig.weight > 500) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN BUTCHERED AND GAVE ${parseInt(pig.weight / 1.2)} KG MEAT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    resources.meat += pig.weight / 1.2
+                    pig.age = -1;
+                    livestock.pigs.splice(pig, 1)
+                    continue;
+                }
+                else continue;
+            }
+            for (let horse of livestock.horses) {
+                if (horse.age > 35 && horse.weight > 150) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> AN OLD HORSE HAS BEEN BUTCHERED AND GAVE ${parseInt(horse.weight / 3)} KG MEAT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    resources.meat += horse.weight / 3
+                    horse.age = -1;
+                    livestock.horses.splice(horse, 1)
+                    continue;
+                }
+                else continue;
+            }
+            for (let hen of poultry.chicken) {
+                if (hen.age > 2 && hen.weight > 2) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> ${hen.gender} HAS BEEN BUTCHERED AND GAVE ${parseInt(hen.weight)} KG MEAT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    resources.meat += hen.weight
+                    hen.age = -1;
+                    poultry.chicken.splice(hen, 1)
+                    continue;
+                }
+                else continue;
+            }
+            for (let turkey of poultry.turkey) {
+                if (turkey.age > 3 && turkey.weight > 3) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> TURKEY HAS BEEN BUTCHERED AND GAVE ${parseInt(turkey.weight)} KG MEAT</h3>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+
+                    resources.meat += turkey.weight
+                    turkey.age = -1;
+                    poultry.turkey.splice(turkey, 1)
+                    continue;
+                }
+                else continue;
+            }
+            farm.population.inspection.butcher.splice(this, 1)
+            this.hasFinished = true;
+
+        }
+
+    }
+
+    static generate = (interval) => {
+        setInterval(() => {
+            farm.population.inspection.butcher.push(new Butcher(Human.randomName(`male`)))
+        }, interval)
+    }
+}
+
 //#endregion
 
 //#region ANIMAL
@@ -1536,249 +1737,11 @@ class Turkey extends Bird {
 
 //#endregion
 
-//INSPECTION AND AI CHECKS
 
-//#region VETERINARY INSPECTOR
+page.tablePrint();
 setInterval(() => {
-    //VETERINARY INSPECTOR CHECKS ON REGULAR INTERVALS IF THERE ARE SICK ANIMALS, AND CURES THE SICK IF HE FOUNDS THEM,
-    (function veterinaryInspector() {
-        let veterinaryCost = 100;
-        economy.totalBudget -= veterinaryCost;
-        let numberOFsickAnimalsFound = 0;
-        let newDivItem = document.createElement('DIV');
-
-        newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:WHITE; background-color: darkred;">A VERERINARY HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED ${veterinaryCost} $</h3>`
-        page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-        for (let cow of livestock.cows) {
-            if (cow.sick) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                cow.sick = false;
-                continue;
-            }
-            else continue;
-        }
-        for (let pig of livestock.pigs) {
-            if (pig.sick) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                pig.sick = false;
-                continue;
-            }
-            else continue;
-        }
-        for (let horse of livestock.horses) {
-            if (horse.sick) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A HORSE HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                horse.sick = false;
-                continue;
-            }
-            else continue;
-        }
-        for (let hen of poultry.chicken) {
-            if (hen.sick) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A ${this.gender} HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                hen.sick = false;
-                continue;
-            }
-            else continue;
-        }
-        for (let turkey of poultry.turkey) {
-            if (turkey.sick) {
-                numberOFsickAnimalsFound++;
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A TURKEY HAS BEEN FOUND SICK AND TAKEN CARE OF</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                turkey.sick = false;
-                continue;
-            }
-            else continue;
-        }
-
-        setTimeout(() => {
-            if (numberOFsickAnimalsFound === 0) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: pink;"> NO SICK ANIMALS WERE FOUND ON THE FARM</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-            }
-            else {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:white; background-color: darkred;"> ${numberOFsickAnimalsFound} SICK ANIMALS WERE FOUND, AND THE VET CHARGED ${numberOFsickAnimalsFound * veterinaryCost} $</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-            }
-        }, 2000)
-
-    })();
-}, 100000)
-//#endregion
-
-//#region AI CHECK FOR TOURIST
-setInterval(() => {
-    //CHECKS FOR TOURIST IF IS TO LEFT THE FARM OR NOT
-    (function touristInspector() {
-        for (let tourist of tourists.all) {
-            let newDivItem = document.createElement('DIV');
-            if (tourist.touristTimeSpent > 10) {
-                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith - tourist.touristBudget} $ and had a great time on your farm and left home</p>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                tourist.isOnFarm = false;
-                tourists.all.splice(tourist, 1)
-                continue;
-            }
-            else if (tourist.touristBudget < 100) {
-                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:cyan; background-color: blue;">Tourist ${tourist.name} spent ${tourist.touristTimeSpent} months on your farm, spent ${tourist.touristBudgetThatCameWith} $ and had a great time on your farm</p>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                tourist.isOnFarm = false;
-                tourists.all.splice(tourist, 1)
-                continue;
-            }
-            else continue;
-
-        }
-    })();
-}, 10000)
-//#endregion
-
-//#region REGULAR BUTCHER VISIT
-setInterval(() => {
-    //BUTCHER VISITS THE FARM ON REGULAR INTERVALS, AND IF THE ANIMAL IS VERY FAT, OR IS AT APROPRIATE AGE WITH GOOD WEIGHT, IS BEING SLAUGHTERED
-    //KEEP IN MIND THAT PIGS GIVE MORE MEAT THAN COWS, AND HORSES GIVE LEAST. CHICKEN IS ALSO GOOD FOR MEAT, BUT THEY CAN DIE BEFORE THE BUTCHER ARRIVES
-    (function butcherInspector() {
-        economy.totalBudget -= 200;
-        let newDivItem = document.createElement('DIV');
-
-        newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;">A BUTCHER HAS BEEN HIRED TO CHECK THE ANIMALS, AND COSTED 200$</h3>`
-        page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-        for (let cow of livestock.cows) {
-            if ((cow.age > 25 && cow.weight > 100) || cow.weight > 300) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A COW HAS BEEN BUTCHERED AND GAVE ${Math.floor(cow.weight / 2)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                resources.meat += cow.weight / 2
-                cow.age = -1;
-                livestock.cows.splice(cow, 1)
-                continue;
-            }
-            else continue;
-        }
-        for (let pig of livestock.pigs) {
-            if ((pig.age > 5 && pig.weight > 250) || pig.weight > 500) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> A PIG HAS BEEN BUTCHERED AND GAVE ${parseInt(pig.weight / 1.2)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                resources.meat += pig.weight / 1.2
-                pig.age = -1;
-                livestock.pigs.splice(pig, 1)
-                continue;
-            }
-            else continue;
-        }
-        for (let horse of livestock.horses) {
-            if (horse.age > 35 && horse.weight > 150) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> AN OLD HORSE HAS BEEN BUTCHERED AND GAVE ${parseInt(horse.weight / 3)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                resources.meat += horse.weight / 3
-                horse.age = -1;
-                livestock.horses.splice(horse, 1)
-                continue;
-            }
-            else continue;
-        }
-        for (let hen of poultry.chicken) {
-            if (hen.age > 2 && hen.weight > 2) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> ${hen.gender} HAS BEEN BUTCHERED AND GAVE ${parseInt(hen.weight)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                resources.meat += hen.weight
-                hen.age = -1;
-                poultry.chicken.splice(hen, 1)
-                continue;
-            }
-            else continue;
-        }
-        for (let turkey of poultry.turkey) {
-            if (turkey.age > 3 && turkey.weight > 3) {
-                let newDivItem = document.createElement('DIV');
-                newDivItem.innerHTML += `<h3 class ="dropDown" style = "font-size: 20px;color:black; background-color: red;"> TURKEY HAS BEEN BUTCHERED AND GAVE ${parseInt(turkey.weight)} KG MEAT</h3>`
-                page.log.insertBefore(newDivItem, page.log.childNodes[0])
-
-                resources.meat += turkey.weight
-                turkey.age = -1;
-                poultry.turkey.splice(turkey, 1)
-                continue;
-            }
-            else continue;
-        }
-
-
-
-    })();
-}, 60000)
-//#endregion
-
-
-//INTERVAL REGIONS
-
-//#region TOP PAGE TABLE AND IT'S INTERVALS
-//TOP TABLE PRINTS
-// function months(number) {
-//     let months = ['', "January", "February", "March", "April", "May", "June",
-//         "July", "August", "September", "October", "November", "December"];
-
-//     if (monthCounter === 12) {
-//         monthCounter = 0;
-//     }
-
-//     return months[number];
-
-// }
-function tablePrint() {
-    page.table.innerHTML = `
-    <tr>
-        <td><abbr customTitle ="Current Month">${currentMonth}</abbr></td>
-        <td><abbr customTitle ="Surface Area Occupied, measured in hectares. the more area occupied, the less fields for hay and corn.">${globalDwellings.surfaceOccupied}/${globalDwellings.surface} ha</abbr></td>
-        <td><abbr customTitle ="Number of tractors: ${machines.tractor.length}">${machines.all}</abbr></td>
-        <td><abbr customTitle ="Tractor Driver: ${workers.tractorDriver}\nHay Combers: ${workers.haystackComber}\nAnimal Handlers: ${workers.animalHandler} \nFarmers: ${workers.farmer}\nApprentice: ${workers.apprentice}">${workers.all.length}/${globalDwellings.beds}</abbr></td>
-        <td><abbr customTitle ="Chicken: ${poultry.chicken.length}\r\nCows: ${livestock.cows.length} Pigs: ${livestock.pigs.length} Horses: ${livestock.horses.length}">${animals.all}/${globalDwellings.stables}</abbr></td>            
-        <td><abbr customTitle ="Milk: ${resources.milk} Meat: ${resources.meat} Eggs: ${resources.eggs}">${Math.floor(resources.milk + resources.eggs + resources.meat)}</abbr></td>
-        <td><abbr customTitle ="Corn: ${resources.corn}">${Math.floor(resources.corn)}</abbr></td>
-        <td><abbr customTitle ="Hay: ${resources.hay}">${Math.floor(resources.hay)}</abbr></td>
-        <td><abbr customTitle ="Water: ${resources.water}/${globalDwellings.waterTowerCapacity}">${resources.water}</abbr></td>
-        <td><abbr customTitle ="Economy Work Factor:${economy.workFactor}\n Fertile Lands Coefficient: ${economy.fertileLandsCoefficient()}">${Math.floor(economy.workFactor + economy.fertileLandsCoefficient())}</abbr></td>
-        <td><abbr customTitle ="Worker Revenue: ${parseInt(economy.workerRevenue)}$\nSalaries Paid: ${parseInt(economy.salariesPaid)}$\nFarm Expenses: ${Math.floor(economy.farmExpenses)}$">${parseInt(economy.totalBudget)}$</abbr></td>
-       
-    </tr>
-    `
-}
-;
-tablePrint();
-setInterval(() => {
-    tablePrint();
+    page.tablePrint();
 }, 1000)
-
-//TOURIST INTERVAL
-
-
-//COW INTERVAL
 
 Cow.generate(month * 2);
 Horse.generate(month * 3);
@@ -1787,41 +1750,13 @@ Pig.generate(month);
 Chicken.generate(week);
 Turkey.generate(week * 2);
 
-
 Tractor.generate(month);
-
 
 Tourist.generate(month);
 Worker.generate(week);
 
 Inspector.generate(month);
+Veterinary.generate(year)
+Butcher.generate(year / 2);
 
 
-
-
-
-
-
-//RANDOM WATER SPRING IS FOUND
-setInterval(() => {
-    if (random(100) < 5) {
-        farm.numberOfWells++;
-        let newDivItem = document.createElement('DIV');
-        newDivItem.innerHTML += `
-            <div class = "divCardMain">
-            <div class = "divCard1">
-                <h3>WATER SPRING HAS BEEN FOUND</h3>           
-                <ul>  
-                    <li>WATER WELLS ON FARM NOW: ${farm.numberOfWells}</li>          
-                </ul>
-            </div>
-            <div class = "divCard2">
-                <img src="images/geyser.png" height="100%">
-            </div>
-        </div>
-            `
-        page.log.insertBefore(newDivItem, page.log.childNodes[0])
-    };
-}, 60000)
-
-//#endregion
