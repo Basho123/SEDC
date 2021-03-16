@@ -130,7 +130,7 @@ class Machine {
                     economy.totalBudget -= servicePrice;
 
                     let newDivItem = document.createElement('DIV');
-                    newDivItem.innerHTML += `<h3 class = "divCardMain" style="color: black;background-color:yellow;">VEHICLE ${this.type} WITH LICENCE PLATES ${this.licensePlates} HAS WENT REPAIR SERVICE , ${servicePrice}$ HAVE BEEN DEDUCTED.</h3>`
+                    newDivItem.innerHTML += `<h3 class = "divCardMain" style="color: black;background-color:yellow;">VEHICLE ${this.type} WITH LICENCE PLATES ${this.licensePlates} HAS BEEN REPAIRED, ${servicePrice}$ HAVE BEEN DEDUCTED.</h3>`
                     page.log.insertBefore(newDivItem, page.log.childNodes[0])
 
                     //IF VEHICLE IS NOT BROKEN SO MUCH, SERVICE TIME IS SHORTER
@@ -838,60 +838,78 @@ class Tourist extends Human {
         setInterval(() => {
             if (this.isOnFarm === true) {
                 this.touristTimeSpent++;
-                switch (this.reason) {
-                    case `SIGHT SEEING`:
-                        economy.totalBudget += 100;
-                        this.touristBudget -= 100;
-                        break;
-                    case `HORSE RIDING`:
-                        if (livestock.horses.length > 0) {
-                            economy.totalBudget += 500;
-                            this.touristBudget -= 500;
-                        }
-                        else {
-                            let newDivItem = document.createElement('DIV');
-                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:purple; background-color: black;">Tourist ${this.name} came for ${this.reason} and has left the farm because there were no horses</p>`
-                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                            this.isOnFarm = false;
-                            tourists.all.splice(this, 1)
-                        }
-                        break;
+                if (this.touristBudget < 100) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: blue;">Tourist ${this.name} came for ${this.reason}, spent ${this.touristBudgetThatCameWith-this.touristBudget}$ the tourist came in ${time.currentMonth}</p>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])     
+                    this.isOnFarm = false;              
+                    tourists.all.splice(this, 1);
 
-                    case `FOOD SHOPPING`:
-                        let shopAmmountMilk = random(20);
-                        let shopAmmountMeat = random(20);
-                        let shopAmmountEggs = random(20);
+                }
+                else if (this.touristTimeSpent > 10) {
+                    let newDivItem = document.createElement('DIV');
+                    newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:yellow; background-color: blue;">Tourist ${this.name} came for ${this.reason}, spent ${this.touristBudgetThatCameWith-this.touristBudget}$ and had a great time on your farm. The tourist came in ${time.currentMonth}<</p>`
+                    page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                    this.isOnFarm = false;
+                    tourists.all.splice(this, 1);
+                }
+                else {
 
-                        if (resources.meat > shopAmmountMeat) {
-                            resources.meat -= shopAmmountMeat
-                            economy.totalBudget += shopAmmountMeat * 20;
-                            this.touristBudget -= shopAmmountMeat * 20;
-                        }
-                        if (resources.milk > shopAmmountMilk) {
-                            resources.milk -= shopAmmountMilk
-                            economy.totalBudget += shopAmmountMilk * 20;
-                            this.touristBudget -= shopAmmountMilk * 20;
-                        }
-                        if (resources.eggs > shopAmmountEggs) {
-                            resources.eggs -= shopAmmountEggs
-                            economy.totalBudget += shopAmmountEggs * 1;
-                            this.touristBudget -= shopAmmountEggs * 1;
-                        }
-                        else if (resources.milk < shopAmmountMilk && resources.meat < shopAmmountMeat && resources.eggs < shopAmmountEggs) {
-                            tourists.all.splice(this, 1);
-                            this.isOnFarm = false
-                            let newDivItem = document.createElement('DIV');
-                            newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:purple; background-color: pink;">Tourist ${this.name} came for ${this.reason} and has left the farm because there was nothing to shop</p>`
-                            page.log.insertBefore(newDivItem, page.log.childNodes[0])
-                        }
-                        else null;
-                        break;
-                    default:
-                        break;
+                    switch (this.reason) {
+                        case `SIGHT SEEING`:
+                            economy.totalBudget += 100;
+                            this.touristBudget -= 100;
+                            break;
+                        case `HORSE RIDING`:
+                            if (livestock.horses.length > 0) {
+                                economy.totalBudget += 500;
+                                this.touristBudget -= 500;
+                            }
+                            else {
+                                let newDivItem = document.createElement('DIV');
+                                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:pink; background-color: black;">Tourist ${this.name} came for ${this.reason} and has left the farm because there were no horses</p>`
+                                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                                this.isOnFarm = false;
+                                tourists.all.splice(this, 1)
+                            }
+                            break;
+
+                        case `FOOD SHOPPING`:
+                            let shopAmmountMilk = random(20);
+                            let shopAmmountMeat = random(20);
+                            let shopAmmountEggs = random(20);
+
+                            if (resources.meat > shopAmmountMeat) {
+                                resources.meat -= shopAmmountMeat
+                                economy.totalBudget += shopAmmountMeat * 20;
+                                this.touristBudget -= shopAmmountMeat * 20;
+                            }
+                            if (resources.milk > shopAmmountMilk) {
+                                resources.milk -= shopAmmountMilk
+                                economy.totalBudget += shopAmmountMilk * 20;
+                                this.touristBudget -= shopAmmountMilk * 20;
+                            }
+                            if (resources.eggs > shopAmmountEggs) {
+                                resources.eggs -= shopAmmountEggs
+                                economy.totalBudget += shopAmmountEggs * 1;
+                                this.touristBudget -= shopAmmountEggs * 1;
+                            }
+                            else if (resources.milk < shopAmmountMilk && resources.meat < shopAmmountMeat && resources.eggs < shopAmmountEggs) {
+                                tourists.all.splice(this, 1);
+                                this.isOnFarm = false
+                                let newDivItem = document.createElement('DIV');
+                                newDivItem.innerHTML += `<p class ="dropDown" style = "font-size: 20px;color:pink; background-color: pink;">Tourist ${this.name} came for ${this.reason} and has left the farm because there was nothing to shop</p>`
+                                page.log.insertBefore(newDivItem, page.log.childNodes[0])
+                            }
+                            else null;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             else null;
-        }, 10000)
+        }, month)
     }
 
     static generate = (interval) => {
