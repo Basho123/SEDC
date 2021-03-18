@@ -1,7 +1,9 @@
 //#region variables
-
+let collisionClass;
 let collision = false;
 let sine;
+
+let terrain = [];
 
 let sky1;
 let sand1;
@@ -16,31 +18,16 @@ let tree1Array = [];
 let walls = [];
 let grassArray = [];
 
-// 
-
 let rotX = 0;
 let rotXSpeed = 5;
 
 let rotY = 0;
 let rotYSpeed = 5;
 
-
-
-
 let brickSlices = 200;
 
 let tankModel;
 let t34Texture;
-// let playerT34 = [];
-
-// let tank = [];
-
-
-
-
-
-// let moveX;
-// let moveY;
 
 let tankRadius;
 
@@ -77,12 +64,13 @@ let camera = new Camera()
 class Environment {
   constructor() {
     this.gravity = [0, 0.981, 0];
-    this.sky = [];
+    this.sky;
   }
 }
 
-class Elements {
+class Elements extends Environment {
   constructor(x, y, z, radius) {
+    super();
     this.pos = createVector(x, y, z);
     this.vel = createVector();
     this.acc = createVector();
@@ -96,16 +84,18 @@ class Elements {
     this.dirX;
     this.dirY;
 
-    this.acc.add(environment.gravity[0], environment.gravity[1], environment.gravity[2]);
+    this.acc.add(this.gravity[0], this.gravity[1], this.gravity[2]);
+
+    this.setCollision = true;
 
     this.colided = false;
-  }
 
+    this.playerTank = false;
+  }
   applyForce(force) {
     this.acc.add(force);
   }
-
-  updatePlayer() {
+  playerControlled() {
     if (keyIsDown(104)) {
       this.acc.z = -this.dirY;
       this.acc.x = this.dirX;
@@ -126,7 +116,9 @@ class Elements {
     if (keyIsDown(102)) {
       this.acc2.x = 5
     }
-    else { this.acc2.x = 0 }
+    else {
+      this.acc2.x = 0
+    }
 
     if (keyIsDown(100)) {
       this.acc2.x = -5;
@@ -142,10 +134,8 @@ class Elements {
     this.rot.add(this.ang);
     this.acc2.set(0);
 
-    this.dirX = map(-sin(this.ang.x / 100), 0, 628, 0, 360);
-    this.dirY = map(-cos(this.ang.x / 100), 0, 628, 0, 360);
-
-    camDirX = this.dirX;
+    this.dirX = map(sin(this.ang.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.ang.x / 100), 0, 628, 0, 360);
   }
 
   updateOther() {
@@ -165,58 +155,8 @@ class Elements {
       this.vel.y *= -0.5;
     }
   }
-
-  // show() {
-
-  //   push();  
-  //   this.ang.x > 625 || this.ang.x < -625 ? this.ang.x = 0 : false;
-
-  //   translate(this.pos.x, this.pos.y + 100, this.pos.z);
-  //   rotateY(-this.ang.x / 100);
-  //   // rotate(1)
-
-  //   if (this.pos.x > camera.xPosition + 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-  //   if (this.pos.x < camera.xPosition - 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-
-  //   if (this.pos.z > camera.zPosition + 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-  //   if (this.pos.z < camera.zPosition - 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-
-  //   rotateZ(PI);
-  //   scale(25);
-  //   //box(100);
-  //   noStroke();
-  //   ambientMaterial(100);
-  //   texture(t34Texture);
-  //   model(tankModel);
-  //   pop();
-
-  // }
-
-  //   collision(walls) {
-  //     let distance = dist(this.pos.x, this.pos.z, walls.xPos, walls.yPos);
-  //     // console.log(distance);
-  //     if (distance < this.radius + walls.radius) {
-  //       this.colided = true;
-  //       this.pos.x = this.pos.x + (this.pos.x - walls.xPos) / 25;
-  //       this.pos.z = this.pos.z + (this.pos.z - walls.yPos) / 25;
-  //     } else {
-  //       this.colided = false;
-  //     }
-  //   }
-
-  // }
 }
-
-
-class Bank extends Elements {
-  constructor() {
-    super();
-  }
-}
-
 //#endregion
-
-
 class Collision extends Environment {
   constructor() {
     super()
@@ -227,22 +167,31 @@ class Collision extends Environment {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
-          let distance = dist(this.objects[i].pos.x, this.objects[i].pos.y, this.objects[i].pos.z, this.objects[g].pos.x, this.objects[g].pos.y, this.objects[g].pos.z);
+          if (this.objects[i].setCollision === true && this.objects[g].setCollision === true) {
+            let distance = dist(this.objects[i].pos.x, this.objects[i].pos.y, this.objects[i].pos.z, this.objects[g].pos.x, this.objects[g].pos.y, this.objects[g].pos.z);
+            if (distance < this.objects[i].radius + this.objects[g].radius) {
+              console.log(distance);
+              this.objects[i].colided = true;
+              this.objects[g].colided = true;
 
-          if (distance < this.objects[i].radius + this.objects[g].radius) {
+            //  this.objects.splice(g,1);
 
-            this.objects[i].colided = true;
-            this.objects[g].colided = true;
+              this.objects[i].pos.x = this.objects[i].pos.x + (this.objects[i].pos.x - this.objects[g].pos.x) ;
+              this.objects[i].pos.y = this.objects[i].pos.y + (this.objects[i].pos.y - this.objects[g].pos.y) ;
+              this.objects[i].pos.z = this.objects[i].pos.z + (this.objects[i].pos.z - this.objects[g].pos.z) ;
+          
+              this.objects[g].pos.x = this.objects[g].pos.x + (this.objects[g].pos.x - this.objects[i].pos.x) ;
+              this.objects[g].pos.y = this.objects[g].pos.y + (this.objects[g].pos.y - this.objects[i].pos.y) ;
+              this.objects[g].pos.z = this.objects[g].pos.z + (this.objects[g].pos.z - this.objects[i].pos.z) ;
 
-            this.objects[i].pos.x = this.objects[i].pos.x + (this.objects[i].pos.x - this.objects[g].pos.x) / 25;
-            this.objects[i].pos.y = this.objects[i].pos.y + (this.objects[i].pos.y - this.objects[g].pos.y) / 25;
-            this.objects[i].pos.z = this.objects[i].pos.z + (this.objects[i].pos.z - this.objects[g].pos.z) / 25;
 
+            }
+            else {
+              this.objects[i].colided = false;
+              this.objects[g].colided = false;
+            }
           }
-          else {
-            this.objects[i].colided = false;
-            this.objects[g].colided = false;
-          }
+          else continue;
         }
       }
 
@@ -252,10 +201,14 @@ class Collision extends Environment {
 
   }
 }
-
 class Terrain extends Environment {
-  constructor() {
+  constructor(x = 1000, z = 1000, texture) {
     super();
+
+    this.x = x;
+    this.z = z;
+
+    this.texture = texture;
 
     this.objects = {
       grass: [],
@@ -263,41 +216,35 @@ class Terrain extends Environment {
   }
 
   show() {
-    //background(200, 240, 255);
-    //clear();
     push()
-    translate(0, 100, 0)
+    translate(this.x, 100, this.z)
     rotateX(PI / 2);
     ambientMaterial(0);
-    texture(sand1);
+    texture(this.texture);
     noStroke();
-    plane(width * 10, height * 10);
-
-    //console.log(frameCount);
-
+    plane(1000, 1000);
     pop();
-    //   
   }
 
 }
-class Grass {
+class Grass extends Elements {
   constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, model = grass) {
-    this.pos = createVector(x, y, z)
+    super(x, y, z);
+
     this.rotateX = rotateX;
     this.rotateY = rotateY;
-    this.radius = 1;
+    this.radius = 100;
     this.scale = random(1, 30)
 
+    this.setCollision = false;
     this.model = model;
 
   }
   show() {
     push();
-
-    translate(this.pos.x, this.pos.y, this.pos.z);
+    translate(this.pos.x, this.pos.y + 100, this.pos.z);
     rotateY(this.rotateY);
-    rotateX(this.rotateX)
-
+    rotateX(this.rotateX);
     scale(this.scale);
     noStroke();
     // ambientMaterial(0);
@@ -307,29 +254,28 @@ class Grass {
     pop();
   }
 }
-
-class Tree {
+class Tree extends Elements {
   constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, rotateZ = 0, model = tree1, texture = tree1Texture) {
-    this.pos = createVector(x, y, z)
-
+    super(x, y, z);
     this.rotateX = rotateX;
     this.rotateY = random(0, 4);
     this.rotateZ = rotateZ;
-    this.radius = 50;
-    this.playerTank = false;
+    this.radius = 200;
 
     this.scale = random(0.05, 0.5)
     this.model = model;
     this.texture = texture;
     this.colided = false;
 
-    collisionClass.objects.push(this);
+    this.setCollision = false;
+
+
+    // collisionClass.objects.push(this);
 
   }
   show() {
     push();
-
-    translate(this.pos.x, this.pos.y, this.pos.z);
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
     rotateX(this.rotateX);
     rotateY(this.rotateY);
     rotateZ(this.rotateZ);
@@ -344,7 +290,6 @@ class Tree {
     pop();
   }
 }
-
 class Sky extends Environment {
   constructor(x = 0, y = 0, z = 0, textureFileUrl = sky1) {
     super();
@@ -367,24 +312,26 @@ class Sky extends Environment {
 
   // }
 }
-class Walls extends Environment {
-  constructor(xPos = 0, yPos = 0, rotateY = 0, texture = brick) {
-    super();
-    this.xPos = xPos;
-    this.yPos = yPos;
+class Walls extends Elements {
+  constructor(x = 0, y = 50, z = 0, rotateY = 0, texture = brick) {
+    super(x, y, z);
+
     this.rotateY = rotateY;
+
     this.length = 200;
     this.width = 5;
     this.radius = 100;
 
     this.texture = texture;
+    this.setCollision = false;
+
 
   }
   show() {
 
     push();
     //rotateZ(PI/2);
-    translate(this.xPos, 50, this.yPos);
+    translate(this.pos.x, 50, this.pos.z);
     rotateY(this.rotateY);
     noStroke();
     ambientMaterial(0);
@@ -421,13 +368,67 @@ class Walls extends Environment {
   // }
 
 }
+class Tank extends Elements {
+  constructor(x, y, z, playerTank = false, driverName = `AI`, radius) {
+    super(x, y, z, radius);
+    this.radius = 80;
+    tankRadius = this.radius;
+
+    this.driverName = driverName;
+    this.playerTank = playerTank;
+
+    collisionClass.objects.push(this);
+  }
+
+  show() {
+
+    push();
+    // console.log(this.pos.x);
+    //limit the counter of the angle
+    this.ang.x > 625 || this.ang.x < -625 ? this.ang.x = 0 : false;
+
+    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    rotateY(-this.ang.x / 100);
+    // rotate(1)
+
+    if (this.pos.x > camera.xPosition + 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
+    if (this.pos.x < camera.xPosition - 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
+
+    if (this.pos.z > camera.zPosition + 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
+    if (this.pos.z < camera.zPosition - 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
+
+    rotateZ(PI);
+    rotateY(PI);
+    scale(25);
+    //box(100);
+    noStroke();
+    ambientMaterial(100);
+    texture(t34Texture);
+    model(tankModel);
+    pop();
+
+  }
+
+  // collision(walls) {
+  //   let distance = dist(this.pos.x, this.pos.z, walls.xPos, walls.yPos);
+  //   // console.log(distance);
+  //   if (distance < this.radius + walls.radius) {
+  //     this.colided = true;
+  //     this.pos.x = this.pos.x + (this.pos.x - walls.xPos) / 25;
+  //     this.pos.z = this.pos.z + (this.pos.z - walls.yPos) / 25;
+  //   } else {
+  //     this.colided = false;
+  //   }
+  // }
+
+}
 //#endregion
 
 //#region PRELOAD
 //PRELOAD ALL DATA
 function preload() {
   sky1 = loadImage("files/background/sky20.jpg");
-  sand1 = loadImage("files/background/sand2.jpg");
+  sand1 = loadImage("files/background/sand6.jpg");
   brick = loadImage("files/background/brick.jpg");
   tankModel = loadModel("files/models/t34.obj");
   tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
@@ -449,26 +450,28 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   camera.body = createCamera();
+  collisionClass = new Collision();
 
+  for (let i = 0; i < 20; i++) {
+    for (let g = 0; g < 20; g++) {
+      terrain.push(new Terrain(-10000 + (i * 1000), -10000 + (g * 1000), sand1))
+    }
+  }
   environment.sky = new Sky(0, 0, 0);
-  let bank = new Bank()
-  console.log(bank);
 
+
+  pTank = new Tank(-300, -100, 0, true);
   for (let tankCount = 0; tankCount < 5; tankCount++) {
     otherTanks.push(new Tank(-100, -100, -500 - (tankCount * 500)))
   }
 
   for (let grassCount = 0; grassCount < 100; grassCount++) {
-    grassArray.push(new Grass(random(-3000, 3000), 110, random(-3000, 3000), PI))
+    collisionClass.objects.push(new Grass(random(-3000, 3000), 0, random(-3000, 3000), PI))
   }
 
   for (let treeCount = 0; treeCount < 30; treeCount++) {
-    tree1Array.push(new Tree(random(-5000, 5000), 110, random(-3000, 3000), PI))
+    collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI))
   }
-  // otherTanks = new Tank(-100, -100, -500)
-  // otherTanks2 = new Tank(-100, -100, -1000)
-  console.log();
-  pTank = new Tank(-300, -100, 0, true);
 
   let horizontalWallPosition = 3000;
   let verticalWallPosition = -900;
@@ -481,46 +484,37 @@ function setup() {
       let phaseShifter = [-1, 1];
       let randomPhase = phaseShifter[Math.floor(Math.random() * 2)]
       horizontalWallPosition += 500 * (Math.random() + 0.1) * randomPhase;
-      walls.push(new Walls(horizontalWallPosition, verticalWallPosition, PI / 2))
+      collisionClass.objects.push(new Walls(horizontalWallPosition, 50, verticalWallPosition, PI / 2))
     }
     else {
       let phaseShifter = [-1, 1];
       let randomPhase = phaseShifter[Math.floor(Math.random() * 2)]
       verticalWallPosition += 500 * (Math.random() + 0.1) * randomPhase
-      walls.push(new Walls(horizontalWallPosition, verticalWallPosition, PI))
+      collisionClass.objects.push(new Walls(horizontalWallPosition, 50, verticalWallPosition, PI))
     }
   }
+
 }
 //#endregion
 
 //#region DRAW
 function draw() {
 
+  //FRAMERATE DROPPING FOR DEBUGGING
   // frameCount(1);
-  //frameRate(0.0025)
+  //frameRate(0.0025)  
   collisionClass.collision();
+
   // THIS IS TEMPORARY
   // camera.body.eyeX = 0
   // camera.body.eyeY = -3197
   // camera.body.eyeZ = 2589
   // camera.mode = 0;
   ////////
-
-  // background(150);
   ambientLight(255);
 
-
-
-  for (let wall of walls) {
-    wall.show();
-  }
-
-  for (let each of grassArray) {
-    each.show();
-  }
-
-  // for (let each of tree1Array) {
-  //   each.show();
+  // for (let wall of walls) {
+  //   wall.show();
   // }
 
   //CAMERA
@@ -560,17 +554,17 @@ function draw() {
 
 
   //DRAW TERRAIN
-  terrain.show();
+  for (let plane of terrain) {
+    plane.show();
+  }
 
-  // Walls.wallX(6, 0);
-  keyCommands();
-
-
+  //MOUSE PRESSED
   if (mouseIsPressed) {
+
+    //WIND EXAMPLE
     let wind = createVector(0.01, 0, 0);
     pTank.applyForce(wind);
     //requestPointerLock();
-
     if (!lockOn) {
       lockOn = true;
       requestPointerLock();
@@ -581,79 +575,19 @@ function draw() {
   }
 
 
+  collisionClass.objects.forEach((object) => {
+    object.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
+   
+    object.playerTank === true
+      ? object.playerControlled()
+      : object.updateOther();
+    object.edges();
+    object.show();
+  })
 
-
-
-  // playerT34.push(pTank);
-  // otherTanks.update();
-
-  // for (let tank of otherTanks) {
-
-  //   //console.log(tank.colided);
-  //   // if (tank.colided === true) {
-  //   //   otherTanks.splice(tank, 1)
-  //   //   break;
-  //   // }
-  // }
-
-  //collisionClass.objects[i].show();
-
-  for (let i = 0; i < collisionClass.objects.length; i++) {
-    if ((collisionClass.objects[i] instanceof Tank) === true) {
-      collisionClass.objects[i].applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
-      if (collisionClass.objects[i].playerTank === true) {
-        collisionClass.objects[i].updatePlayer();
-      }
-      else {
-        collisionClass.objects[i].updateOther();
-      }
-      collisionClass.objects[i].edges();
-    }
-
-    if (collisionClass.objects[i].colided === true && collisionClass.objects[i].playerTank === false) {
-      collisionClass.objects.splice(i, 1);
-    }
-    else continue;
-  }
-
-  for (let object of collisionClass.objects) { object.show(); }
-
-
-  // pTank.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
-  // pTank.updatePlayer();
-  // pTank.show();
-  // pTank.edges();
 
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
-
-
-
-
-
-
-  // walls.forEach(wall => pTank.collision(wall))
-
-  // for (let wall of walls){
-  for (let wall of walls) {
-    pTank.collision(wall);
-    if (pTank.colided === true) {
-      break;
-    }
-    else continue;
-  }
-  // console.log(walls[1]);
-
-
-  // console.log(wall);
-  // }
-  //pTank.collision(walls[0])
-
-  // playerT34.splice(pTank, 1)
-
-  // console.log(pTank.colided);
-  // console.log( walls.forEach(wall => pTank.collision(wall)));
-
 }
 
 //#endregion
@@ -661,8 +595,6 @@ function draw() {
 
 //#region KEYCOMMANDS
 function keyCommands() {
-
-
   if (keyIsDown(69)) {
     camera.yPositionSpeed = 5;
   }
@@ -670,214 +602,24 @@ function keyCommands() {
   if (keyIsDown(81)) {
     camera.yPositionSpeed = -5;
   }
-
-
-  // if (keyIsDown(101)) {
-  //   rotYSpeed = 5;
-  // }
-  // else { rotYSpeed = 0}
-  // if (keyIsDown(104)) {
-  //   rotYSpeed = -5;
-  // }
-
-  //  if (keyIsDown(102)) {
-  //   rotXSpeed = 5;
-  // }
-  // else { rotXSpeed = 0}
-  // if (keyIsDown(100)) {
-  //   rotXSpeed = -5;
-  // }
-
-
 }
 //#endregion
 
 //#region TANK
-let camDirX = 0;
-class Tank {
 
-  constructor(x, y, z, playerTank = false, driverName = `AI`) {
-
-    this.pos = createVector(x, y, z);
-    //this.vel = createVector(1, -1);
-    // this.vel = p5.Vector.random2D()
-    // this.vel.mult(random(0, 3));
-    this.vel = createVector();
-    this.acc = createVector();
-
-    this.ang = createVector(-315, 0, 0);
-    this.acc2 = createVector();
-
-    this.rot = createVector();
-    this.radius = 80;
-
-    this.dirX;
-    this.dirY;
-
-    this.driverName = driverName;
-    this.playerTank = playerTank;
-
-
-    tankRadius = this.radius;
-
-    // this.x = x;
-    // this.y = y;
-    this.acc.add(environment.gravity[0], environment.gravity[1], environment.gravity[2]);
-
-    this.colided = false;
-
-    collisionClass.objects.push(this);
-  }
-
-
-
-  applyForce(force) {
-    this.acc.add(force);
-  }
-
-  updatePlayer() {
-    if (keyIsDown(104)) {
-      this.acc.z = -this.dirY;
-      this.acc.x = this.dirX;
-
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
-
-    if (keyIsDown(101)) {
-      this.acc.z = this.dirY;
-      this.acc.x = -this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
-
-    if (keyIsDown(102)) {
-      this.acc2.x = 5
-    }
-    else { this.acc2.x = 0 }
-
-    if (keyIsDown(100)) {
-      this.acc2.x = -5;
-    }
-
-    this.vel.limit(100);
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-    this.acc.set(0);
-
-    this.rot.limit(500);
-    this.ang.add(this.acc2);
-    this.rot.add(this.ang);
-    this.acc2.set(0);
-
-
-    this.dirX = map(-sin(this.ang.x / 100), 0, 628, 0, 360);
-    this.dirY = map(-cos(this.ang.x / 100), 0, 628, 0, 360);
-
-    camDirX = this.dirX;
-  }
-
-  updateOther() {
-    //     let mouse = createVector(mouseX,mouseY);
-    //     this.acc = p5.Vector.sub(mouse,this.pos);
-    //     this.acc.setMag(0.05);
-    // let control = createVector(dirX,0 ,dirY);
-
-
-    //this.acc = p5.Vector.random2D()
-    // this.vel = p5.Vector.sub(mouse,this.pos);
-    //this.acc.setMag(0.5);
-
-
-
-    this.vel.limit(100);
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-    this.acc.set(0);
-
-
-
-    this.rot.limit(500);
-    this.ang.add(this.acc2);
-    this.rot.add(this.ang);
-    this.acc2.set(0);
-
-
-    // dirX = map(-sin(this.ang.x / 100), 0, 628, 0, 360);
-    // dirY = map(-cos(this.ang.x / 100), 0, 628, 0, 360);
-  }
-
-
-  edges() {
-    if (this.pos.y >= 0) {
-      this.pos.y = 0;
-      this.vel.y *= -0.5;
-    }
-
-
-
-  }
-
-
-
-  show() {
-
-    push();
-    // console.log(this.pos.x);
-    //limit the counter of the angle
-    this.ang.x > 625 || this.ang.x < -625 ? this.ang.x = 0 : false;
-
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
-    rotateY(-this.ang.x / 100);
-    // rotate(1)
-
-    if (this.pos.x > camera.xPosition + 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-    if (this.pos.x < camera.xPosition - 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-
-    if (this.pos.z > camera.zPosition + 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-    if (this.pos.z < camera.zPosition - 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-
-    rotateZ(PI);
-    scale(25);
-    //box(100);
-    noStroke();
-    ambientMaterial(100);
-    texture(t34Texture);
-    model(tankModel);
-    pop();
-
-  }
-
-  collision(walls) {
-    let distance = dist(this.pos.x, this.pos.z, walls.xPos, walls.yPos);
-    // console.log(distance);
-    if (distance < this.radius + walls.radius) {
-      this.colided = true;
-      this.pos.x = this.pos.x + (this.pos.x - walls.xPos) / 25;
-      this.pos.z = this.pos.z + (this.pos.z - walls.yPos) / 25;
-    } else {
-      this.colided = false;
-    }
-  }
-
-}
 //#endregion
 
 let environment = new Environment();
-let terrain = new Terrain();
-let collisionClass = new Collision();
+// let collisionClass = new Collision();
 
 
-console.log(grassArray);
+//CHANGE CAMERA
 keyPressed = () => {
   keyCode === 67 ? camera.mode++ : null;
   camera.mode === 4 ? camera.mode = 0 : null;
 }
 
-// setInterval(() => {
-//   console.log(Math.floor(camera.body.eyeX), Math.floor(camera.body.eyeY), Math.floor(camera.body.eyeZ));
-
-// }, 1000)
+setInterval(() => {
+  console.log(pTank.colided, pTank.playerTank);
+}, 1000)
 
