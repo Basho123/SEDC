@@ -719,7 +719,7 @@ function draw() {
   // lightFalloff(1, 0, 0);
 
   pointLight(250, 250, 250, pTank.pos.x-3000, -600, pTank.pos.z+500);
-  pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
+  // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
 
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
