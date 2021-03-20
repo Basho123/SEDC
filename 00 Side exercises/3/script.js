@@ -8,14 +8,6 @@ dovod
 ana
 kalabalak`);
 
-
-
-
-
-
-
-
-
 function palindrom(zbor) {
     let palindrom = '';   
         for (let i = zbor.length - 1; i >= 0; i--) {

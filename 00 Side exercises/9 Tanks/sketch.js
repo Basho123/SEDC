@@ -6,10 +6,43 @@ let sine;
 // let terrain = [];
 let terrain;
 
+let environment;
+let m1a2Body;
+let m1a2Turret;
+let m1a2Cannon;
+
+
+let m1a2BodyTexture;
+let m1a2TurretTexture;
+let m1a2CannonTexture;
+
+let howitzerBody;
+let howitzerTurret
+let howitzerCannon;
+let howitzerRadar;
+
 let sky1;
 let sand1;
 let brick;
+
 let tree1;
+let tree2;
+let tree3;
+
+let complexTree = {
+  model: {
+    body: ``,
+    leaves: ``,
+    flowers: ``,
+  },
+  texture: {
+    body: ``,
+    leaves: ``,
+    flowers: ``,
+  }
+}
+
+
 let barbedWire;
 let grass;
 let grassTexture;
@@ -64,7 +97,6 @@ class Camera {
 let camera = new Camera()
 //#endregion
 
-
 //#region ENVIRONMENT 
 
 class Environment {
@@ -80,10 +112,10 @@ class Elements extends Environment {
     this.vel = createVector();
     this.acc = createVector();
 
-    this.ang = createVector(0, 0, 0);
+    this.rot = createVector();
+    this.ang = createVector();
     this.acc2 = createVector();
 
-    this.rot = createVector();
     this.radius = radius;
 
     this.dirX;
@@ -103,7 +135,36 @@ class Elements extends Environment {
     this.acc.add(force);
   }
   playerControlled() {
-    if (keyIsDown(104)) {
+    if (keyIsDown(104)) { //NUM 8 KEY
+      {
+        this.turretAcc.x -= 0.0005;
+      };
+    }
+    else this.turretVel.x /= 1.1;
+
+    if (keyIsDown(98)) { //NUM 2 KEY
+      {
+        this.turretAcc.x += 0.0005
+      };
+    }
+    else this.turretVel.x /= 1.1;
+
+
+    if (keyIsDown(100)) { //NUM 4 KEY
+      {
+        this.turretAcc.y += 0.005
+      };
+    }
+    else this.turretVel.y /= 5;
+    if (keyIsDown(102)) { //NUM 6 KEY
+      this.turretAcc.y -= 0.005;
+    }
+    else {
+      this.turretVel.y /= 5;
+    }
+
+
+    if (keyIsDown(87)) { //W KEY
       this.acc.z = -this.dirY
       this.acc.x = this.dirX;
 
@@ -112,7 +173,7 @@ class Elements extends Environment {
       this.vel.x /= 1.1;
     }
 
-    if (keyIsDown(101)) {
+    if (keyIsDown(83)) { //S KEY
       this.acc.z = this.dirY;
       this.acc.x = -this.dirX;
     } else {
@@ -120,29 +181,38 @@ class Elements extends Environment {
       this.vel.x /= 1.1;
     }
 
-    if (keyIsDown(102)) {
-      this.acc2.x = 5
+    if (keyIsDown(68)) { // D KEY
+      this.acc2.x += 0.5
     }
     else {
-      this.acc2.x = 0
+      this.ang.x /= 1.1
     }
 
-    if (keyIsDown(100)) {
-      this.acc2.x = -5;
+    if (keyIsDown(65)) { // A KEY
+      this.acc2.x -= 0.5;
     }
+    else this.ang.x /= 1.1
 
     this.vel.limit(30);
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     this.acc.set(0);
 
+
+    this.turretVel.limit(0.045);
+    this.turretVel.add(this.turretAcc)
+    this.turretAng.add(this.turretVel)
+    this.turretAcc.set(0)
+
     this.rot.limit(500);
     this.ang.add(this.acc2);
     this.rot.add(this.ang);
     this.acc2.set(0);
 
-    this.dirX = map(sin(this.ang.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.ang.x / 100), 0, 628, 0, 360);
+    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+
+
   }
 
   updateOther() {
@@ -156,8 +226,18 @@ class Elements extends Environment {
     this.rot.add(this.ang);
     this.acc2.set(0);
 
-    this.dirX = map(sin(this.ang.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.ang.x / 100), 0, 628, 0, 360);
+    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+
+    this.ang.x /= 1.02
+    this.ang.y /= 1.02
+    this.ang.z /= 1.02
+
+    if (this.isDead === true) {
+      this.vel.x /= 1.02
+      this.vel.y /= 1.02
+      this.vel.z /= 1.02
+    }
   }
 
   edges() {
@@ -193,14 +273,14 @@ class Collision extends Environment {
                 //IF SHELL HITS TARGET
                 if ((this.objects[g] instanceof Shell)) {
 
-                  this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 5
-                  this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 5
+                  this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 15
+                  this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 15
 
-                  this.objects[i].vel.y = random(0, 100) + 20 / this.objects[i].mass / 5
+                  this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
 
-                  this.objects[i].ang.y = random(0, 300) + 100;
-                  this.objects[i].ang.x = -random(0, 300) - 100;
-                  this.objects[i].ang.z = -random(0, 300) - 100;
+
+                  this.objects[i].ang.x = 0.01 * random(1, 3)
+                  this.objects[i].ang.z = 0.01 * random(1, 3)
 
                   this.objects[i].isDead = true;
                   this.objects[g].isDead = true;
@@ -240,7 +320,7 @@ class Collision extends Environment {
                   this.objects[g].pos.z -= ((this.objects[i].pos.z - this.objects[g].pos.z) / 500)
                 }
 
-                //CHECK THE COLLISION FOR THREES
+                //CHECK THE COLLISION FOR TREES
                 if ((this.objects[i] instanceof Tree) || (this.objects[g] instanceof Tree)) {
                   this.objects[i].colided = true;
                   this.objects[g].colided = true;
@@ -255,10 +335,10 @@ class Collision extends Environment {
                     this.objects[g].vel.z = this.objects[i].vel.z * this.objects[g].mass
 
                     //WHEN TREE IS COLLIDED, IT FLIPS OVER, AND THERE IS A DIFFERENCE BETWEEN LARGE AND SMALL TREE BECAUSE OF MASS, AND IF THE TREE IS FLIPPED OVER LOT, I FLIPS EVEN FASTER
-                    this.objects[g].rotateZ += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rotateZ / 20
+                    this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
 
 
-                    if (this.objects[g].rotateZ > 1.5) {
+                    if (this.objects[g].rot.z > 1.5) {
                       this.objects[g].setCollision = false;
 
                       this.objects[g].vel.x = 0;
@@ -288,10 +368,10 @@ class Collision extends Environment {
                     this.objects[g].vel.y = this.objects[i].vel.y * this.objects[g].mass
                     this.objects[g].vel.z = this.objects[i].vel.z * this.objects[g].mass
 
-                    //WHEN TREE IS COLLIDED, IT FLIPS OVER, AND THERE IS A DIFFERENCE BETWEEN LARGE AND SMALL TREE BECAUSE OF MASS, AND IF THE TREE IS FLIPPED OVER LOT, I FLIPS EVEN FASTER
-                    this.objects[g].rotateZ += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rotateZ / 20
+                    //WHEN WALL IS COLLIDED, IT FLIPS OVER SLOWLY
+                    this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
 
-                    if (this.objects[g].rotateZ > 1.5) {
+                    if (this.objects[g].rot.z > 1.5) {
                       this.objects[g].setCollision = false;
 
                       this.objects[g].vel.x = 0;
@@ -319,17 +399,15 @@ class Collision extends Environment {
                   this.objects[g].vel.y /= 1.1
                   this.objects[g].vel.z /= 1.1
                 }
-
+                else null
               }
             }
           }
+          else null
         }
       }
-
-
-
     }
-
+    else null
   }
 }
 class Terrain extends Environment {
@@ -409,38 +487,72 @@ class Grass extends Elements {
   }
 }
 class Tree extends Elements {
-  constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, rotateZ = 0, model = tree1, texture = tree1Texture) {
+  constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, rotateZ = 0) {
     super(x, y, z);
+
     this.rot.x = rotateX;
     this.rot.y = random(0, 4);
     this.rot.z = rotateZ;
+
     this.radius = 100;
 
     this.scale = random(0.05, 0.5)
-    this.model = model;
-    this.texture = texture;
     this.colided = false;
 
+    this.texture = ``;
+    this.model = ``;
+
     this.mass = 5 + this.scale;
-    //this.setCollision = true;
+  }
+}
 
-
-    //collisionClass.objects.push(this);
-
+class YellowTree extends Tree {
+  constructor(x, y, z) {
+    super();
+    this.pos.x = x;
+    this.pos.y = y;
+    this.pos.z = z;
+    this.model = model;
+    this.texture = texture;
   }
   show() {
+    //BODY
     push();
     translate(this.pos.x, this.pos.y + 110, this.pos.z);
     rotateX(this.rot.x);
     rotateY(this.rot.y);
     rotateZ(this.rot.z);
-
-
     scale(this.scale);
     noStroke();
-    // ambientMaterial(0);
-    texture(this.texture);
-    model(this.model);
+    texture(complexTree.texture.body);
+    model(complexTree.model.body);
+    noFill();
+    pop();
+
+    //LEAVEAS
+    push();
+    translate(this.pos.x, this.pos.y+110, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    noStroke();
+    texture(complexTree.texture.leaves);
+    model(complexTree.model.leaves);
+    noFill();
+    pop();
+
+    //FLOWERS
+    push();
+    translate(this.pos.x, this.pos.y+110, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    noStroke();
+    ambientMaterial(255,255,0);
+    // texture(complexTree.texture.flowers);
+    model(complexTree.model.flowers);
     noFill();
     pop();
   }
@@ -464,47 +576,22 @@ class Walls extends Elements {
 
   }
   show() {
-
     push();
-    //rotateZ(PI/2);
+
     translate(this.pos.x, 50, this.pos.z);
+
     rotateY(this.rot.x);
     rotateX(this.rot.y);
     rotateZ(this.rot.z);
+
     noStroke();
     ambientMaterial(0);
     texture(this.texture);
     box(10, 100, 200);
     noFill();
+
     pop();
   }
-
-  // collision(object) {
-  //   let distance = dist(this.xPos, this.yPos, object.pos.x, object.pos.z);
-  //   if (distance < this.radius + object.radius) {
-  //     collision = true;
-  //   } else {
-  //     collision = false;
-  //   }
-  // }
-
-  // wallX(slices = 200, xPos = 0, yPos = 0, d = brick, e = PI / 2) {
-  //   //   slices = number of slices
-  //   //   xPos = horizontal pos
-  //   //   yPos = vertical pos
-  //   //   d = material
-  //   //   e = rotation
-
-  //   slices = slices * brickSlices
-  //   for (let i = 0; i < slices; i += 200) {
-  //     let w = new Walls(i - xPos, yPos, d, e);
-  //     walls.push(w);
-
-  //     // w.show();
-  //     // w.collision(pTank);
-  //   }
-  // }
-
 }
 class Tank extends Elements {
   constructor(x, y, z, playerTank = false, driverName = `AI`, radius) {
@@ -513,34 +600,75 @@ class Tank extends Elements {
     this.radius = 80;
     this.mass = 20; // MINIMUM 1, MAXIMUM ~20
 
-    tankRadius = this.radius;
+    this.turretAng = createVector()
+    this.turretVel = createVector()
+    this.turretAcc = createVector()
 
     this.driverName = driverName;
     this.playerTank = playerTank;
+
+    this.scale = 0.6;
   }
 
   show() {
+
+
+    if (this.rot.x > 312.5) {
+      this.rot.x = -312.5
+    }
+    else if (this.rot.x <= -312.5) {
+      this.rot.x = 312.5
+    }
+
+    if (this.turretAng.y > 3.125) {
+      this.turretAng.y = -3.125
+    }
+    else if (this.turretAng.y <= -3.125) {
+      this.turretAng.y = 3.125
+    }
+
+
+    //BODY
     push();
-    //limit the counter of the angle
-    this.ang.x > 625 || this.ang.x < -625 ? this.ang.x = 0 : false;
-
     translate(this.pos.x, this.pos.y + 100, this.pos.z);
-    rotateY(-this.ang.x / 100);
-
-    if (this.pos.x > camera.xPosition + 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-    if (this.pos.x < camera.xPosition - 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-
-    if (this.pos.z > camera.zPosition + 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-    if (this.pos.z < camera.zPosition - 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-
+    rotateY(-this.rot.x / 100);
     rotateZ(PI);
-    rotateY(PI + this.ang.y)
+    rotateY(-PI / 2 + this.ang.y)
     rotateZ(this.ang.z);
-    scale(25);
+    scale(this.scale);
+    noStroke();
+    ambientMaterial(100);
+    texture(m1a2BodyTexture);
+    model(m1a2Body);
+    pop();
+
+    //TURRET
+    push();
+    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    // this.turretAng.x += -movedX * 0.002 //MOVE BY MOUSE
+    rotateY(PI / 2 + this.ang.y + this.turretAng.y);
+    rotateZ(this.ang.z + PI);
+    scale(this.scale);
+    noStroke();
+    ambientMaterial(100);
+    texture(m1a2TurretTexture);
+    model(m1a2Turret);
+    pop();
+
+    //  CANNON
+    push();
+    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    rotateY(PI / 2 + this.turretAng.y);
+    rotateZ(this.ang.z + PI + this.turretAng.x);
+
+    this.turretAng.x > 0.03 ? this.turretAng.x = 0.03 :
+      this.turretAng.x < -0.15 ? this.turretAng.x = -0.15 : null
+
+    scale(this.scale);
     noStroke();
     ambientMaterial(100);
     texture(t34Texture);
-    model(tankModel);
+    model(m1a2Cannon);
     pop();
   }
 
@@ -549,31 +677,31 @@ class Tank extends Elements {
       this.pos.x,
       this.pos.y,
       this.pos.z,
-      this.ang.x,
-      this.ang.y,
-      this.ang.z,
-      this.dirX,
-      this.dirY,
+      -this.turretAng.y * 100,
+      this.turretAng.x,
+      this.rot.z,
       this.playerTank
     )
   }
 
 }
 class Shell extends Tank {
-  constructor(x, y, z, angX, angY, angZ, dirX, dirY, playerTank, type = `HESH`) {
+  constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `HESH`) {
     super();
     this.pos.x = x;
     this.pos.y = y;
     this.pos.z = z;
 
-    this.ang.x = angX;
-    this.ang.y = angY;
-    this.ang.z = angZ;
+    this.rot.x = rotX;
+    this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
+    this.rot.z = rotZ;
 
     this.radius = 10;
 
     this.vel.limit(1000)
-    this.vel.y = -35;
+
+    this.vel.y = (this.turretAng.x * 80) - 5;
+    console.log(this.turretAng.x);
 
     this.type = type;
 
@@ -590,20 +718,9 @@ class Shell extends Tank {
 
   show() {
     push();
-
-    //limit the counter of the angle
-    this.ang.x > 625 || this.ang.x < -625 ? this.ang.x = 0 : false;
-
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
-    rotateY(-this.ang.x / 100);
+    translate(this.pos.x, this.pos.y + 60, this.pos.z);
+    rotateY(-this.rot.x / 100);
     rotateX(this.vel.y / 75)
-
-    if (this.pos.x > camera.xPosition + 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-    if (this.pos.x < camera.xPosition - 300) { camera.xPosition = camera.xPosition - this.vel.x / 2.5 }
-
-    if (this.pos.z > camera.zPosition + 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-    if (this.pos.z < camera.zPosition - 100) { camera.zPosition = camera.zPosition - this.vel.z / 2 }
-
     scale(1);
     noStroke();
     ambientMaterial(100);
@@ -615,26 +732,49 @@ class Shell extends Tank {
     // this.acc.z = -this.dirY*100;
     // this.acc.x = this.dirX*100;
 
-
-    this.vel.z = -this.dirY * 1000
-    this.vel.x = this.dirX * 1000;
+    this.vel.z = -this.dirY * 200
+    this.vel.x = this.dirX * 200;
   }
 
-  static isFired(x, y, z, angX, angY, angZ, dirX, dirY, playerTank, type = `HESH`) {
-    collisionClass.objects.push(new Shell(x, y, z, angX, angY, angZ, dirX, -dirY, playerTank, type = `HESH`))
+  static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`) {
+    collisionClass.objects.push(new Shell(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`))
   }
 }
 //#endregion
 
 //#region PRELOAD
-//PRELOAD ALL DATA
+
 function preload() {
+  //PRELOAD ALL DATA
   sky1 = loadImage("files/background/sky20.jpg");
   sand1 = loadImage("files/background/sand.png");
   brick = loadImage("files/background/brick.jpg");
+
   tankModel = loadModel("files/models/t34.obj");
+
+  m1a2Body = loadModel("files/models/tanks/m1a2/m1a2body.obj");
+  m1a2Turret = loadModel("files/models/tanks/m1a2/m1a2turret.obj");
+  m1a2Cannon = loadModel("files/models/tanks/m1a2/m1a2cannon.obj");
+
+  m1a2BodyTexture = loadImage("files/textures/m1a2texture.jpg")
+  m1a2CannonTexture = loadImage("files/textures/m1a2texture.jpg")
+  m1a2TurretTexture = loadImage("files/textures/m1a2texture.jpg")
+
   // tankModel = loadModel("files/models/t34.obj");
   tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
+  tree2 = loadModel("files/models/scenery/trees/treeWithLeaves.obj");
+  tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
+
+  complexTree.model.body = loadModel("files/models/scenery/trees/tree/treeBody.obj");
+  complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/treeFlowers.obj");
+  complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/leaves.obj");
+
+  complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
+  complexTree.texture.leaves = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
+  complexTree.texture.flowers = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
+
+
+
   // wire = loadModel("files/models/scenery/objects/barbedWire.obj");
 
   // grass = loadModel("files/models/scenery/grass/Grass.obj");
@@ -646,8 +786,14 @@ function preload() {
 
   t34Texture = loadImage("files/textures/t34Texture.jpg");
   shellHESHtexture = loadImage("files/textures/HESH.png");
+
   grassTexture = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+
   tree1Texture = loadImage("files/models/scenery/trees/tree1noleaves/tree1.jpg");
+  tree2Texture = loadImage("files/models/scenery/trees/treeWithLeaves/bark1.jpg");
+  tree3Texture = loadImage("files/models/scenery/trees/treeBoomDobro/bladeren.jpg");
+
+
 }
 //#endregion
 
@@ -657,11 +803,17 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   camera.body = createCamera();
   collisionClass = new Collision();
+  environment = new Environment();
 
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
 
   pTank = new Tank(-300, -100, 0, true);
+
+
+  setInterval(() => {
+    console.log(camera);
+  }, 1000)
 
   collisionClass.objects.push(pTank);
   for (let tankCount = 0; tankCount < 5; tankCount++) {
@@ -672,8 +824,16 @@ function setup() {
     collisionClass.objects.push(new Grass(random(-3000, 3000), 0, random(-3000, 3000), PI))
   }
 
-  for (let treeCount = 0; treeCount < 30; treeCount++) {
-    collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI))
+  // for (let treeCount = 0; treeCount < 30; treeCount++) {
+  //   collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI))
+  // }
+
+  // for (let treeCount = 0; treeCount < 30; treeCount++) {
+  //   collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI, 0, 0, tree2, tree2Texture))
+  // }
+
+   for (let treeCount = 0; treeCount < 30; treeCount++) {
+    collisionClass.objects.push(new YellowTree(random(-5000, 5000), 0, random(-3000, 3000)))
   }
 
   let horizontalWallPosition = 0;
@@ -707,18 +867,17 @@ function draw() {
   //FRAMERATE DROPPING FOR DEBUGGING
   // frameCount(1);
   //frameRate(0.0025)  
-  collisionClass.collision();
   // THIS IS TEMPORARY
   // camera.body.eyeX = 0
   // camera.body.eyeY = -3197
   // camera.body.eyeZ = 2589
   // camera.mode = 0;
   // ////////
-   ambientLight(255);
-
+  ambientLight(255);
   // lightFalloff(1, 0, 0);
+  pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
+  collisionClass.collision();
 
-  pointLight(250, 250, 250, pTank.pos.x-3000, -600, pTank.pos.z+500);
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
 
   // directionalLight(255, 255, 255, 0, 50, 0)
@@ -731,17 +890,18 @@ function draw() {
     camera.body.pan(-movedX * 0.002);
     camera.body.tilt(movedY * 0.002);
   }
+  // console.log(movedX);
 
   // camera.body.pan(-movedX * 0.002);
   // camera.body.tilt(movedY * 0.002);
 
   //MOVE AROUND WITH W/S/A/D
-  keyIsDown(87) ? camera.body.move(0, 0, -5) : false; //W  FORWARD
-  keyIsDown(83) ? camera.body.move(0, 0, 5) : false;  //S  BACKWARD
-  keyIsDown(65) ? camera.body.move(-5, 0, 0) : false; //A  LEFT
-  keyIsDown(68) ? camera.body.move(5, 0, 0) : false;  //D  RIGHT
-  keyIsDown(69) ? camera.body.move(0, -5, 0) : false;  //Q  DOWN
-  keyIsDown(81) ? camera.body.move(0, 5, 0) : false;  //E UP 
+  keyIsDown(104) ? camera.body.move(0, 0, -5) : false;  //NUM 8  FORWARD
+  keyIsDown(101) ? camera.body.move(0, 0, 5) : false;   //NUM 5  BACKWARD
+  keyIsDown(100) ? camera.body.move(-5, 0, 0) : false;  //NUM 4  LEFT
+  keyIsDown(102) ? camera.body.move(5, 0, 0) : false;   //NUM 6  RIGHT
+  keyIsDown(97) ? camera.body.move(0, 5, 0) : false;   //NUM 1  DOWN
+  keyIsDown(103) ? camera.body.move(0, -5, 0) : false;   //NUM 7  UP 
 
   //BOUNDRY FOR FLOOR
   camera.body.eyeY > 0 ? camera.body.setPosition(camera.body.eyeX, 0, camera.body.eyeZ) : false;
@@ -756,8 +916,11 @@ function draw() {
 
 
   //FPS CAMERA CONDITIONS
-  keyIsDown(100) && camera.mode === 2 ? camera.body.pan(0.05) : false;
-  keyIsDown(102) && camera.mode === 2 ? camera.body.pan(-0.05) : false;
+  // keyIsDown(100) && camera.mode === 2 ? camera.body.pan(0.022) : false;
+  // keyIsDown(102) && camera.mode === 2 ? camera.body.pan(-0.022) : false;
+
+  keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
+  keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
 
 
 
@@ -806,21 +969,20 @@ function draw() {
 
 //#endregion
 
-
 //#region KEYCOMMANDS
 function keyCommands() {
-  if (keyIsDown(69)) {
+  if (keyIsDown(105)) {
     camera.yPositionSpeed = 5;
   }
   else { camera.yPositionSpeed = 0 }
-  if (keyIsDown(81)) {
+  if (keyIsDown(99)) {
     camera.yPositionSpeed = -5;
   }
 }
 //#endregion
 
 
-let environment = new Environment();
+
 
 
 
@@ -833,8 +995,5 @@ keyPressed = () => {
 
 
 }
-
-setInterval(() => {
-}, 1000)
 
 
