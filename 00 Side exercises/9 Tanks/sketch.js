@@ -42,6 +42,19 @@ let complexTree = {
   }
 }
 
+let AI = {
+  forward: false,
+  backward: false,
+  rotateLeft: false,
+  rotateRight: false,
+
+  turretLeft: false,
+  turretRight: false,
+
+  cannonUp: false,
+  cannonDown: false,
+}
+
 
 let barbedWire;
 let grass;
@@ -126,6 +139,8 @@ class Elements extends Environment {
     this.setCollision = true;
     this.colided = false;
 
+    this.AIActive = `AIDisabled`;
+
     this.playerTank = false;
     this.mass = 1;
 
@@ -135,45 +150,24 @@ class Elements extends Environment {
     this.acc.add(force);
   }
   playerControlled() {
-    if (keyIsDown(104)) { //NUM 8 KEY
-      {
-        this.turretAcc.x -= 0.0005;
-      };
-    }
-    else this.turretVel.x /= 1.1;
+    keyIsDown(104) ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1; // NUM 8 KEY CANNON UP
+    keyIsDown(98) ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;  // NUM 2 KEY CANNON DOWN
 
-    if (keyIsDown(98)) { //NUM 2 KEY
-      {
-        this.turretAcc.x += 0.0005
-      };
-    }
-    else this.turretVel.x /= 1.1;
+    keyIsDown(100) ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;    // NUM 4 KEY TURRET LEFT
+    keyIsDown(102) ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;    // NUM 6 KEY TURRET RIGHT
 
+    keyIsDown(65) ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                 // A KEY TANK ROTATE LEFT    
+    keyIsDown(68) ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // D KEY TANK ROTATE RIGHT
 
-    if (keyIsDown(100)) { //NUM 4 KEY
-      {
-        this.turretAcc.y += 0.005
-      };
-    }
-    else this.turretVel.y /= 5;
-    if (keyIsDown(102)) { //NUM 6 KEY
-      this.turretAcc.y -= 0.005;
-    }
-    else {
-      this.turretVel.y /= 5;
-    }
-
-
-    if (keyIsDown(87)) { //W KEY
+    if (keyIsDown(87)) {                  // W KEY TANK FORWARD
       this.acc.z = -this.dirY
       this.acc.x = this.dirX;
-
     } else {
       this.vel.z /= 1.1;
       this.vel.x /= 1.1;
     }
 
-    if (keyIsDown(83)) { //S KEY
+    if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
       this.acc.z = this.dirY;
       this.acc.x = -this.dirX;
     } else {
@@ -181,23 +175,10 @@ class Elements extends Environment {
       this.vel.x /= 1.1;
     }
 
-    if (keyIsDown(68)) { // D KEY
-      this.acc2.x += 0.5
-    }
-    else {
-      this.ang.x /= 1.1
-    }
-
-    if (keyIsDown(65)) { // A KEY
-      this.acc2.x -= 0.5;
-    }
-    else this.ang.x /= 1.1
-
     this.vel.limit(30);
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     this.acc.set(0);
-
 
     this.turretVel.limit(0.045);
     this.turretVel.add(this.turretAcc)
@@ -211,8 +192,51 @@ class Elements extends Environment {
 
     this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
     this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+  }
 
+  AIControlled() {
+    AI.cannonUp ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1;     // AI CANNON UP
+    AI.cannonDown ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;   // AI CANNON DOWN
 
+    AI.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;      // AI TURRET LEFT
+    AI.turretRight ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;     // AI TURRET RIGHT
+
+    AI.rotateLeft ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                  // AI ROTATE LEFT    
+    AI.rotateRight ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // AI ROTATE RIGHT
+
+    if (AI.forward === true) {                                                  // AI FORWARD
+      this.acc.z = -this.dirY
+      this.acc.x = this.dirX;
+    } else {
+      this.vel.z /= 1.1;
+      this.vel.x /= 1.1;
+    }
+
+    if (AI.backward) {                  // AI BACKWARD
+      this.acc.z = this.dirY;
+      this.acc.x = -this.dirX;
+    } else {
+      this.vel.z /= 1.1;
+      this.vel.x /= 1.1;
+    }
+
+    this.vel.limit(30);
+    this.vel.add(this.acc);
+    this.pos.add(this.vel);
+    this.acc.set(0);
+
+    this.turretVel.limit(0.045);
+    this.turretVel.add(this.turretAcc)
+    this.turretAng.add(this.turretVel)
+    this.turretAcc.set(0)
+
+    this.rot.limit(500);
+    this.ang.add(this.acc2);
+    this.rot.add(this.ang);
+    this.acc2.set(0);
+
+    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
   }
 
   updateOther() {
@@ -278,7 +302,6 @@ class Collision extends Environment {
 
                   this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
 
-
                   this.objects[i].ang.x = 0.01 * random(1, 3)
                   this.objects[i].ang.z = 0.01 * random(1, 3)
 
@@ -337,7 +360,6 @@ class Collision extends Environment {
                     //WHEN TREE IS COLLIDED, IT FLIPS OVER, AND THERE IS A DIFFERENCE BETWEEN LARGE AND SMALL TREE BECAUSE OF MASS, AND IF THE TREE IS FLIPPED OVER LOT, I FLIPS EVEN FASTER
                     this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
 
-
                     if (this.objects[g].rot.z > 1.5) {
                       this.objects[g].setCollision = false;
 
@@ -346,7 +368,6 @@ class Collision extends Environment {
                       this.objects[g].vel.z = 0;
                       //this.objects.splice(g, 1);
                     }
-
                   }
                   //THIS HELPS SO THE TANKS DONT STICK
                   this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
@@ -486,6 +507,8 @@ class Grass extends Elements {
     pop();
   }
 }
+
+//#region TREES
 class Tree extends Elements {
   constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, rotateZ = 0) {
     super(x, y, z);
@@ -531,7 +554,7 @@ class YellowTree extends Tree {
 
     //LEAVEAS
     push();
-    translate(this.pos.x, this.pos.y+110, this.pos.z);
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
     rotateX(this.rot.x);
     rotateY(this.rot.y);
     rotateZ(this.rot.z);
@@ -544,19 +567,74 @@ class YellowTree extends Tree {
 
     //FLOWERS
     push();
-    translate(this.pos.x, this.pos.y+110, this.pos.z);
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
     rotateX(this.rot.x);
     rotateY(this.rot.y);
     rotateZ(this.rot.z);
     scale(this.scale);
     noStroke();
-    ambientMaterial(255,255,0);
+    ambientMaterial(255, 255, 0);
     // texture(complexTree.texture.flowers);
     model(complexTree.model.flowers);
     noFill();
     pop();
   }
 }
+
+class PalmTree extends Tree {
+  constructor(x, y, z) {
+    super();
+    this.pos.x = x;
+    this.pos.y = y;
+    this.pos.z = z;
+    this.model = model;
+    this.texture = texture;
+  }
+  show() {
+    //BODY
+    push();
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    noStroke();
+    texture(complexTree.texture.body);
+    model(complexTree.model.body);
+    noFill();
+    pop();
+
+    //LEAVEAS
+    push();
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    noStroke();
+    texture(complexTree.texture.leaves);
+    model(complexTree.model.leaves);
+    noFill();
+    pop();
+
+    //FLOWERS
+    push();
+    translate(this.pos.x, this.pos.y + 110, this.pos.z);
+    rotateX(this.rot.x);
+    rotateY(this.rot.y);
+    rotateZ(this.rot.z);
+    scale(this.scale);
+    noStroke();
+    ambientMaterial(255, 255, 0);
+    // texture(complexTree.texture.flowers);
+    model(complexTree.model.flowers);
+    noFill();
+    pop();
+  }
+}
+
+
+//#endregion
 class Walls extends Elements {
   constructor(x = 0, y = 50, z = 0, rotateY = 0, rotateX = 0, rotateZ = 0, texture = brick) {
     super(x, y, z);
@@ -594,7 +672,7 @@ class Walls extends Elements {
   }
 }
 class Tank extends Elements {
-  constructor(x, y, z, playerTank = false, driverName = `AI`, radius) {
+  constructor(x, y, z, playerTank = false, driverName = `AI`, radius, AIActive = `AIDisabled`) {
     super(x, y, z, radius);
 
     this.radius = 80;
@@ -607,12 +685,12 @@ class Tank extends Elements {
     this.driverName = driverName;
     this.playerTank = playerTank;
 
+    this.AIActive = AIActive;
+
     this.scale = 0.6;
   }
 
   show() {
-
-
     if (this.rot.x > 312.5) {
       this.rot.x = -312.5
     }
@@ -801,41 +879,36 @@ function preload() {
 function setup() {
 
   createCanvas(windowWidth, windowHeight, WEBGL);
+
+  //CREATE CAMERA
   camera.body = createCamera();
+
+  // setInterval(() => {
+  //   console.log(camera);
+  // }, 1000)
+
+  //CREATE ESSENTIALS
   collisionClass = new Collision();
   environment = new Environment();
-
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
 
+  //CREATE PLAYER TANK
   pTank = new Tank(-300, -100, 0, true);
 
-
-  setInterval(() => {
-    console.log(camera);
-  }, 1000)
-
+  //CREATE ENEMY TANKS
   collisionClass.objects.push(pTank);
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500)))
+    collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500),false,`AI Tank`,100,`AIActive`))
   }
 
+  //CREATE SCENERY
   for (let grassCount = 0; grassCount < 100; grassCount++) {
     collisionClass.objects.push(new Grass(random(-3000, 3000), 0, random(-3000, 3000), PI))
   }
-
-  // for (let treeCount = 0; treeCount < 30; treeCount++) {
-  //   collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI))
-  // }
-
-  // for (let treeCount = 0; treeCount < 30; treeCount++) {
-  //   collisionClass.objects.push(new Tree(random(-5000, 5000), 0, random(-3000, 3000), PI, 0, 0, tree2, tree2Texture))
-  // }
-
-   for (let treeCount = 0; treeCount < 30; treeCount++) {
+  for (let treeCount = 0; treeCount < 30; treeCount++) {
     collisionClass.objects.push(new YellowTree(random(-5000, 5000), 0, random(-3000, 3000)))
   }
-
   let horizontalWallPosition = 0;
   let verticalWallPosition = 0;
 
@@ -856,7 +929,6 @@ function setup() {
       collisionClass.objects.push(new Walls(horizontalWallPosition, 50, verticalWallPosition, PI))
     }
   }
-
 }
 //#endregion
 
@@ -890,12 +962,8 @@ function draw() {
     camera.body.pan(-movedX * 0.002);
     camera.body.tilt(movedY * 0.002);
   }
-  // console.log(movedX);
 
-  // camera.body.pan(-movedX * 0.002);
-  // camera.body.tilt(movedY * 0.002);
-
-  //MOVE AROUND WITH W/S/A/D
+  //MOVE AROUND WITH NUMPAD KEYS
   keyIsDown(104) ? camera.body.move(0, 0, -5) : false;  //NUM 8  FORWARD
   keyIsDown(101) ? camera.body.move(0, 0, 5) : false;   //NUM 5  BACKWARD
   keyIsDown(100) ? camera.body.move(-5, 0, 0) : false;  //NUM 4  LEFT
@@ -903,39 +971,32 @@ function draw() {
   keyIsDown(97) ? camera.body.move(0, 5, 0) : false;   //NUM 1  DOWN
   keyIsDown(103) ? camera.body.move(0, -5, 0) : false;   //NUM 7  UP 
 
-  //BOUNDRY FOR FLOOR
+  //BOUNDRY FOR FLOOR FOR THE CAMERA
   camera.body.eyeY > 0 ? camera.body.setPosition(camera.body.eyeX, 0, camera.body.eyeZ) : false;
 
-
-  //FREE MOVING CAMERA
+  //FREE MOVING CAMERA CONDITIONS
   camera.mode === 0 ? camera.body.setPosition(camera.body.eyeX, camera.body.eyeY, camera.body.eyeZ) // FREE LOOK
     : camera.mode === 1 ? camera.body.setPosition(camera.body.eyeX, 0, camera.body.eyeZ) //GROUND LOOK
       : camera.mode === 2 ? camera.body.setPosition(pTank.pos.x, pTank.pos.y, pTank.pos.z) //FIRST PERSON
         : false;
 
-
-
   //FPS CAMERA CONDITIONS
-  // keyIsDown(100) && camera.mode === 2 ? camera.body.pan(0.022) : false;
-  // keyIsDown(102) && camera.mode === 2 ? camera.body.pan(-0.022) : false;
+  // keyIsDown(100) && camera.mode === 2 ? camera.body.pan(0.01) : false;
+  // keyIsDown(102) && camera.mode === 2 ? camera.body.pan(-0.01) : false;
 
   keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
   keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
 
 
 
-  //DRAW TERRAIN
-  // for (let plane of terrain) {
-  //   plane.show();
-  // }
+  //DRAW TERRAIN  
   terrain.show();
 
   //MOUSE PRESSED
   if (mouseIsPressed) {
-
     //WIND EXAMPLE
-    let wind = createVector(0.01, 0, 0);
-    pTank.applyForce(wind);
+    // let wind = createVector(0.01, 0, 0);
+    // pTank.applyForce(wind);
     //requestPointerLock();
     if (!lockOn) {
       lockOn = true;
@@ -949,11 +1010,14 @@ function draw() {
 
   collisionClass.objects.forEach((object) => {
     object.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
+
     // if((object instanceof Tank) === true){
     //   if(random(10000)<10 && object.playerTank != true){        
     //     object.fire();
     //   }
     // }
+    object.AIActive === `AIActive`
+      ? object.AIControlled() : null;
 
     object.playerTank === true
       ? object.playerControlled()
@@ -979,6 +1043,7 @@ function keyCommands() {
     camera.yPositionSpeed = -5;
   }
 }
+
 //#endregion
 
 
