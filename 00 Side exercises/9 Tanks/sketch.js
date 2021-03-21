@@ -11,6 +11,9 @@ let m1a2Body;
 let m1a2Turret;
 let m1a2Cannon;
 
+let box1;
+let box2;
+
 
 let m1a2BodyTexture;
 let m1a2TurretTexture;
@@ -90,6 +93,21 @@ let materialVariables = {
 
 }
 
+class Box {
+  constructor(x, y, z, sizeX=1000, sizeY=100, sizeZ=200) {
+    this.pos = createVector(x, y, z); //POSITION
+    this.sizeX = sizeX;  //SIZE
+    this.sizeY = sizeY;
+    this.sizeZ = sizeZ;
+  }
+  show() {
+    push()
+    rotateX(PI/2)
+    translate(this.pos.x, this.pos.y, this.pos.z)
+    box(this.sizeX,this.sizeY,this.sizeZ)
+    pop()
+  }
+}
 
 //#region CAMERA
 class Camera {
@@ -887,6 +905,14 @@ function setup() {
   //   console.log(camera);
   // }, 1000)
 
+  //TEST /////////////////////
+  ////////////////////////////////////////
+
+  box1 = new Box(0, 0, 0, 300,500,400)
+  box2 = new Box(0, 0,0, 200,300,700)
+
+  ///////////////////////////////
+
   //CREATE ESSENTIALS
   collisionClass = new Collision();
   environment = new Environment();
@@ -899,7 +925,7 @@ function setup() {
   //CREATE ENEMY TANKS
   collisionClass.objects.push(pTank);
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500),false,`AI Tank`,100,`AIActive`))
+    collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500), false, `AI Tank`, 100, `AIActive`))
   }
 
   //CREATE SCENERY
@@ -932,6 +958,102 @@ function setup() {
 }
 //#endregion
 
+//#region INTERSECTS
+function intersects(
+  firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
+  secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
+) {
+  // let topLeftFirst = [];
+  // let topRightFirst = [];
+  // let bottomLeftFirst = [];
+  // let bottomRightFirst = [];
+
+  // let topLeftSecond = [];
+  // let topRightSecond = [];
+  // let bottomLeftSecond = [];
+  // let bottomRightSecond = [];
+
+  rightSideFirst = firstRectPosX + firstRectWidth / 2;
+  leftSideFirst = firstRectPosX - firstRectWidth / 2;
+  bottomSideFirst = firstRectPosY + firstRectHeight / 2;
+  topSideFirst = firstRectPosY - firstRectHeight / 2;
+  frontSideFirst = firstRectPosZ + firstRectDepth / 2; //DEPTH
+  backSideFirst = firstRectPosZ - firstRectDepth / 2; //DEPTH
+
+  rightSideSecond = secondRectPosX + secondRectWidth / 2;
+  leftSideSecond = secondRectPosX - secondRectWidth / 2;
+  bottomSideSecond = secondRectPosY + secondRectHeight / 2;
+  topSideSecond = secondRectPosY - secondRectHeight / 2;
+  frontSideSecond = secondRectPosZ + secondRectDepth / 2; //DEPTH
+  backSideSecond = secondRectPosZ - secondRectDepth / 2; //DEPTH
+
+
+  // topLeftFirst = [firstRectPosX - firstRectWidth / 2, firstRectPosY - firstRectHeight / 2]
+  // topRightFirst = [firstRectPosX + firstRectWidth / 2, firstRectPosY - firstRectHeight / 2]
+  // bottomLeftFirst = [firstRectPosX - firstRectWidth / 2, firstRectPosY + firstRectHeight / 2]
+  // bottomRightFirst = [firstRectPosX + firstRectWidth / 2, firstRectPosY + firstRectHeight / 2]
+
+  // topLeftSecond = [secondRectPosX - secondRectWidth / 2, secondRectPosY - secondRectHeight / 2]
+  // topRightSecond = [secondRectPosX + secondRectWidth / 2, secondRectPosY - secondRectHeight / 2]
+  // bottomLeftSecond = [secondRectPosX - secondRectWidth / 2, secondRectPosY + secondRectHeight / 2]
+  // bottomRightSecond = [secondRectPosX + secondRectWidth / 2, secondRectPosY + secondRectHeight / 2]
+
+  if (
+    // bottomLeftFirst[0] < topRightSecond[0] && bottomLeftFirst[1] > topRightSecond[1] &&
+    // bottomLeftFirst[0] > topLeftSecond[0] && bottomLeftFirst[1] > topLeftSecond[1] &&
+    // bottomLeftFirst[0] < bottomRightSecond[0] && bottomLeftFirst[1] < bottomRightSecond[1] &&
+    // bottomLeftFirst[0] > bottomLeftSecond[0] && bottomLeftFirst[1] < bottomLeftSecond[1] ||
+
+    // topLeftFirst[0] < bottomRightSecond[0] && topLeftFirst[1] < bottomRightSecond[1] &&
+    // topLeftFirst[0] < topRightSecond[0] && topLeftFirst[1] > topRightSecond[1] &&
+    // topLeftFirst[0] > bottomLeftSecond[0] && topLeftFirst[1] < bottomLeftSecond[1] &&
+    // topLeftFirst[0] > topLeftSecond[0] && topLeftFirst[1] > topLeftSecond[1] ||
+
+    // topRightFirst[0] > bottomLeftSecond[0] && topRightFirst[1] < bottomLeftSecond[1] &&
+    // topRightFirst[0] > topLeftSecond[0] && topRightFirst[1] > topLeftSecond[1] &&
+    // topRightFirst[0] < topRightSecond[0] && topRightFirst[1] > topRightSecond[1] &&
+    // topRightFirst[0] < bottomRightSecond[0] && topRightFirst[1] < bottomRightSecond[1] ||
+
+    // bottomRightFirst[0] > topLeftSecond[0] && bottomRightFirst[1] > topLeftSecond[1] &&
+    // bottomRightFirst[0] > bottomLeftSecond[0] && bottomRightFirst[1] < bottomLeftSecond[1] &&
+    // bottomRightFirst[0] < topRightSecond[1] && bottomRightFirst[1] > topRightSecond[1] &&
+    // bottomRightFirst[0] < bottomRightSecond[1] && bottomRightFirst[1] < bottomRightSecond[1] ||
+
+
+    // bottomLeftSecond[0] < topRightFirst[0] && bottomLeftSecond[1] > topRightFirst[1] &&
+    // bottomLeftSecond[0] > topLeftFirst[0] && bottomLeftSecond[1] > topLeftFirst[1] &&
+    // bottomLeftSecond[0] < bottomRightFirst[0] && bottomLeftSecond[1] < bottomRightFirst[1] &&
+    // bottomLeftSecond[0] > bottomLeftFirst[0] && bottomLeftSecond[1] < bottomLeftFirst[1] ||
+
+    // topLeftSecond[0] < bottomRightFirst[0] && topLeftSecond[1] < bottomRightFirst[1] &&
+    // topLeftSecond[0] < topRightFirst[0] && topLeftSecond[1] > topRightFirst[1] &&
+    // topLeftSecond[0] > bottomLeftFirst[0] && topLeftSecond[1] < bottomLeftFirst[1] &&
+    // topLeftSecond[0] > topLeftFirst[0] && topLeftSecond[1] > topLeftFirst[1] ||
+
+    // topRightSecond[0] > bottomLeftFirst[0] && topRightSecond[1] < bottomLeftFirst[1] &&
+    // topRightSecond[0] > topLeftFirst[0] && topRightSecond[1] > topLeftFirst[1] &&
+    // topRightSecond[0] < topRightFirst[0] && topRightSecond[1] > topRightFirst[1] &&
+    // topRightSecond[0] < bottomRightFirst[0] && topRightSecond[1] < bottomRightFirst[1] ||
+
+    // bottomRightSecond[0] > topLeftFirst[0] && bottomRightSecond[1] > topLeftFirst[1] &&
+    // bottomRightSecond[0] > bottomLeftFirst[0] && bottomRightSecond[1] < bottomLeftFirst[1] &&
+    // bottomRightSecond[0] < topRightFirst[1] && bottomRightSecond[1] > topRightFirst[1] &&
+    // bottomRightSecond[0] < bottomRightFirst[1] && bottomRightSecond[1] < bottomRightFirst[1] ||
+
+    rightSideFirst > leftSideSecond &&
+    leftSideFirst < rightSideSecond &&
+    bottomSideFirst > topSideSecond && 
+    topSideFirst < bottomSideSecond &&
+    frontSideFirst > backSideSecond &&
+    backSideFirst < frontSideSecond
+  ) {
+    return true;
+  }
+  return false;
+}
+
+//#endregion
+
 //#region DRAW
 function draw() {
 
@@ -940,22 +1062,42 @@ function draw() {
   // frameCount(1);
   //frameRate(0.0025)  
   // THIS IS TEMPORARY
-  // camera.body.eyeX = 0
-  // camera.body.eyeY = -3197
-  // camera.body.eyeZ = 2589
-  // camera.mode = 0;
+  camera.body.eyeX = 0
+  camera.body.eyeY = -3197
+  camera.body.eyeZ = 2589
+  camera.mode = 0;
   // ////////
+
+
+  //LIGHT
   ambientLight(255);
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
   collisionClass.collision();
-
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
-
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
 
+  box1.show();
+  box2.show();
+  box1.pos.x = mouseX*3-1200;
+  box1.pos.z = mouseY*3-1200;
 
+  let i = intersects(
+    box1.pos.x,
+    box1.pos.y,
+    box1.pos.z,
+    box1.sizeX,
+    box1.sizeY,
+    box1.sizeZ,
+    box2.pos.x,
+    box2.pos.y,
+    box2.pos.z,
+    box2.sizeX,
+    box2.sizeY,
+    box2.sizeZ
+    )
+  console.log(i);
   //CAMERA
   //CLICK MOUSE TO LOOK AROUND
   if (lockOn) {
