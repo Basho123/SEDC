@@ -92,22 +92,39 @@ let lockOn = false;
 let materialVariables = {
 
 }
+//#region INTERSECTS
+function intersects(
+  firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
+  secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
+) {
+  rightSideFirst = firstRectPosX + firstRectWidth / 2;
+  leftSideFirst = firstRectPosX - firstRectWidth / 2;
+  bottomSideFirst = firstRectPosY + firstRectHeight / 2;
+  topSideFirst = firstRectPosY - firstRectHeight / 2;
+  frontSideFirst = firstRectPosZ + firstRectDepth / 2; //DEPTH
+  backSideFirst = firstRectPosZ - firstRectDepth / 2; //DEPTH
 
-class Box {
-  constructor(x, y, z, sizeX=1000, sizeY=100, sizeZ=200) {
-    this.pos = createVector(x, y, z); //POSITION
-    this.sizeX = sizeX;  //SIZE
-    this.sizeY = sizeY;
-    this.sizeZ = sizeZ;
+  rightSideSecond = secondRectPosX + secondRectWidth / 2;
+  leftSideSecond = secondRectPosX - secondRectWidth / 2;
+  bottomSideSecond = secondRectPosY + secondRectHeight / 2;
+  topSideSecond = secondRectPosY - secondRectHeight / 2;
+  frontSideSecond = secondRectPosZ + secondRectDepth / 2; //DEPTH
+  backSideSecond = secondRectPosZ - secondRectDepth / 2; //DEPTH
+
+  if (
+    rightSideFirst > leftSideSecond &&
+    leftSideFirst < rightSideSecond &&
+    bottomSideFirst > topSideSecond &&
+    topSideFirst < bottomSideSecond &&
+    frontSideFirst > backSideSecond &&
+    backSideFirst < frontSideSecond
+  ) {
+    return true;
   }
-  show() {
-    push()
-    rotateX(PI/2)
-    translate(this.pos.x, this.pos.y, this.pos.z)
-    box(this.sizeX,this.sizeY,this.sizeZ)
-    pop()
-  }
+  return false;
 }
+
+//#endregion
 
 //#region CAMERA
 class Camera {
@@ -137,15 +154,19 @@ class Environment {
   }
 }
 class Elements extends Environment {
-  constructor(x, y, z, radius) {
+  constructor(positionX, positionY, positionZ, sizeX = 100, sizeY = 100, sizeZ = 100, color = [255, 255, 255], radius) {
     super();
-    this.pos = createVector(x, y, z);
+    this.pos = createVector(positionX, positionY, positionZ);
     this.vel = createVector();
     this.acc = createVector();
 
     this.rot = createVector();
     this.ang = createVector();
-    this.acc2 = createVector();
+    this.acc2 = createVector();  
+
+    this.size = createVector(sizeX, sizeY, sizeZ)
+    this.collisionColor = color;
+    this.collisionOffset = createVector();
 
     this.radius = radius;
 
@@ -164,6 +185,17 @@ class Elements extends Environment {
 
     this.isDead = false;
   }
+
+  showCollisionBox() {
+    push()
+    fill(this.collisionColor)
+    translate(this.pos.x + this.collisionOffset.x, this.pos.y + this.collisionOffset.y, this.pos.z + this.collisionOffset.z)
+    // rotateY(-this.rot.x/100)
+    box(this.size.x, this.size.y, this.size.z)
+    pop()
+  }
+
+
   applyForce(force) {
     this.acc.add(force);
   }
@@ -295,7 +327,7 @@ class Collision extends Environment {
     this.objects = [];
   }
 
-  collision() {
+  measureDistance() {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
@@ -448,6 +480,67 @@ class Collision extends Environment {
     }
     else null
   }
+
+
+  collision() {
+    if (this.objects.length > 0) {
+      for (let i = 0; i < this.objects.length; i++) {
+        for (let g = i + 1; g < this.objects.length; g++) {
+          if (this.objects[i].setCollision === true && this.objects[g].setCollision) {
+            let intersect = intersects(
+              this.objects[i].pos.x + this.objects[i].collisionOffset.x,
+              this.objects[i].pos.y + this.objects[i].collisionOffset.y,
+              this.objects[i].pos.z + this.objects[i].collisionOffset.z,
+              this.objects[i].size.x,
+              this.objects[i].size.y,
+              this.objects[i].size.z,
+              this.objects[g].pos.x + this.objects[g].collisionOffset.x,
+              this.objects[g].pos.y + this.objects[g].collisionOffset.y,
+              this.objects[g].pos.z + this.objects[g].collisionOffset.z,
+              this.objects[g].size.x,
+              this.objects[g].size.y,
+              this.objects[g].size.z
+            )
+            if (intersect === true) {
+              this.objects[i].showCollisionBox();
+              this.objects[g].showCollisionBox();
+
+              if ((this.objects[g] instanceof Shell)) {
+
+                this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 15
+                this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 15
+
+                this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
+
+                this.objects[i].ang.x = 0.01 * random(1, 3)
+                this.objects[i].ang.z = 0.01 * random(1, 3)
+
+                this.objects[i].isDead = true;
+                this.objects[g].isDead = true;
+
+                this.objects[i].setCollision = false;
+
+                //SHELL IS ALWAYS SECOND OBJECT BECAUSE IS CREATED LATER IN ARRAY
+                this.objects.splice(g, 1);
+
+
+                //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
+                setTimeout(() => {
+                  this.objects.splice(i, 1);
+
+                }, 3000)
+
+                continue;
+              }
+            }
+            else null;
+          }
+          else null;
+        }
+      }
+    }
+    else null;
+  }
 }
 class Terrain extends Environment {
   constructor(positionX = 1000, positionZ = 1000, sizeX = 1000, sizeZ = 1000, texture) {
@@ -535,10 +628,16 @@ class Tree extends Elements {
     this.rot.y = random(0, 4);
     this.rot.z = rotateZ;
 
-    this.radius = 100;
+
+    // this.radius = 100;
 
     this.scale = random(0.05, 0.5)
     this.colided = false;
+
+
+    this.size.x = 75 * this.scale;;
+    this.size.y = 2000 * this.scale;
+    this.size.z = 75 * this.scale;
 
     this.texture = ``;
     this.model = ``;
@@ -661,6 +760,10 @@ class Walls extends Elements {
     this.rot.y = rotateY;
     this.rot.z = rotateZ;
 
+    this.size.x = 10;
+    this.size.y = 100;
+    this.size.z = 100;
+
     this.length = 200;
     this.width = 5;
     this.radius = 100;
@@ -691,10 +794,17 @@ class Walls extends Elements {
 }
 class Tank extends Elements {
   constructor(x, y, z, playerTank = false, driverName = `AI`, radius, AIActive = `AIDisabled`) {
-    super(x, y, z, radius);
+    super(x, y, z);
+
+    this.size.x = 100;
+    this.size.y = 110;
+    this.size.z = 100;
+
+    this.collisionOffset.y = 100;
 
     this.radius = 80;
     this.mass = 20; // MINIMUM 1, MAXIMUM ~20
+    // this.size = createVector();w    
 
     this.turretAng = createVector()
     this.turretVel = createVector()
@@ -708,7 +818,19 @@ class Tank extends Elements {
     this.scale = 0.6;
   }
 
-  show() {
+  show() {    
+
+    //CALCULATE COLLISION BOX CHANGE ON ROTATION
+    let angleConvert = map(this.rot.x, -312.5, 312.5, -3.125, 3.125)
+    angleConvert < 0 ? angleConvert *= -1 : null;
+
+    this.size.x = sin(angleConvert) * 150 + 100
+    this.size.z = -sin(angleConvert) * 130 + 210
+
+    // console.log(`sin`,Math.sin(test));    
+    // console.log(`cos`,Math.cos(test));    
+
+
     if (this.rot.x > 312.5) {
       this.rot.x = -312.5
     }
@@ -722,8 +844,6 @@ class Tank extends Elements {
     else if (this.turretAng.y <= -3.125) {
       this.turretAng.y = 3.125
     }
-
-
     //BODY
     push();
     translate(this.pos.x, this.pos.y + 100, this.pos.z);
@@ -785,8 +905,14 @@ class Shell extends Tank {
   constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `HESH`) {
     super();
     this.pos.x = x;
-    this.pos.y = y;
+    this.pos.y = y+50;
     this.pos.z = z;
+
+    this.collisionOffset.y = 20;
+
+    this.size.x = 10;
+    this.size.y = 10;
+    this.size.z = 10;
 
     this.rot.x = rotX;
     this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
@@ -812,9 +938,10 @@ class Shell extends Tank {
 
   }
 
-  show() {
+  show() {   
+    // this.pos.y =  this.pos.y - 60
     push();
-    translate(this.pos.x, this.pos.y + 60, this.pos.z);
+    translate(this.pos.x, this.pos.y, this.pos.z);
     rotateY(-this.rot.x / 100);
     rotateX(this.vel.y / 75)
     scale(1);
@@ -901,15 +1028,12 @@ function setup() {
   //CREATE CAMERA
   camera.body = createCamera();
 
-  // setInterval(() => {
-  //   console.log(camera);
-  // }, 1000)
 
   //TEST /////////////////////
   ////////////////////////////////////////
 
-  box1 = new Box(0, 0, 0, 300,500,400)
-  box2 = new Box(0, 0,0, 200,300,700)
+  // box1 = new Box(0, 0, 0, 300, 500, 400)
+  // box2 = new Box(0, 0, 0, 200, 300, 700)
 
   ///////////////////////////////
 
@@ -921,6 +1045,12 @@ function setup() {
 
   //CREATE PLAYER TANK
   pTank = new Tank(-300, -100, 0, true);
+  // setInterval(() => {
+  //   let test = map(pTank.rot.x,-312.5,312.5,-PI,PI)
+  //   console.log(`sin`,Math.sin(test));    
+  //   console.log(`cos`,Math.cos(test));    
+  // }, 3000)
+
 
   //CREATE ENEMY TANKS
   collisionClass.objects.push(pTank);
@@ -958,102 +1088,6 @@ function setup() {
 }
 //#endregion
 
-//#region INTERSECTS
-function intersects(
-  firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
-  secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
-) {
-  // let topLeftFirst = [];
-  // let topRightFirst = [];
-  // let bottomLeftFirst = [];
-  // let bottomRightFirst = [];
-
-  // let topLeftSecond = [];
-  // let topRightSecond = [];
-  // let bottomLeftSecond = [];
-  // let bottomRightSecond = [];
-
-  rightSideFirst = firstRectPosX + firstRectWidth / 2;
-  leftSideFirst = firstRectPosX - firstRectWidth / 2;
-  bottomSideFirst = firstRectPosY + firstRectHeight / 2;
-  topSideFirst = firstRectPosY - firstRectHeight / 2;
-  frontSideFirst = firstRectPosZ + firstRectDepth / 2; //DEPTH
-  backSideFirst = firstRectPosZ - firstRectDepth / 2; //DEPTH
-
-  rightSideSecond = secondRectPosX + secondRectWidth / 2;
-  leftSideSecond = secondRectPosX - secondRectWidth / 2;
-  bottomSideSecond = secondRectPosY + secondRectHeight / 2;
-  topSideSecond = secondRectPosY - secondRectHeight / 2;
-  frontSideSecond = secondRectPosZ + secondRectDepth / 2; //DEPTH
-  backSideSecond = secondRectPosZ - secondRectDepth / 2; //DEPTH
-
-
-  // topLeftFirst = [firstRectPosX - firstRectWidth / 2, firstRectPosY - firstRectHeight / 2]
-  // topRightFirst = [firstRectPosX + firstRectWidth / 2, firstRectPosY - firstRectHeight / 2]
-  // bottomLeftFirst = [firstRectPosX - firstRectWidth / 2, firstRectPosY + firstRectHeight / 2]
-  // bottomRightFirst = [firstRectPosX + firstRectWidth / 2, firstRectPosY + firstRectHeight / 2]
-
-  // topLeftSecond = [secondRectPosX - secondRectWidth / 2, secondRectPosY - secondRectHeight / 2]
-  // topRightSecond = [secondRectPosX + secondRectWidth / 2, secondRectPosY - secondRectHeight / 2]
-  // bottomLeftSecond = [secondRectPosX - secondRectWidth / 2, secondRectPosY + secondRectHeight / 2]
-  // bottomRightSecond = [secondRectPosX + secondRectWidth / 2, secondRectPosY + secondRectHeight / 2]
-
-  if (
-    // bottomLeftFirst[0] < topRightSecond[0] && bottomLeftFirst[1] > topRightSecond[1] &&
-    // bottomLeftFirst[0] > topLeftSecond[0] && bottomLeftFirst[1] > topLeftSecond[1] &&
-    // bottomLeftFirst[0] < bottomRightSecond[0] && bottomLeftFirst[1] < bottomRightSecond[1] &&
-    // bottomLeftFirst[0] > bottomLeftSecond[0] && bottomLeftFirst[1] < bottomLeftSecond[1] ||
-
-    // topLeftFirst[0] < bottomRightSecond[0] && topLeftFirst[1] < bottomRightSecond[1] &&
-    // topLeftFirst[0] < topRightSecond[0] && topLeftFirst[1] > topRightSecond[1] &&
-    // topLeftFirst[0] > bottomLeftSecond[0] && topLeftFirst[1] < bottomLeftSecond[1] &&
-    // topLeftFirst[0] > topLeftSecond[0] && topLeftFirst[1] > topLeftSecond[1] ||
-
-    // topRightFirst[0] > bottomLeftSecond[0] && topRightFirst[1] < bottomLeftSecond[1] &&
-    // topRightFirst[0] > topLeftSecond[0] && topRightFirst[1] > topLeftSecond[1] &&
-    // topRightFirst[0] < topRightSecond[0] && topRightFirst[1] > topRightSecond[1] &&
-    // topRightFirst[0] < bottomRightSecond[0] && topRightFirst[1] < bottomRightSecond[1] ||
-
-    // bottomRightFirst[0] > topLeftSecond[0] && bottomRightFirst[1] > topLeftSecond[1] &&
-    // bottomRightFirst[0] > bottomLeftSecond[0] && bottomRightFirst[1] < bottomLeftSecond[1] &&
-    // bottomRightFirst[0] < topRightSecond[1] && bottomRightFirst[1] > topRightSecond[1] &&
-    // bottomRightFirst[0] < bottomRightSecond[1] && bottomRightFirst[1] < bottomRightSecond[1] ||
-
-
-    // bottomLeftSecond[0] < topRightFirst[0] && bottomLeftSecond[1] > topRightFirst[1] &&
-    // bottomLeftSecond[0] > topLeftFirst[0] && bottomLeftSecond[1] > topLeftFirst[1] &&
-    // bottomLeftSecond[0] < bottomRightFirst[0] && bottomLeftSecond[1] < bottomRightFirst[1] &&
-    // bottomLeftSecond[0] > bottomLeftFirst[0] && bottomLeftSecond[1] < bottomLeftFirst[1] ||
-
-    // topLeftSecond[0] < bottomRightFirst[0] && topLeftSecond[1] < bottomRightFirst[1] &&
-    // topLeftSecond[0] < topRightFirst[0] && topLeftSecond[1] > topRightFirst[1] &&
-    // topLeftSecond[0] > bottomLeftFirst[0] && topLeftSecond[1] < bottomLeftFirst[1] &&
-    // topLeftSecond[0] > topLeftFirst[0] && topLeftSecond[1] > topLeftFirst[1] ||
-
-    // topRightSecond[0] > bottomLeftFirst[0] && topRightSecond[1] < bottomLeftFirst[1] &&
-    // topRightSecond[0] > topLeftFirst[0] && topRightSecond[1] > topLeftFirst[1] &&
-    // topRightSecond[0] < topRightFirst[0] && topRightSecond[1] > topRightFirst[1] &&
-    // topRightSecond[0] < bottomRightFirst[0] && topRightSecond[1] < bottomRightFirst[1] ||
-
-    // bottomRightSecond[0] > topLeftFirst[0] && bottomRightSecond[1] > topLeftFirst[1] &&
-    // bottomRightSecond[0] > bottomLeftFirst[0] && bottomRightSecond[1] < bottomLeftFirst[1] &&
-    // bottomRightSecond[0] < topRightFirst[1] && bottomRightSecond[1] > topRightFirst[1] &&
-    // bottomRightSecond[0] < bottomRightFirst[1] && bottomRightSecond[1] < bottomRightFirst[1] ||
-
-    rightSideFirst > leftSideSecond &&
-    leftSideFirst < rightSideSecond &&
-    bottomSideFirst > topSideSecond && 
-    topSideFirst < bottomSideSecond &&
-    frontSideFirst > backSideSecond &&
-    backSideFirst < frontSideSecond
-  ) {
-    return true;
-  }
-  return false;
-}
-
-//#endregion
-
 //#region DRAW
 function draw() {
 
@@ -1062,42 +1096,28 @@ function draw() {
   // frameCount(1);
   //frameRate(0.0025)  
   // THIS IS TEMPORARY
-  camera.body.eyeX = 0
-  camera.body.eyeY = -3197
-  camera.body.eyeZ = 2589
-  camera.mode = 0;
+  // camera.body.eyeX = 0
+  // camera.body.eyeY = -3197
+  // camera.body.eyeZ = 2589
+  // camera.mode = 0;
   // ////////
 
-
+  // pTank.showCollisionBox();
   //LIGHT
   ambientLight(255);
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
+
   collisionClass.collision();
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
 
-  box1.show();
-  box2.show();
-  box1.pos.x = mouseX*3-1200;
-  box1.pos.z = mouseY*3-1200;
+  // box1.showCollisionBox();
+  // box2.showCollisionBox();
+  // box1.pos.x = mouseX * 3 - 1200;
+  // box1.pos.z = mouseY * 3 - 1200;
 
-  let i = intersects(
-    box1.pos.x,
-    box1.pos.y,
-    box1.pos.z,
-    box1.sizeX,
-    box1.sizeY,
-    box1.sizeZ,
-    box2.pos.x,
-    box2.pos.y,
-    box2.pos.z,
-    box2.sizeX,
-    box2.sizeY,
-    box2.sizeZ
-    )
-  console.log(i);
   //CAMERA
   //CLICK MOUSE TO LOOK AROUND
   if (lockOn) {
@@ -1189,18 +1209,12 @@ function keyCommands() {
 //#endregion
 
 
-
-
-
-
 //CHANGE CAMERA
 keyPressed = () => {
   keyCode === 67 ? camera.mode++ : null;  //C KEY
   camera.mode === 4 ? camera.mode = 0 : null; //RESET CAMERA TO FIRST MODE
 
   keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY
-
-
 }
 
 
