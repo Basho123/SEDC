@@ -1027,7 +1027,8 @@ function setup() {
 
   //CREATE CAMERA
   camera.body = createCamera();
-
+  // perspective(PI/4, width/height)
+  
 
   //TEST /////////////////////
   ////////////////////////////////////////
