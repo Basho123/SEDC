@@ -3,7 +3,8 @@ let collisionClass;
 let collision = false;
 let sine;
 
-const globalExistenceDistanceLimit = 5000;
+const globalExistenceDistanceLimit = 25000;
+const globalBoundry = 8000;
 
 // let terrain = [];
 let terrain;
@@ -15,7 +16,6 @@ let m1a2Cannon;
 
 let box1;
 let box2;
-
 
 let m1a2BodyTexture;
 let m1a2TurretTexture;
@@ -46,20 +46,6 @@ let complexTree = {
     flowers: ``,
   }
 }
-
-let AI = {
-  forward: false,
-  backward: false,
-  rotateLeft: false,
-  rotateRight: false,
-
-  turretLeft: true,
-  turretRight: false,
-
-  cannonUp: false,
-  cannonDown: false,
-}
-
 
 let barbedWire;
 let grass;
@@ -94,40 +80,43 @@ let lockOn = false;
 let materialVariables = {
 
 }
-//#endregion
 
-//#region INTERSECTS
-function intersects(
-  firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
-  secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
-) {
-  rightSideFirst = firstRectPosX + firstRectWidth / 2;
-  leftSideFirst = firstRectPosX - firstRectWidth / 2;
-  bottomSideFirst = firstRectPosY + firstRectHeight / 2;
-  topSideFirst = firstRectPosY - firstRectHeight / 2;
-  frontSideFirst = firstRectPosZ + firstRectDepth / 2; //DEPTH
-  backSideFirst = firstRectPosZ - firstRectDepth / 2; //DEPTH
 
-  rightSideSecond = secondRectPosX + secondRectWidth / 2;
-  leftSideSecond = secondRectPosX - secondRectWidth / 2;
-  bottomSideSecond = secondRectPosY + secondRectHeight / 2;
-  topSideSecond = secondRectPosY - secondRectHeight / 2;
-  frontSideSecond = secondRectPosZ + secondRectDepth / 2; //DEPTH
-  backSideSecond = secondRectPosZ - secondRectDepth / 2; //DEPTH
+let randomState = {
+  randomNumber: Math.random() * 10000,
+  randomStateArray: [true, false],
 
-  if (
-    rightSideFirst > leftSideSecond &&
-    leftSideFirst < rightSideSecond &&
-    bottomSideFirst > topSideSecond &&
-    topSideFirst < bottomSideSecond &&
-    frontSideFirst > backSideSecond &&
-    backSideFirst < frontSideSecond
-  ) {
-    return true;
-  }
-  return false;
+  randomState1: false,
+  randomState2: false,
+  randomState3: false,
+  randomState4: false,
+  randomState5: false,
+  randomState6: false,
+  randomState7: false,
+  randomState8: false,
+  randomState9: false,
+  randomState10: false,
 }
+let { randomStateArray, randomState1, randomState2, randomState3, randomState4, randomState5, randomState6, randomState7, randomState8, randomState9, randomState10 } = randomState;
 
+setInterval(() => {
+  let randomNumber = Math.random() * 100
+  if (randomNumber < 5) {
+    randomState1 = true;
+    setTimeout(() => { randomState1 = false }, randomNumber * 100)
+  }
+}, 100)
+setInterval(() => { randomState2 = randomStateArray[Math.floor(Math.random() * 2)] }, 500)
+setInterval(() => { randomState3 = randomStateArray[Math.floor(Math.random() * 2)] }, 1000)
+setInterval(() => { randomState4 = randomStateArray[Math.floor(Math.random() * 2)] }, 2000)
+setInterval(() => { randomState5 = randomStateArray[Math.floor(Math.random() * 2)] }, 4000)
+setInterval(() => { randomState6 = randomStateArray[Math.floor(Math.random() * 2)] }, 6000)
+setInterval(() => { randomState7 = randomStateArray[Math.floor(Math.random() * 2)] }, 7000)
+setInterval(() => { randomState8 = randomStateArray[Math.floor(Math.random() * 2)] }, 8000)
+setInterval(() => { randomState9 = randomStateArray[Math.floor(Math.random() * 2)] }, 9000)
+setInterval(() => { randomState10 = randomStateArray[Math.floor(Math.random() * 2)] }, 12000)
+// console.log(randomNumber.three);
+//#endregion
 //#endregion
 
 //#region CAMERA
@@ -157,10 +146,9 @@ class Environment {
     this.sky;
   }
 }
-class Elements extends p5.Vector {
+class Elements extends Environment {
   constructor(positionX, positionY, positionZ, sizeX = 100, sizeY = 100, sizeZ = 100, color = [255, 255, 255], radius = 100) {
-    super(positionX, positionZ, radius);
-
+    super();
     this.pos = createVector(positionX, positionY, positionZ);
     this.vel = createVector();
     this.acc = createVector();
@@ -176,9 +164,6 @@ class Elements extends p5.Vector {
     this.radius = radius;
     this.r = radius;
 
-    this.gravity = [0, 0.981, 0];
-    this.sky;
-
     this.dirX;
     this.dirY;
 
@@ -187,14 +172,14 @@ class Elements extends p5.Vector {
     this.setCollision = true;
     this.colided = false;
 
-    this.AIActive = `AIDisabled`;
+    this.AIActive = false;
     this.id = random(999999999)
 
     this.objectType = `undefined`;
     this.playerTank = false;
     this.mass = 1;
 
-    this.seeingDistance = 1000;
+    this.isTank = false;
 
     this.maxSpeed = 4;
     this.maxForce = 0.25;
@@ -223,98 +208,57 @@ class Elements extends p5.Vector {
     this.acc.add(force);
   }
   playerControlled() {
-    keyIsDown(104) ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1; // NUM 8 KEY CANNON UP
-    keyIsDown(98) ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;  // NUM 2 KEY CANNON DOWN
+    if (this.isDead === false) {
+      keyIsDown(104) ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1; // NUM 8 KEY CANNON UP
+      keyIsDown(98) ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;  // NUM 2 KEY CANNON DOWN
 
-    keyIsDown(100) ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;    // NUM 4 KEY TURRET LEFT
-    keyIsDown(102) ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;    // NUM 6 KEY TURRET RIGHT
+      keyIsDown(100) ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;    // NUM 4 KEY TURRET LEFT
+      keyIsDown(102) ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;    // NUM 6 KEY TURRET RIGHT
 
-    keyIsDown(65) ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                 // A KEY TANK ROTATE LEFT    
-    keyIsDown(68) ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // D KEY TANK ROTATE RIGHT
+      keyIsDown(65) ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                 // A KEY TANK ROTATE LEFT    
+      keyIsDown(68) ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // D KEY TANK ROTATE RIGHT
 
-    if (keyIsDown(87)) {                  // W KEY TANK FORWARD
-      this.acc.z = -this.dirY
-      this.acc.x = this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
+      if (keyIsDown(87)) {                  // W KEY TANK FORWARD
+        this.acc.z = -this.dirY
+        this.acc.x = this.dirX;
+      } else {
+        this.vel.z /= 1.1;
+        this.vel.x /= 1.1;
+      }
 
-    if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
-      this.acc.z = this.dirY;
-      this.acc.x = -this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
+      if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
+        this.acc.z = this.dirY;
+        this.acc.x = -this.dirX;
+      } else {
+        this.vel.z /= 1.1;
+        this.vel.x /= 1.1;
+      }
 
-    this.vel.limit(30);
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-    this.acc.set(0);
+      this.vel.limit(30);
+      this.vel.add(this.acc);
+      this.pos.add(this.vel);
+      this.acc.set(0);
 
-    this.turretVel.limit(0.045);
-    this.turretVel.add(this.turretAcc)
-    this.turretAng.add(this.turretVel)
-    this.turretAcc.set(0)
+      this.turretVel.limit(0.045);
+      this.turretVel.add(this.turretAcc)
+      this.turretAng.add(this.turretVel)
+      this.turretAcc.set(0)
 
-    this.rot.limit(500);
-    this.ang.add(this.acc2);
-    this.rot.add(this.ang);
-    this.acc2.set(0);
+      this.rot.limit(500);
+      this.ang.add(this.acc2);
+      this.rot.add(this.ang);
+      this.acc2.set(0);
 
-    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+      this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
+      this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+    } else null;
   }
 
-  AIControlled() {
-    AI.cannonUp ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1;     // AI CANNON UP
-    AI.cannonDown ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;   // AI CANNON DOWN
 
-    AI.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;      // AI TURRET LEFT
-    AI.turretRight ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;     // AI TURRET RIGHT
-
-    AI.rotateLeft ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                  // AI ROTATE LEFT    
-    AI.rotateRight ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // AI ROTATE RIGHT
-
-
-    if (AI.forward === true) {                                                  // AI FORWARD
-      this.acc.z = -this.dirY
-      this.acc.x = this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
-
-    if (AI.backward) {                  // AI BACKWARD
-      this.acc.z = this.dirY;
-      this.acc.x = -this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
-
-    this.vel.limit(30);
-    this.vel.add(this.acc);
-    this.pos.add(this.vel);
-    this.acc.set(0);
-
-    this.turretVel.limit(0.045);
-    this.turretVel.add(this.turretAcc)
-    this.turretAng.add(this.turretVel)
-    this.turretAcc.set(0)
-
-    this.rot.limit(500);
-    this.ang.add(this.acc2);
-    this.rot.add(this.ang);
-    this.acc2.set(0);
-
-    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
-  }
 
   updateOther() {
-    this.vel.limit(100);
+    if (this.AIActive === false)
+      this.vel.limit(100);
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     this.acc.set(0);
@@ -336,6 +280,8 @@ class Elements extends p5.Vector {
       this.vel.y /= 1.02
       this.vel.z /= 1.02
     }
+
+
   }
 
   edges() {
@@ -355,160 +301,53 @@ class Collision extends Environment {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
-          if (this.objects[i].setCollision === true && this.objects[g].setCollision === true) {
+          if (this.objects[i].playerTank && this.objects[g].isTank) {
+            let distance = dist(
+              this.objects[i].pos.x,
+              this.objects[i].pos.y,
+              this.objects[i].pos.z,
+              this.objects[g].pos.x,
+              this.objects[g].pos.y,
+              this.objects[g].pos.z);
 
-            //IF SHELL FALLS ON GROUND TO SELF-DESTRY
-            if ((this.objects[g] instanceof Shell) && this.objects[g].pos.y >= 0) {
-              this.objects.splice(g, 1);
-              continue;
+              //THIS CORRECTS THE ENEMY TANK VERTICAL AIM
+            if (distance < (this.objects[i].radius + this.objects[g].radius) * 10) {
+              this.objects[g].turretAng.x = -distance/15000
             }
-            //ELSE IF SHELL IS IN THE AIR, CHECK THE DISTANCE
-            else {
-              let distance = dist(
-                this.objects[i].pos.x,
-                this.objects[i].pos.y,
-                this.objects[i].pos.z,
-                this.objects[g].pos.x,
-                this.objects[g].pos.y,
-                this.objects[g].pos.z);
-              if (distance < (this.objects[i].radius + this.objects[g].radius) * 1.05) {
-
-                //IF SHELL HITS TARGET
-                if ((this.objects[g] instanceof Shell)) {
-
-                  this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 15
-                  this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 15
-
-                  this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
-
-                  this.objects[i].ang.x = 0.01 * random(1, 3)
-                  this.objects[i].ang.z = 0.01 * random(1, 3)
-
-                  this.objects[i].isDead = true;
-                  this.objects[g].isDead = true;
-
-                  this.objects[i].setCollision = false;
-
-                  //SHELL IS ALWAYS SECOND OBJECT BECAUSE IS CREATED LATER IN ARRAY
-                  this.objects.splice(g, 1);
-
-
-                  //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
-                  setTimeout(() => {
-                    this.objects.splice(i, 1);
-
-                  }, 3000)
-
-                  continue;
-                }
-
-                else if ((this.objects[i] instanceof Tank) === (this.objects[g] instanceof Tank)) {
-                  this.objects[i].colided = true;
-                  this.objects[g].colided = true;
-
-                  this.objects[i].vel.x /= this.objects[g].mass
-                  this.objects[i].vel.y /= this.objects[g].mass
-                  this.objects[i].vel.z /= this.objects[g].mass
-
-
-                  if (distance < (this.objects[i].radius + this.objects[g].radius)) {
-                    this.objects[g].vel.x = this.objects[i].vel.x * this.objects[g].mass
-                    this.objects[g].vel.y = this.objects[i].vel.y * this.objects[g].mass
-                    this.objects[g].vel.z = this.objects[i].vel.z * this.objects[g].mass
-                  }
-                  //THIS HELPS SO THE TANKS DONT STICK
-                  this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
-                  this.objects[g].pos.y -= ((this.objects[i].pos.y - this.objects[g].pos.y) / 500)
-                  this.objects[g].pos.z -= ((this.objects[i].pos.z - this.objects[g].pos.z) / 500)
-                }
-
-                //CHECK THE COLLISION FOR TREES
-                if ((this.objects[i] instanceof Tree) || (this.objects[g] instanceof Tree)) {
-                  this.objects[i].colided = true;
-                  this.objects[g].colided = true;
-
-                  this.objects[i].vel.x /= this.objects[g].mass
-                  this.objects[i].vel.y /= this.objects[g].mass
-                  this.objects[i].vel.z /= this.objects[g].mass
-
-                  if (distance < (this.objects[i].radius + this.objects[g].radius)) {
-                    this.objects[g].vel.x = this.objects[i].vel.x * this.objects[g].mass
-                    this.objects[g].vel.y = this.objects[i].vel.y * this.objects[g].mass
-                    this.objects[g].vel.z = this.objects[i].vel.z * this.objects[g].mass
-
-                    //WHEN TREE IS COLLIDED, IT FLIPS OVER, AND THERE IS A DIFFERENCE BETWEEN LARGE AND SMALL TREE BECAUSE OF MASS, AND IF THE TREE IS FLIPPED OVER LOT, I FLIPS EVEN FASTER
-                    this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
-
-                    if (this.objects[g].rot.z > 1.5) {
-                      this.objects[g].setCollision = false;
-
-                      this.objects[g].vel.x = 0;
-                      this.objects[g].vel.y = 0;
-                      this.objects[g].vel.z = 0;
-                      //this.objects.splice(g, 1);
-                    }
-                  }
-                  //THIS HELPS SO THE TANKS DONT STICK
-                  this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
-                  this.objects[g].pos.y -= ((this.objects[i].pos.y - this.objects[g].pos.y) / 500)
-                  this.objects[g].pos.z -= ((this.objects[i].pos.z - this.objects[g].pos.z) / 500)
-                }
-
-                //WALLS
-                if ((this.objects[i] instanceof Walls) || (this.objects[g] instanceof Walls)) {
-                  this.objects[i].colided = true;
-                  this.objects[g].colided = true;
-
-                  this.objects[i].vel.x /= this.objects[g].mass
-                  this.objects[i].vel.y /= this.objects[g].mass
-                  this.objects[i].vel.z /= this.objects[g].mass
-
-                  if (distance < (this.objects[i].radius + this.objects[g].radius)) {
-                    this.objects[g].vel.x = this.objects[i].vel.x * this.objects[g].mass
-                    this.objects[g].vel.y = this.objects[i].vel.y * this.objects[g].mass
-                    this.objects[g].vel.z = this.objects[i].vel.z * this.objects[g].mass
-
-                    //WHEN WALL IS COLLIDED, IT FLIPS OVER SLOWLY
-                    this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
-
-                    if (this.objects[g].rot.z > 1.5) {
-                      this.objects[g].setCollision = false;
-
-                      this.objects[g].vel.x = 0;
-                      this.objects[g].vel.y = 0;
-                      this.objects[g].vel.z = 0;
-                      setTimeout(() => {
-                        this.objects.splice(g, 1);
-                      }, 30000)
-
-                    }
-
-                  }
-                  //THIS HELPS SO THE TANKS DONT STICK
-                  this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
-                  this.objects[g].pos.y -= ((this.objects[i].pos.y - this.objects[g].pos.y) / 500)
-                  this.objects[g].pos.z -= ((this.objects[i].pos.z - this.objects[g].pos.z) / 500)
-                }
-              }
-              else {
-                this.objects[i].colided = false;
-                this.objects[g].colided = false;
-
-                if ((this.objects[g] instanceof Shell) === false) {
-                  this.objects[g].vel.x /= 1.1
-                  this.objects[g].vel.y /= 1.1
-                  this.objects[g].vel.z /= 1.1
-                }
-                else null
-              }
-            }
-
           }
-          else null
         }
       }
     }
-    else null
+  }
+  static intersects(
+    firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
+    secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
+  ) {
+    let rightSideFirst = firstRectPosX + firstRectWidth / 2;
+    let leftSideFirst = firstRectPosX - firstRectWidth / 2;
+    let bottomSideFirst = firstRectPosY + firstRectHeight / 2;
+    let topSideFirst = firstRectPosY - firstRectHeight / 2;
+    let frontSideFirst = firstRectPosZ + firstRectDepth / 2; //DEPTH
+    let backSideFirst = firstRectPosZ - firstRectDepth / 2; //DEPTH
+
+    let rightSideSecond = secondRectPosX + secondRectWidth / 2;
+    let leftSideSecond = secondRectPosX - secondRectWidth / 2;
+    let bottomSideSecond = secondRectPosY + secondRectHeight / 2;
+    let topSideSecond = secondRectPosY - secondRectHeight / 2;
+    let frontSideSecond = secondRectPosZ + secondRectDepth / 2; //DEPTH
+    let backSideSecond = secondRectPosZ - secondRectDepth / 2; //DEPTH
+
+    if (
+      rightSideFirst > leftSideSecond &&
+      leftSideFirst < rightSideSecond &&
+      bottomSideFirst > topSideSecond &&
+      topSideFirst < bottomSideSecond &&
+      frontSideFirst > backSideSecond &&
+      backSideFirst < frontSideSecond
+    ) {
+      return true;
+    }
+    return false;
   }
 
 
@@ -517,6 +356,8 @@ class Collision extends Environment {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
           //CHECK IF OBJECT IS IN GLOBAL EXISTENCE BOUNDARIES FIRST
+
+
           if (
             this.objects[g].pos.x > globalExistenceDistanceLimit ||
             this.objects[g].pos.y >= 100 || //GROUND
@@ -528,9 +369,18 @@ class Collision extends Environment {
             break;
           }
 
+          else if (this.objects[i].isTank === true) {
+            this.objects[i].pos.x < -globalBoundry ? this.objects[i].pos.x += 10
+              : this.objects[i].pos.x > globalBoundry ? this.objects[i].pos.x -= 10 : null;
+
+            this.objects[i].pos.z < -globalBoundry ? this.objects[i].pos.z += 10
+              : this.objects[i].pos.z > globalBoundry ? this.objects[i].pos.z -= 10 : null;
+
+          }
+
           //COLLISION CHECK STARTS
-          else if (this.objects[i].setCollision && this.objects[g].setCollision) {
-            let intersect = intersects(
+          if (this.objects[i].setCollision && this.objects[g].setCollision) {
+            let intersect = Collision.intersects(
               this.objects[i].pos.x + this.objects[i].collisionOffset.x,
               this.objects[i].pos.y + this.objects[i].collisionOffset.y,
               this.objects[i].pos.z + this.objects[i].collisionOffset.z,
@@ -551,9 +401,10 @@ class Collision extends Environment {
 
               //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
               if ((this.objects[g] instanceof Shell)) {
+                this.objects[i].vel.limit(1000);
 
-                this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 150
-                this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 150
+                this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
+                this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
 
                 this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
 
@@ -601,17 +452,18 @@ class Collision extends Environment {
                     }
                     else null;
                   })
-            
+
                 } else continue;
 
                 this.objects.splice(g, 1);
-            
+
               }
               //#endregion 
 
               // #region 3. TANK INTERACTS WITH OBJECTS
 
               if ((this.objects[i] instanceof Tank)) {
+
                 this.objects[i].vel.x /= this.objects[g].mass
                 this.objects[i].vel.y /= this.objects[g].mass
                 this.objects[i].vel.z /= this.objects[g].mass
@@ -706,7 +558,8 @@ class Grass extends Elements {
     this.rotateX = rotateX;
     this.rotateY = rotateY;
     this.radius = 100;
-    this.scale = random(1, 30)
+    this.scale = random(1, 100)
+    // this.scale =1;
 
     this.setCollision = false;
     this.model = model;
@@ -714,7 +567,7 @@ class Grass extends Elements {
   }
   show() {
     push();
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    translate(this.pos.x, this.pos.y + 100 + this.scale / 4, this.pos.z);
     rotateY(this.rotateY);
     rotateX(this.rotateX);
     scale(this.scale);
@@ -856,8 +709,6 @@ class PalmTree extends Tree {
     pop();
   }
 }
-
-
 //#endregion
 class Walls extends Elements {
   constructor(x = 0, y = 50, z = 0, rotateY = 0, rotateX = 0, rotateZ = 0, texture = brick) {
@@ -903,6 +754,9 @@ class Tank extends Elements {
   constructor(x, y, z, playerTank = false, driverName = `AI`, radius, AIActive = `AIDisabled`) {
     super(x, y, z);
 
+    this.randomNumber = random(100);
+
+
     this.size.x = 100;
     this.size.y = 110;
     this.size.z = 100;
@@ -923,6 +777,7 @@ class Tank extends Elements {
     this.AIActive = AIActive;
 
     this.scale = 0.65;
+    this.isTank = true;
 
     this.id = `${this.playerTank ? `PlayerTank_ID` : `AITank_ID`}${random(0, 999999999)}`
 
@@ -932,6 +787,59 @@ class Tank extends Elements {
       }, 1000)
     }
 
+    this.ai = {
+      forward: false,
+      backward: false,
+      rotateLeft: false,
+      rotateRight: false,
+
+      turretLeft: true,
+      turretRight: false,
+
+      cannonUp: true,
+      cannonDown: false,
+    }
+    this.randomState = {
+      randomNumber: Math.random() * 10000,
+      randomStateArray: [true, false],
+
+      randomState1: false,
+      randomState2: false,
+      randomState3: false,
+      randomState4: false,
+      randomState5: false,
+      randomState6: false,
+      randomState7: false,
+      randomState8: false,
+      randomState9: false,
+      randomState10: false,
+    }
+
+    setInterval(() => {
+      let randomNumber = Math.random() * 100
+      if (randomNumber < 5) {
+        this.randomState.randomState1 = true;
+        setTimeout(() => { this.randomState.randomState1 = false }, randomNumber * 100)
+      }
+    }, 100)
+
+    setInterval(() => {
+      let randomNumber = Math.random() * 100
+      if (randomNumber < 10) {
+        this.randomState.randomState2 = true;
+        setTimeout(() => { this.randomState.randomState1 = false }, randomNumber * 100)
+      }
+    }, 1000)
+
+    setInterval(() => { this.randomState.randomState3 = randomStateArray[Math.floor(Math.random() * 2)] }, 1000)
+    setInterval(() => { this.randomState.randomState4 = randomStateArray[Math.floor(Math.random() * 2)] }, 2000)
+    setInterval(() => { this.randomState.randomState5 = randomStateArray[Math.floor(Math.random() * 2)] }, 4000)
+    setInterval(() => { this.randomState.randomState6 = randomStateArray[Math.floor(Math.random() * 2)] }, 6000)
+    setInterval(() => { this.randomState.randomState7 = randomStateArray[Math.floor(Math.random() * 2)] }, 7000)
+    setInterval(() => { this.randomState.randomState8 = randomStateArray[Math.floor(Math.random() * 2)] }, 8000)
+    setInterval(() => { this.randomState.randomState9 = randomStateArray[Math.floor(Math.random() * 2)] }, 9000)
+    setInterval(() => { this.randomState.randomState10 = randomStateArray[Math.floor(Math.random() * 2)] }, 12000)
+    // this.setAI();
   }
 
   show() {
@@ -1001,45 +909,110 @@ class Tank extends Elements {
     model(m1a2Cannon);
     pop();
   }
+  AIControlled() {
+    this.ai.cannonUp ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1;     // AI CANNON UP
+    this.ai.cannonDown ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;   // AI CANNON DOWN
+
+    this.ai.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;      // AI TURRET LEFT
+    this.ai.turretRight ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;     // AI TURRET RIGHT
+
+    this.ai.rotateLeft ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                  // AI ROTATE LEFT    
+    this.ai.rotateRight ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // AI ROTATE RIGHT
+
+    if (this.ai.forward === true) {                                                  // AI FORWARD
+      this.acc.z = -this.dirY
+      this.acc.x = this.dirX;
+    } else {
+      this.vel.z /= 1.1;
+      this.vel.x /= 1.1;
+    }
+
+    if (this.ai.backward) {                  // AI BACKWARD
+      this.acc.z = this.dirY;
+      this.acc.x = -this.dirX;
+    } else {
+      this.vel.z /= 1.1;
+      this.vel.x /= 1.1;
+    }
+
+    this.vel.limit(30);
+    this.vel.add(this.acc);
+    this.pos.add(this.vel);
+    this.acc.set(0);
+
+    this.turretVel.limit(0.045);
+    this.turretVel.add(this.turretAcc)
+    this.turretAng.add(this.turretVel)
+    this.turretAcc.set(0)
+
+    this.rot.limit(500);
+    this.ang.add(this.acc2);
+    this.rot.add(this.ang);
+    this.acc2.set(0);
+
+    this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+  }
+
+  setAI() {
+
+    this.ai.forward = this.randomState.randomState3;
+
+    this.randomState.randomState10 === false
+      ? this.ai.rotateLeft = this.randomState.randomState1
+      : this.ai.rotateRight = this.randomState.randomState1;
+
+    this.randomState.randomState10 === false
+      ? this.ai.turretRight = this.randomState.randomState6
+      : this.ai.turretLeft = this.randomState.randomState6;
+
+
+  }
 
   fire() {
-    Shell.isFired(
-      this.pos.x,
-      this.pos.y,
-      this.pos.z,
-      -this.turretAng.y * 100,
-      this.turretAng.x,
-      this.rot.z,
-      this.playerTank,
-      `HESH`,
-      this.id,
-    )
+    if (!this.isDead) {
+      Shell.isFired(
+        this.pos.x,
+        this.pos.y,
+        this.pos.z,
+        -this.turretAng.y * 100,
+        this.turretAng.x,
+        this.rot.z,
+        this.playerTank,
+        `HESH`,
+        this.id,
+      )
+    }
   }
   scanTurret() {
-    DummyShellTurret.isFired(
-      this.pos.x,
-      this.pos.y,
-      this.pos.z,
-      -this.turretAng.y * 100,
-      this.turretAng.x,
-      this.rot.z,
-      this.playerTank,
-      `TURRET_DUMMY`,
-      this.id
-    )
+    if (!this.isDead) {
+      DummyShellTurret.isFired(
+        this.pos.x,
+        this.pos.y,
+        this.pos.z,
+        -this.turretAng.y * 100,
+        this.turretAng.x,
+        this.rot.z,
+        this.playerTank,
+        `TURRET_DUMMY`,
+        this.id
+      )
+    }
   }
   scanBody() {
-    DummyShellBody.isFired(
-      this.pos.x,
-      this.pos.y,
-      this.pos.z,
-      this.rot.x,
-      this.rot.y,
-      this.rot.z,
-      this.playerTank,
-      `BODY_DUMMY`,
-      this.id
-    )
+    if (!this.isDead) {
+      DummyShellBody.isFired(
+        this.pos.x,
+        this.pos.y,
+        this.pos.z,
+        this.rot.x,
+        this.rot.y,
+        this.rot.z,
+        this.playerTank,
+        `BODY_DUMMY`,
+        this.id
+      )
+    }
   }
 
 }
@@ -1051,6 +1024,7 @@ class Shell extends Tank {
     this.pos.z = z;
 
     this.id = id;
+    this.isTank = false;
 
     this.collisionOffset.y = -10;
     this.objectType = `shell`;
@@ -1062,7 +1036,7 @@ class Shell extends Tank {
     this.rot.x = rotX;
     this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
     this.rot.z = rotZ;
-
+    this.AIActive = false;
     this.radius = 10;
 
     this.vel.limit(1000)
@@ -1114,6 +1088,9 @@ class DummyShellTurret extends Tank {
     this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
     this.rot.z = rotZ;
 
+    this.AIActive = false;
+    this.isTank = false;
+
     this.id = id;
 
     this.objectType = `dummyShellTurret`;
@@ -1129,12 +1106,6 @@ class DummyShellTurret extends Tank {
     this.playerShell = playerTank;
 
     this.setCollision = true;
-
-    //SO IT DONT COLLIDES WITH PARENT OBJECT
-    setTimeout(() => {
-      this.setCollision = true
-    }, 100);
-
   }
 
   show() {
@@ -1167,6 +1138,8 @@ class DummyShellBody extends Tank {
 
     this.collisionOffset.y = -10;
 
+    this.AIActive = false;
+
     this.size.x = 100;
     this.size.y = 100;
     this.size.z = 100;
@@ -1175,6 +1148,8 @@ class DummyShellBody extends Tank {
     this.rot.z = rotZ;
 
     this.radius = 10;
+    this.isTank = false;
+
 
     this.vel.limit(1000)
 
@@ -1282,16 +1257,14 @@ function setup() {
 
   createCanvas(windowWidth, windowHeight, WEBGL);
 
-
-
   //CREATE CAMERA
   camera.body = createCamera();
-  perspective(PI / 2.3, width / height, 0.01, 25000)
+  perspective(PI / 2.3, width / height, 0.01, 35000)
 
 
   //TEST /////////////////////
   ////////////////////////////////////////
-
+  5
   // box1 = new Box(0, 0, 0, 300, 500, 400)
   // box2 = new Box(0, 0, 0, 200, 300, 700)
 
@@ -1302,24 +1275,29 @@ function setup() {
   environment = new Environment();
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
-
   //CREATE PLAYER TANK
   pTank = new Tank(-300, -100, 0, true);
   collisionClass.objects.push(pTank);
+  console.log(pTank);
 
+  setInterval(() => {
+    console.log(`ptankturretang`, pTank.turretAng.x);
+    // console.log(`pos.x`, pTank.pos.x);
+    // console.log(`pos.z`, pTank.pos.z);
+  }, 2000);
   // oTank = new Tank(500, -200, 500)
 
   //CREATE ENEMY TANKS
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500), false, `AI Tank`, 100, `AIActive`))
+    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-2000, 2000), false, `AI Tank`, 100, `AIActive`))
   }
 
   //CREATE SCENERY
   for (let grassCount = 0; grassCount < 100; grassCount++) {
-    collisionClass.objects.push(new Grass(random(-3000, 3000), 0, random(-3000, 3000), PI))
+    collisionClass.objects.push(new Grass(random(-5000, 5000), 0, random(-5000, 5000), PI))
   }
-  for (let treeCount = 0; treeCount < 30; treeCount++) {
-    collisionClass.objects.push(new YellowTree(random(-5000, 5000), 0, random(-3000, 3000)))
+  for (let treeCount = 0; treeCount < 60; treeCount++) {
+    collisionClass.objects.push(new YellowTree(random(-6000, 6000), 0, random(-5000, 5000)))
   }
   let horizontalWallPosition = 0;
   let verticalWallPosition = 0;
@@ -1369,6 +1347,7 @@ function draw() {
   // oTank.updateOther();
   // oTank.edges()
   collisionClass.collision();
+  collisionClass.measureDistance();
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
@@ -1403,7 +1382,7 @@ function draw() {
         : false;
 
   //FPS CAMERA CONDITIONS
-  
+
 
   keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
   keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
@@ -1438,12 +1417,15 @@ function draw() {
     //     object.fire();
     //   }
     // }
-    object.AIActive === `AIActive`
-      ? object.AIControlled() : null;
+    if (object.AIActive === `AIActive` && object.isDead === false) {
+      object.AIControlled();
+      object.setAI()
+    }
 
-    object.playerTank === true
-      ? object.playerControlled()
-      : object.updateOther();
+
+    object.playerTank === true ? object.playerControlled() : null;
+    object.AIActive === false && object.playerTank === false ? object.updateOther() : null;
+
     (object instanceof Shell) === false ? object.edges() : null;
     object.show();
   })
