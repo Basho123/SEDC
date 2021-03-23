@@ -3,6 +3,8 @@ let collisionClass;
 let collision = false;
 let sine;
 
+const globalExistenceDistanceLimit = 5000;
+
 // let terrain = [];
 let terrain;
 
@@ -51,7 +53,7 @@ let AI = {
   rotateLeft: false,
   rotateRight: false,
 
-  turretLeft: false,
+  turretLeft: true,
   turretRight: false,
 
   cannonUp: false,
@@ -92,6 +94,8 @@ let lockOn = false;
 let materialVariables = {
 
 }
+//#endregion
+
 //#region INTERSECTS
 function intersects(
   firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
@@ -153,22 +157,27 @@ class Environment {
     this.sky;
   }
 }
-class Elements extends Environment {
-  constructor(positionX, positionY, positionZ, sizeX = 100, sizeY = 100, sizeZ = 100, color = [255, 255, 255], radius) {
-    super();
+class Elements extends p5.Vector {
+  constructor(positionX, positionY, positionZ, sizeX = 100, sizeY = 100, sizeZ = 100, color = [255, 255, 255], radius = 100) {
+    super(positionX, positionZ, radius);
+
     this.pos = createVector(positionX, positionY, positionZ);
     this.vel = createVector();
     this.acc = createVector();
 
     this.rot = createVector();
     this.ang = createVector();
-    this.acc2 = createVector();  
+    this.acc2 = createVector();
 
     this.size = createVector(sizeX, sizeY, sizeZ)
     this.collisionColor = color;
     this.collisionOffset = createVector();
 
     this.radius = radius;
+    this.r = radius;
+
+    this.gravity = [0, 0.981, 0];
+    this.sky;
 
     this.dirX;
     this.dirY;
@@ -179,11 +188,19 @@ class Elements extends Environment {
     this.colided = false;
 
     this.AIActive = `AIDisabled`;
+    this.id = random(999999999)
 
+    this.objectType = `undefined`;
     this.playerTank = false;
     this.mass = 1;
 
+    this.seeingDistance = 1000;
+
+    this.maxSpeed = 4;
+    this.maxForce = 0.25;
+
     this.isDead = false;
+
   }
 
   showCollisionBox() {
@@ -195,7 +212,13 @@ class Elements extends Environment {
     pop()
   }
 
-
+  seek(target) {
+    let force = p5.Vector.sub(target, this.pos);
+    force.setMag(this.maxSpeed);
+    force.sub(this.vel);
+    // force.limit(this.maxForce);
+    this.applyForce(force);
+  }
   applyForce(force) {
     this.acc.add(force);
   }
@@ -253,6 +276,7 @@ class Elements extends Environment {
 
     AI.rotateLeft ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                  // AI ROTATE LEFT    
     AI.rotateRight ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // AI ROTATE RIGHT
+
 
     if (AI.forward === true) {                                                  // AI FORWARD
       this.acc.z = -this.dirY
@@ -331,17 +355,22 @@ class Collision extends Environment {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
-
           if (this.objects[i].setCollision === true && this.objects[g].setCollision === true) {
 
             //IF SHELL FALLS ON GROUND TO SELF-DESTRY
             if ((this.objects[g] instanceof Shell) && this.objects[g].pos.y >= 0) {
               this.objects.splice(g, 1);
-              grassArray.splice(0, 1)
               continue;
             }
+            //ELSE IF SHELL IS IN THE AIR, CHECK THE DISTANCE
             else {
-              let distance = dist(this.objects[i].pos.x, this.objects[i].pos.y, this.objects[i].pos.z, this.objects[g].pos.x, this.objects[g].pos.y, this.objects[g].pos.z);
+              let distance = dist(
+                this.objects[i].pos.x,
+                this.objects[i].pos.y,
+                this.objects[i].pos.z,
+                this.objects[g].pos.x,
+                this.objects[g].pos.y,
+                this.objects[g].pos.z);
               if (distance < (this.objects[i].radius + this.objects[g].radius) * 1.05) {
 
                 //IF SHELL HITS TARGET
@@ -473,6 +502,7 @@ class Collision extends Environment {
                 else null
               }
             }
+
           }
           else null
         }
@@ -486,7 +516,20 @@ class Collision extends Environment {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
         for (let g = i + 1; g < this.objects.length; g++) {
-          if (this.objects[i].setCollision === true && this.objects[g].setCollision) {
+          //CHECK IF OBJECT IS IN GLOBAL EXISTENCE BOUNDARIES FIRST
+          if (
+            this.objects[g].pos.x > globalExistenceDistanceLimit ||
+            this.objects[g].pos.y >= 100 || //GROUND
+            this.objects[g].pos.z > globalExistenceDistanceLimit ||
+            this.objects[g].pos.x < -globalExistenceDistanceLimit ||
+            this.objects[g].pos.y < -globalExistenceDistanceLimit ||
+            this.objects[g].pos.z < -globalExistenceDistanceLimit) {
+            this.objects.splice(g, 1);
+            break;
+          }
+
+          //COLLISION CHECK STARTS
+          else if (this.objects[i].setCollision && this.objects[g].setCollision) {
             let intersect = intersects(
               this.objects[i].pos.x + this.objects[i].collisionOffset.x,
               this.objects[i].pos.y + this.objects[i].collisionOffset.y,
@@ -501,14 +544,16 @@ class Collision extends Environment {
               this.objects[g].size.y,
               this.objects[g].size.z
             )
-            if (intersect === true) {
-              this.objects[i].showCollisionBox();
-              this.objects[g].showCollisionBox();
+            //IF CHECK PASSES AND ID OF OBJECT IS NOT SELF(SHELLS COLLIDING WITH PARENT OBJECT)
+            if (intersect === true && this.objects[i].id !== this.objects[g].id) {
+              // this.objects[g].showCollisionBox();
+              // this.objects[i].showCollisionBox();
 
+              //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
               if ((this.objects[g] instanceof Shell)) {
 
-                this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 15
-                this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 15
+                this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 150
+                this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 150
 
                 this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
 
@@ -523,7 +568,6 @@ class Collision extends Environment {
                 //SHELL IS ALWAYS SECOND OBJECT BECAUSE IS CREATED LATER IN ARRAY
                 this.objects.splice(g, 1);
 
-
                 //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
                 setTimeout(() => {
                   this.objects.splice(i, 1);
@@ -531,7 +575,71 @@ class Collision extends Environment {
                 }, 3000)
 
                 continue;
+              } else null;
+              //#endregion
+
+              //#region 2. TANK DUMMY SCANNERS
+
+              //#region 2.1 BODY TANK DUMMY CHECK
+
+              if ((this.objects[g] instanceof DummyShellBody)) {
+                if ((this.objects[i] instanceof YellowTree)) {
+                }
+                else if ((this.objects[i] instanceof Tank))
+                  this.objects[i].turretAng.y = -this.objects[i].rot.x / 100
+
               }
+              //#endregion
+              //#endregion
+
+              //#region 2.2 TURRET TANK DUMMY CHECK
+              if ((this.objects[g] instanceof DummyShellTurret)) {
+                if ((this.objects[i].playerTank === true)) {
+                  this.objects.forEach((tank) => {
+                    if (tank.id === this.objects[g].id && tank.objectType == `tank`) {
+                      tank.fire();
+                    }
+                    else null;
+                  })
+            
+                } else continue;
+
+                this.objects.splice(g, 1);
+            
+              }
+              //#endregion 
+
+              // #region 3. TANK INTERACTS WITH OBJECTS
+
+              if ((this.objects[i] instanceof Tank)) {
+                this.objects[i].vel.x /= this.objects[g].mass
+                this.objects[i].vel.y /= this.objects[g].mass
+                this.objects[i].vel.z /= this.objects[g].mass
+
+                //NONSTICK BOUNCE EFFECT
+                this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
+                this.objects[g].pos.y -= ((this.objects[i].pos.y - this.objects[g].pos.y) / 500)
+                this.objects[g].pos.z -= ((this.objects[i].pos.z - this.objects[g].pos.z) / 500)
+
+                //#region 3.1 TANK INTERACTS WITH TREE
+                if ((this.objects[g] instanceof Tree)) {
+                  this.objects[g].rot.z += ((1 / (this.objects[g].mass - 1)) / 400) * 1 + this.objects[g].rot.z / 20
+
+                  if (this.objects[g].rot.z > 1.5) {
+                    this.objects[g].setCollision = false;
+
+                    this.objects[g].vel.x = 0;
+                    this.objects[g].vel.y = 0;
+                    this.objects[g].vel.z = 0;
+                    //this.objects.splice(g, 1);
+                  }
+                }
+                //#endregion
+
+
+              }
+              // endregion 
+
             }
             else null;
           }
@@ -584,7 +692,7 @@ class Sky extends Environment {
     translate(this.position.x, this.position.y, this.position.z);
     noStroke();
     texture(this.textureFileUrl);
-    sphere(((width + height) / 2) * 5, 24, 24);
+    sphere(((width + height) / 2) * 20, 24, 24);
 
     noFill();
     pop();
@@ -618,7 +726,6 @@ class Grass extends Elements {
     pop();
   }
 }
-
 //#region TREES
 class Tree extends Elements {
   constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, rotateZ = 0) {
@@ -800,7 +907,7 @@ class Tank extends Elements {
     this.size.y = 110;
     this.size.z = 100;
 
-    this.collisionOffset.y = 100;
+    this.collisionOffset.y = 90;
 
     this.radius = 80;
     this.mass = 20; // MINIMUM 1, MAXIMUM ~20
@@ -812,24 +919,28 @@ class Tank extends Elements {
 
     this.driverName = driverName;
     this.playerTank = playerTank;
-
+    this.objectType = `tank`;
     this.AIActive = AIActive;
 
-    this.scale = 0.6;
+    this.scale = 0.65;
+
+    this.id = `${this.playerTank ? `PlayerTank_ID` : `AITank_ID`}${random(0, 999999999)}`
+
+    if (this.playerTank === false) {
+      setInterval(() => {
+        this.scanTurret();
+      }, 1000)
+    }
+
   }
 
-  show() {    
-
+  show() {
     //CALCULATE COLLISION BOX CHANGE ON ROTATION
     let angleConvert = map(this.rot.x, -312.5, 312.5, -3.125, 3.125)
     angleConvert < 0 ? angleConvert *= -1 : null;
 
     this.size.x = sin(angleConvert) * 150 + 100
     this.size.z = -sin(angleConvert) * 130 + 210
-
-    // console.log(`sin`,Math.sin(test));    
-    // console.log(`cos`,Math.cos(test));    
-
 
     if (this.rot.x > 312.5) {
       this.rot.x = -312.5
@@ -847,6 +958,9 @@ class Tank extends Elements {
     //BODY
     push();
     translate(this.pos.x, this.pos.y + 100, this.pos.z);
+
+    // rotate(this.vel.heading())
+
     rotateY(-this.rot.x / 100);
     rotateZ(PI);
     rotateY(-PI / 2 + this.ang.y)
@@ -896,19 +1010,50 @@ class Tank extends Elements {
       -this.turretAng.y * 100,
       this.turretAng.x,
       this.rot.z,
-      this.playerTank
+      this.playerTank,
+      `HESH`,
+      this.id,
+    )
+  }
+  scanTurret() {
+    DummyShellTurret.isFired(
+      this.pos.x,
+      this.pos.y,
+      this.pos.z,
+      -this.turretAng.y * 100,
+      this.turretAng.x,
+      this.rot.z,
+      this.playerTank,
+      `TURRET_DUMMY`,
+      this.id
+    )
+  }
+  scanBody() {
+    DummyShellBody.isFired(
+      this.pos.x,
+      this.pos.y,
+      this.pos.z,
+      this.rot.x,
+      this.rot.y,
+      this.rot.z,
+      this.playerTank,
+      `BODY_DUMMY`,
+      this.id
     )
   }
 
 }
 class Shell extends Tank {
-  constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `HESH`) {
+  constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `HESH`, id) {
     super();
     this.pos.x = x;
-    this.pos.y = y+50;
+    this.pos.y = y + 50;
     this.pos.z = z;
 
-    this.collisionOffset.y = 20;
+    this.id = id;
+
+    this.collisionOffset.y = -10;
+    this.objectType = `shell`;
 
     this.size.x = 10;
     this.size.y = 10;
@@ -923,22 +1068,15 @@ class Shell extends Tank {
     this.vel.limit(1000)
 
     this.vel.y = (this.turretAng.x * 80) - 5;
-    console.log(this.turretAng.x);
 
     this.type = type;
 
     this.playerShell = playerTank;
 
-    this.setCollision = false;
-
-    //SO IT DONT COLLIDES WITH PARENT OBJECT
-    setTimeout(() => {
-      this.setCollision = true
-    }, 100);
-
+    this.setCollision = true;
   }
 
-  show() {   
+  show() {
     // this.pos.y =  this.pos.y - 60
     push();
     translate(this.pos.x, this.pos.y, this.pos.z);
@@ -959,14 +1097,133 @@ class Shell extends Tank {
     this.vel.x = this.dirX * 200;
   }
 
-  static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`) {
-    collisionClass.objects.push(new Shell(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`))
+  static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
+    collisionClass.objects.push(new Shell(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
+  }
+}
+class DummyShellTurret extends Tank {
+  constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `DUMMY`, id) {
+    super(x, y + 50, z);
+
+    this.collisionOffset.y = -10;
+
+    this.size.x = 100;
+    this.size.y = 100;
+    this.size.z = 100;
+    this.rot.x = rotX;
+    this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
+    this.rot.z = rotZ;
+
+    this.id = id;
+
+    this.objectType = `dummyShellTurret`;
+
+    this.radius = 10;
+
+    this.vel.limit(1000)
+
+    this.vel.y = (this.turretAng.x * 80) - 5;
+
+    this.type = type;
+
+    this.playerShell = playerTank;
+
+    this.setCollision = true;
+
+    //SO IT DONT COLLIDES WITH PARENT OBJECT
+    setTimeout(() => {
+      this.setCollision = true
+    }, 100);
+
+  }
+
+  show() {
+    // this.pos.y =  this.pos.y - 60
+    // push();
+    // translate(this.pos.x, this.pos.y, this.pos.z);
+    // rotateY(-this.rot.x / 100);
+    // rotateX(this.vel.y / 75)
+    // scale(1);
+    // color(255);
+    // box(100, 100)
+    // ambientMaterial(100);
+    // pop();
+
+    // MULTIPLY THESE TO MAKE MISSILE PHYSICS 
+    // this.acc.z = -this.dirY * 5000;
+    // this.acc.x = this.dirX * 5000;
+
+    this.vel.z = -this.dirY * 1000
+    this.vel.x = this.dirX * 1000;
+  }
+
+  static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
+    collisionClass.objects.push(new DummyShellTurret(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
+  }
+}
+class DummyShellBody extends Tank {
+  constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `DUMMY`, id) {
+    super(x, y + 50, z);
+
+    this.collisionOffset.y = -10;
+
+    this.size.x = 100;
+    this.size.y = 100;
+    this.size.z = 100;
+    this.rot.x = rotX;
+    this.turretAng.x = turretAngX; //VERTICAL TURRET POSITION
+    this.rot.z = rotZ;
+
+    this.radius = 10;
+
+    this.vel.limit(1000)
+
+    this.id = id;
+
+    this.objectType = `dummyShellBody`;
+
+    this.vel.y = (this.turretAng.x * 80) - 5;
+
+    this.type = type;
+
+    this.playerShell = playerTank;
+
+    this.setCollision = true;
+
+    //SO IT DONT COLLIDES WITH PARENT OBJECT
+    // setTimeout(() => {
+    //   this.setCollision = true
+    // }, 100);
+
+  }
+
+  show() {
+    // this.pos.y =  this.pos.y - 60
+    // push();
+    // translate(this.pos.x, this.pos.y, this.pos.z);
+    // rotateY(-this.rot.x / 100);
+    // rotateX(this.vel.y / 75)
+    // scale(1);
+    // color(255, 0, 0);
+    // box(100, 100)
+    // ambientMaterial(100);
+    // pop();
+
+    // MULTIPLY THESE TO MAKE MISSILE PHYSICS 
+    // this.acc.z = -this.dirY * 5000;
+    // this.acc.x = this.dirX * 5000;
+
+    this.vel.z = -this.dirY * 2000
+    this.vel.x = this.dirX * 2000;
+  }
+
+  static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
+    collisionClass.objects.push(new DummyShellBody(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
   }
 }
 //#endregion
 
 //#region PRELOAD
-
 function preload() {
   //PRELOAD ALL DATA
   sky1 = loadImage("files/background/sky20.jpg");
@@ -1025,10 +1282,12 @@ function setup() {
 
   createCanvas(windowWidth, windowHeight, WEBGL);
 
+
+
   //CREATE CAMERA
   camera.body = createCamera();
-  // perspective(PI/4, width/height)
-  
+  perspective(PI / 2.3, width / height, 0.01, 25000)
+
 
   //TEST /////////////////////
   ////////////////////////////////////////
@@ -1046,15 +1305,11 @@ function setup() {
 
   //CREATE PLAYER TANK
   pTank = new Tank(-300, -100, 0, true);
-  // setInterval(() => {
-  //   let test = map(pTank.rot.x,-312.5,312.5,-PI,PI)
-  //   console.log(`sin`,Math.sin(test));    
-  //   console.log(`cos`,Math.cos(test));    
-  // }, 3000)
+  collisionClass.objects.push(pTank);
 
+  // oTank = new Tank(500, -200, 500)
 
   //CREATE ENEMY TANKS
-  collisionClass.objects.push(pTank);
   for (let tankCount = 0; tankCount < 5; tankCount++) {
     collisionClass.objects.push(new Tank(-100, -100, -500 - (tankCount * 500), false, `AI Tank`, 100, `AIActive`))
   }
@@ -1109,6 +1364,10 @@ function draw() {
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
 
+
+  // oTank.show();
+  // oTank.updateOther();
+  // oTank.edges()
   collisionClass.collision();
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
@@ -1119,7 +1378,7 @@ function draw() {
   // box1.pos.x = mouseX * 3 - 1200;
   // box1.pos.z = mouseY * 3 - 1200;
 
-  //CAMERA
+  //#region CAMERA
   //CLICK MOUSE TO LOOK AROUND
   if (lockOn) {
     camera.body.pan(-movedX * 0.002);
@@ -1144,13 +1403,13 @@ function draw() {
         : false;
 
   //FPS CAMERA CONDITIONS
-  // keyIsDown(100) && camera.mode === 2 ? camera.body.pan(0.01) : false;
-  // keyIsDown(102) && camera.mode === 2 ? camera.body.pan(-0.01) : false;
+  
 
   keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
   keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
+  //#endregion
 
-
+  // pTank.seek(createVector(500, 1000));
 
   //DRAW TERRAIN  
   terrain.show();
@@ -1190,6 +1449,7 @@ function draw() {
   })
 
 
+
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 }
@@ -1216,6 +1476,7 @@ keyPressed = () => {
   camera.mode === 4 ? camera.mode = 0 : null; //RESET CAMERA TO FIRST MODE
 
   keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY
+  // keyCode === 32 ? pTank.scanTurret(true) : null;  //SPACE KEY
+  //keyCode === 32 ? pTank.scanBody(true) : null;  //SPACE KEY
 }
-
 
