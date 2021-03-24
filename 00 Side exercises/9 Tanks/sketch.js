@@ -558,8 +558,8 @@ class Grass extends Elements {
     this.rotateX = rotateX;
     this.rotateY = rotateY;
     this.radius = 100;
-    // this.scale = random(1, 100)
-    this.scale = 1;
+    this.scale = random(1, 50)
+    // this.scale = 1;
 
     this.setCollision = false;
     this.model = model;
@@ -751,7 +751,7 @@ class Walls extends Elements {
   }
 }
 class Tank extends Elements {
-  constructor(x, y, z, playerTank = false, driverName = `AI`, radius, AIActive = `AIDisabled`) {
+  constructor(x, y, z, playerTank = false, driverName = `AI`, angle = 0, AIActive = `AIDisabled`) {
     super(x, y, z);
 
     this.randomNumber = random(100);
@@ -763,6 +763,7 @@ class Tank extends Elements {
 
     this.collisionOffset.y = 90;
 
+    // this.ang.y = angle
     this.radius = 80;
     this.mass = 20; // MINIMUM 1, MAXIMUM ~20
     // this.size = createVector();w    
@@ -1296,7 +1297,7 @@ function setup() {
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
   //CREATE PLAYER TANK
-  pTank = new Tank(-300, -100, 0, true);
+  pTank = new Tank(0, -100, 0, true,`BASHO`,1); 
   collisionClass.objects.push(pTank);
   console.log(pTank);
   // oTank = new Tank(500, -200, 500)
@@ -1311,7 +1312,7 @@ function setup() {
 
   //CREATE ENEMY TANKS
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(random(4000, 5000), -100, random(-2000, 2000), false, `AI Tank`, 100, `AIActive`))
+    collisionClass.objects.push(new Tank(random(-1000, 1000), -100, random(4000, 6000), false, `AI Tank`, 100, `AIActive`))
   }
 
   //CREATE SCENERY
