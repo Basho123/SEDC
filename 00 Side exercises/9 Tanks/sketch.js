@@ -67,6 +67,8 @@ let brickSlices = 200;
 let tankModel;
 let t34Texture;
 
+let headingl
+
 let shellHESH;
 let shellHESHtexture;
 
@@ -310,9 +312,9 @@ class Collision extends Environment {
               this.objects[g].pos.y,
               this.objects[g].pos.z);
 
-              //THIS CORRECTS THE ENEMY TANK VERTICAL AIM
+            //THIS CORRECTS THE ENEMY TANK VERTICAL AIM
             if (distance < (this.objects[i].radius + this.objects[g].radius) * 10) {
-              this.objects[g].turretAng.x = -distance/15000
+              this.objects[g].turretAng.x = -distance / 15000
             }
           }
         }
@@ -349,8 +351,6 @@ class Collision extends Environment {
     }
     return false;
   }
-
-
   collision() {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
@@ -500,7 +500,7 @@ class Collision extends Environment {
       }
     }
     else null;
-  }
+  }  
 }
 class Terrain extends Environment {
   constructor(positionX = 1000, positionZ = 1000, sizeX = 1000, sizeZ = 1000, texture) {
@@ -558,8 +558,8 @@ class Grass extends Elements {
     this.rotateX = rotateX;
     this.rotateY = rotateY;
     this.radius = 100;
-    this.scale = random(1, 100)
-    // this.scale =1;
+    // this.scale = random(1, 100)
+    this.scale =1;
 
     this.setCollision = false;
     this.model = model;
@@ -1014,6 +1014,12 @@ class Tank extends Elements {
       )
     }
   }
+  getHeading(posX1,posX2,posY1,posY2) {
+    let v1 = createVector(posX1 - posX2, posY1 - posY2);
+
+    let myHeading = v1.heading();
+    return myHeading
+  }
 
 }
 class Shell extends Tank {
@@ -1279,16 +1285,18 @@ function setup() {
   pTank = new Tank(-300, -100, 0, true);
   collisionClass.objects.push(pTank);
   console.log(pTank);
+  oTank = new Tank(500, -200, 500)
 
+
+  
   setInterval(() => {
-    console.log(`ptankturretang`, pTank.turretAng.x);
+    console.log(`ptankgetHeading`, heading);
     // console.log(`pos.x`, pTank.pos.x);
     // console.log(`pos.z`, pTank.pos.z);
   }, 2000);
-  // oTank = new Tank(500, -200, 500)
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 5; tankCount++) {
+  for (let tankCount = 0; tankCount < 1; tankCount++) {
     collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-2000, 2000), false, `AI Tank`, 100, `AIActive`))
   }
 
@@ -1348,6 +1356,8 @@ function draw() {
   // oTank.edges()
   collisionClass.collision();
   collisionClass.measureDistance();
+  heading = pTank.getHeading(pTank.pos.x,oTank.pos.x,pTank.pos.z,oTank.pos.z)
+  pTank.turretAng.y = -heading;
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
