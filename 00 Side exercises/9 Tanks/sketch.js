@@ -67,7 +67,7 @@ let brickSlices = 200;
 let tankModel;
 let t34Texture;
 
-let headingl
+// let headingl
 
 let shellHESH;
 let shellHESHtexture;
@@ -500,7 +500,7 @@ class Collision extends Environment {
       }
     }
     else null;
-  }  
+  }
 }
 class Terrain extends Environment {
   constructor(positionX = 1000, positionZ = 1000, sizeX = 1000, sizeZ = 1000, texture) {
@@ -559,7 +559,7 @@ class Grass extends Elements {
     this.rotateY = rotateY;
     this.radius = 100;
     // this.scale = random(1, 100)
-    this.scale =1;
+    this.scale = 1;
 
     this.setCollision = false;
     this.model = model;
@@ -962,9 +962,9 @@ class Tank extends Elements {
       ? this.ai.rotateLeft = this.randomState.randomState1
       : this.ai.rotateRight = this.randomState.randomState1;
 
-    this.randomState.randomState10 === false
-      ? this.ai.turretRight = this.randomState.randomState6
-      : this.ai.turretLeft = this.randomState.randomState6;
+    // this.randomState.randomState10 === false
+    //   ? this.ai.turretRight = this.randomState.randomState6
+    //   : this.ai.turretLeft = this.randomState.randomState6;
 
 
   }
@@ -1014,11 +1014,25 @@ class Tank extends Elements {
       )
     }
   }
-  getHeading(posX1,posX2,posY1,posY2) {
+  getTurretHeading(posX1, posX2, posY1, posY2,) {
+
     let v1 = createVector(posX1 - posX2, posY1 - posY2);
 
     let myHeading = v1.heading();
-    return myHeading
+    myHeading = map(myHeading, -PI, PI, -PI - PI / 2, PI / 2);
+    if (myHeading < -3.14) {
+      myHeading += PI * 2;
+
+    }
+    if (this.turretAng.y < -myHeading) {
+      this.ai.turretLeft = true;
+      this.ai.turretRight = false;
+    }
+    if (this.turretAng.y > -myHeading) {
+      this.ai.turretRight = true;
+      this.ai.turretLeft = false;
+    }
+
   }
 
 }
@@ -1285,19 +1299,19 @@ function setup() {
   pTank = new Tank(-300, -100, 0, true);
   collisionClass.objects.push(pTank);
   console.log(pTank);
-  oTank = new Tank(500, -200, 500)
+  // oTank = new Tank(500, -200, 500)
 
 
-  
-  setInterval(() => {
-    console.log(`ptankgetHeading`, heading);
-    // console.log(`pos.x`, pTank.pos.x);
-    // console.log(`pos.z`, pTank.pos.z);
-  }, 2000);
+
+  // setInterval(() => {
+  //   console.log(`ptankgetHeading`, heading);
+  //   // console.log(`pos.x`, pTank.pos.x);
+  //   // console.log(`pos.z`, pTank.pos.z);
+  // }, 2000);
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 1; tankCount++) {
-    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-2000, 2000), false, `AI Tank`, 100, `AIActive`))
+  for (let tankCount = 0; tankCount < 5; tankCount++) {
+    collisionClass.objects.push(new Tank(random(4000, 5000), -100, random(-2000, 2000), false, `AI Tank`, 100, `AIActive`))
   }
 
   //CREATE SCENERY
@@ -1356,8 +1370,7 @@ function draw() {
   // oTank.edges()
   collisionClass.collision();
   collisionClass.measureDistance();
-  heading = pTank.getHeading(pTank.pos.x,oTank.pos.x,pTank.pos.z,oTank.pos.z)
-  pTank.turretAng.y = -heading;
+
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
   // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
@@ -1429,7 +1442,15 @@ function draw() {
     // }
     if (object.AIActive === `AIActive` && object.isDead === false) {
       object.AIControlled();
-      object.setAI()
+      object.setAI();
+      // let heading = object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
+      // object.turretAng.y = heading;
+
+      // pTank.getTurretHeading(pTank.pos.x, object.pos.x, pTank.pos.z, object.pos.z)
+      object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
+
+      // pTank.turretAng.y = heading;
+      // this.ai.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;
     }
 
 
