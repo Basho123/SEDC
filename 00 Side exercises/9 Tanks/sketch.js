@@ -420,10 +420,10 @@ class Collision extends Environment {
                 this.objects.splice(g, 1);
 
                 //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
-                setTimeout(() => {
+                // setTimeout(() => {
                   this.objects.splice(i, 1);
 
-                }, 3000)
+                // }, 3000)
 
                 continue;
               } else null;
@@ -462,8 +462,7 @@ class Collision extends Environment {
 
               // #region 3. TANK INTERACTS WITH OBJECTS
 
-              if ((this.objects[i] instanceof Tank)) {
-
+              if ((this.objects[i] instanceof Tank) && (this.objects[g] instanceof DummyShellTurret) === false) {
                 this.objects[i].vel.x /= this.objects[g].mass
                 this.objects[i].vel.y /= this.objects[g].mass
                 this.objects[i].vel.z /= this.objects[g].mass
@@ -1297,7 +1296,7 @@ function setup() {
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
   //CREATE PLAYER TANK
-  pTank = new Tank(0, -100, 0, true,`BASHO`,1); 
+  pTank = new Tank(0, -100, 0, true, `BASHO`, 1);
   collisionClass.objects.push(pTank);
   console.log(pTank);
   // oTank = new Tank(500, -200, 500)
@@ -1351,7 +1350,7 @@ function draw() {
   background(125, 195, 255);
   //FRAMERATE DROPPING FOR DEBUGGING
   // frameCount(1);
-  //frameRate(0.0025)  
+  // frameRate(0.0025)  
   // THIS IS TEMPORARY
   // camera.body.eyeX = 0
   // camera.body.eyeY = -3197
@@ -1433,14 +1432,18 @@ function draw() {
   }
 
 
+
+  // for (tanks in collisionClass.objects.playerTank) {
+  //   console.log(tanks);
+  // }
+
+  let tankCount = 0;
   collisionClass.objects.forEach((object) => {
     object.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
 
-    // if((object instanceof Tank) === true){
-    //   if(random(10000)<10 && object.playerTank != true){        
-    //     object.fire();
-    //   }
-    // }
+    if (object.objectType == `tank`) {
+      tankCount++;
+    }
     if (object.AIActive === `AIActive` && object.isDead === false) {
       object.AIControlled();
       object.setAI();
@@ -1462,7 +1465,15 @@ function draw() {
     object.show();
   })
 
-
+  let enemyTanksHTML = document.getElementById(`enemyTanksValue`)
+  enemyTanksHTML.innerHTML = tankCount-1;
+  if(pTank.isDead === true){
+    document.getElementById(`centerText`).style.display = `flex`;
+  }
+  if(tankCount-1 === 0){
+    document.getElementById(`centerText`).style.display = `flex`;
+    document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
+  }
 
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
