@@ -210,33 +210,38 @@ class Elements extends Environment {
     this.acc.add(force);
   }
   playerControlled() {
-    if (this.isDead === false) {
-      keyIsDown(104) ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1; // NUM 8 KEY CANNON UP
-      keyIsDown(98) ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;  // NUM 2 KEY CANNON DOWN
+    if (this.isDead === false && this.playerTank) {
 
-      keyIsDown(100) ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;    // NUM 4 KEY TURRET LEFT
-      keyIsDown(102) ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;    // NUM 6 KEY TURRET RIGHT
+      this.vel.limit(5);         // TANK SPEED
+      this.ang.limit(0.4)        //TANK ROTATION SPEED
+      this.turretVel.limit(0.01) // TURRET ROTATION SPEED
 
-      keyIsDown(65) ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                 // A KEY TANK ROTATE LEFT    
-      keyIsDown(68) ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // D KEY TANK ROTATE RIGHT
+      keyIsDown(104) ? this.turretAcc.x -= 0.0005//NUM 8 KEY CANNON UP
+        : keyIsDown(98) ? this.turretAcc.x += 0.0005  // NUM 2 KEY CANNON DOWN
+          : this.turretVel.x /= 1.2; // 
+
+
+      keyIsDown(100) ? this.turretAcc.y += 0.0005 :   // NUM 4 KEY TURRET LEFT
+        keyIsDown(102) ? this.turretAcc.y -= 0.0005 :   // NUM 6 KEY TURRET RIGHT
+          this.turretVel.y /= 5;
+
+
+      keyIsDown(65) ? this.acc2.x -= 0.5  // A KEY TANK ROTATE LEFT    
+        : keyIsDown(68) ? this.acc2.x += 0.5// D KEY TANK ROTATE RIGHT
+          : this.ang.x /= 1.1
+
+
 
       if (keyIsDown(87)) {                  // W KEY TANK FORWARD
-        this.acc.z = -this.dirY
-        this.acc.x = this.dirX;
+        this.acc.add(this.dirX * 0.25, 0, -this.dirY * 0.25)
+      }
+      else if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
+        this.acc.add(0 - this.dirX * 0.25, 0, this.dirY * 0.25)
       } else {
         this.vel.z /= 1.1;
         this.vel.x /= 1.1;
       }
 
-      if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
-        this.acc.z = this.dirY;
-        this.acc.x = -this.dirX;
-      } else {
-        this.vel.z /= 1.1;
-        this.vel.x /= 1.1;
-      }
-
-      this.vel.limit(30);
       this.vel.add(this.acc);
       this.pos.add(this.vel);
       this.acc.set(0);
@@ -246,7 +251,6 @@ class Elements extends Environment {
       this.turretAng.add(this.turretVel)
       this.turretAcc.set(0)
 
-      this.rot.limit(500);
       this.ang.add(this.acc2);
       this.rot.add(this.ang);
       this.acc2.set(0);
@@ -406,7 +410,7 @@ class Collision extends Environment {
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                 this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
 
-                this.objects[i].vel.y = random(0, 30) + 10 / this.objects[i].mass / 5
+                this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
 
                 this.objects[i].ang.x = 0.01 * random(1, 3)
                 this.objects[i].ang.z = 0.01 * random(1, 3)
@@ -420,10 +424,10 @@ class Collision extends Environment {
                 this.objects.splice(g, 1);
 
                 //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
-                // setTimeout(() => {
+                setTimeout(() => {
                   this.objects.splice(i, 1);
 
-                // }, 3000)
+                }, 3000)
 
                 continue;
               } else null;
@@ -750,7 +754,7 @@ class Walls extends Elements {
   }
 }
 class Tank extends Elements {
-  constructor(x, y, z, playerTank = false, driverName = `AI`, angle = 0, AIActive = `AIDisabled`) {
+  constructor(x, y, z, playerTank = false, driverName = `AI`, angle = 0, AIActive = `AIDisabled`, acc2x = 0) {
     super(x, y, z);
 
     this.randomNumber = random(100);
@@ -761,6 +765,15 @@ class Tank extends Elements {
     this.size.z = 100;
 
     this.collisionOffset.y = 90;
+    this.acc2.x = acc2x;
+
+    this.bodyExplodeVelocity = createVector(0, 0, 0);
+    this.turretExplodeVelocity = createVector();
+    this.cannonExplodeVelocity = createVector();
+
+    this.acc.x += this.bodyExplodeVelocity.x
+
+
 
     // this.ang.y = angle
     this.radius = 80;
@@ -846,17 +859,16 @@ class Tank extends Elements {
     //CALCULATE COLLISION BOX CHANGE ON ROTATION
     let angleConvert = map(this.rot.x, -312.5, 312.5, -3.125, 3.125)
     angleConvert < 0 ? angleConvert *= -1 : null;
-
     this.size.x = sin(angleConvert) * 150 + 100
     this.size.z = -sin(angleConvert) * 130 + 210
 
+    //COMPENSATE FOR ROTATION INNACURACY OF MODEL ROTATION
     if (this.rot.x > 312.5) {
       this.rot.x = -312.5
     }
     else if (this.rot.x <= -312.5) {
       this.rot.x = 312.5
     }
-
     if (this.turretAng.y > 3.125) {
       this.turretAng.y = -3.125
     }
@@ -866,9 +878,6 @@ class Tank extends Elements {
     //BODY
     push();
     translate(this.pos.x, this.pos.y + 100, this.pos.z);
-
-    // rotate(this.vel.heading())
-
     rotateY(-this.rot.x / 100);
     rotateZ(PI);
     rotateY(-PI / 2 + this.ang.y)
@@ -910,42 +919,43 @@ class Tank extends Elements {
     pop();
   }
   AIControlled() {
-    this.ai.cannonUp ? this.turretAcc.x -= 0.0005 : this.turretVel.x /= 1.1;     // AI CANNON UP
-    this.ai.cannonDown ? this.turretAcc.x += 0.0005 : this.turretVel.x /= 1.1;   // AI CANNON DOWN
 
-    this.ai.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;      // AI TURRET LEFT
-    this.ai.turretRight ? this.turretAcc.y -= 0.005 : this.turretVel.y /= 5;     // AI TURRET RIGHT
+    this.vel.limit(5);         // TANK SPEED
+    this.ang.limit(0.4)        //TANK ROTATION SPEED
+    this.turretVel.limit(0.01) // TURRET ROTATION SPEED
 
-    this.ai.rotateLeft ? this.acc2.x -= 0.5 : this.ang.x /= 1.1                  // AI ROTATE LEFT    
-    this.ai.rotateRight ? this.acc2.x += 0.5 : this.ang.x /= 1.1                 // AI ROTATE RIGHT
+    this.ai.cannonUp ? this.turretAcc.x -= 0.0005          // AI CANNON UP
+      : this.ai.cannonDown ? this.turretAcc.x += 0.0005    // AI CANNON DOWN
+        : this.turretVel.x /= 1.1;
 
-    if (this.ai.forward === true) {                                                  // AI FORWARD
-      this.acc.z = -this.dirY
-      this.acc.x = this.dirX;
+    this.ai.turretLeft ? this.turretAcc.y += 0.0005        // AI TURRET LEFT
+      : this.ai.turretRight ? this.turretAcc.y -= 0.0005   // AI TURRET RIGHT
+        : this.turretVel.y /= 5;
+
+
+    this.ai.rotateLeft ? this.acc2.x -= 0.5               // AI ROTATE LEFT    
+      : this.ai.rotateRight ? this.acc2.x += 0.5          // AI ROTATE RIGHT
+        : this.ang.x /= 1.1
+
+
+    if (this.ai.forward === true) {                       // AI FORWARD
+      this.acc.add(this.dirX * 0.25, 0, -this.dirY * 0.25)
+    }   
+    else if (this.ai.backward) {                          // AI BACKWARD
+      this.acc.add(0 - this.dirX * 0.25, 0, this.dirY * 0.25)
     } else {
       this.vel.z /= 1.1;
       this.vel.x /= 1.1;
     }
 
-    if (this.ai.backward) {                  // AI BACKWARD
-      this.acc.z = this.dirY;
-      this.acc.x = -this.dirX;
-    } else {
-      this.vel.z /= 1.1;
-      this.vel.x /= 1.1;
-    }
-
-    this.vel.limit(30);
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     this.acc.set(0);
 
-    this.turretVel.limit(0.045);
     this.turretVel.add(this.turretAcc)
     this.turretAng.add(this.turretVel)
     this.turretAcc.set(0)
 
-    this.rot.limit(500);
     this.ang.add(this.acc2);
     this.rot.add(this.ang);
     this.acc2.set(0);
@@ -953,7 +963,6 @@ class Tank extends Elements {
     this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
     this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
   }
-
   setAI() {
 
     this.ai.forward = this.randomState.randomState3;
@@ -1040,7 +1049,7 @@ class Shell extends Tank {
   constructor(x, y, z, rotX, turretAngX, rotZ, playerTank, type = `HESH`, id) {
     super();
     this.pos.x = x;
-    this.pos.y = y + 50;
+    this.pos.y = y + 60;
     this.pos.z = z;
 
     this.id = id;
@@ -1076,7 +1085,7 @@ class Shell extends Tank {
     translate(this.pos.x, this.pos.y, this.pos.z);
     rotateY(-this.rot.x / 100);
     rotateX(this.vel.y / 75)
-    scale(1);
+    scale(2);
     noStroke();
     ambientMaterial(100);
     texture(shellHESHtexture);
@@ -1296,7 +1305,7 @@ function setup() {
   terrain = new Terrain(0, 0, 15000, 15000, sand1)
   environment.sky = new Sky(0, 0, 0);
   //CREATE PLAYER TANK
-  pTank = new Tank(0, -100, 0, true, `BASHO`, 1);
+  pTank = new Tank(0, -100, 0, true, `BASHO`, 1, false, 0);
   collisionClass.objects.push(pTank);
   console.log(pTank);
   // oTank = new Tank(500, -200, 500)
@@ -1311,7 +1320,7 @@ function setup() {
 
   //CREATE ENEMY TANKS
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(random(-1000, 1000), -100, random(4000, 6000), false, `AI Tank`, 100, `AIActive`))
+    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
   }
 
   //CREATE SCENERY
@@ -1466,11 +1475,11 @@ function draw() {
   })
 
   let enemyTanksHTML = document.getElementById(`enemyTanksValue`)
-  enemyTanksHTML.innerHTML = tankCount-1;
-  if(pTank.isDead === true){
+  enemyTanksHTML.innerHTML = tankCount - 1;
+  if (pTank.isDead === true) {
     document.getElementById(`centerText`).style.display = `flex`;
   }
-  if(tankCount-1 === 0){
+  if (tankCount - 1 === 0) {
     document.getElementById(`centerText`).style.display = `flex`;
     document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
   }
