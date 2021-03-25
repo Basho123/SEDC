@@ -364,7 +364,7 @@ class Collision extends Environment {
 
           if (
             this.objects[g].pos.x > globalExistenceDistanceLimit ||
-            this.objects[g].pos.y >= 100 || //GROUND
+            this.objects[g].pos.y > 100 || //GROUND
             this.objects[g].pos.z > globalExistenceDistanceLimit ||
             this.objects[g].pos.x < -globalExistenceDistanceLimit ||
             this.objects[g].pos.y < -globalExistenceDistanceLimit ||
@@ -404,12 +404,17 @@ class Collision extends Environment {
               // this.objects[i].showCollisionBox();
 
               //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
-              if ((this.objects[g] instanceof Shell)) {
+              if ((this.objects[g] instanceof Shell || this.objects[i] instanceof Shell)) {
                 this.objects[i].vel.limit(1000);
 
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                 this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
 
+                if ((this.objects[i] instanceof Tank)) {
+                  this.objects[i].bodyExplodeVelocity.add(100, 300, 200);
+                  this.objects[i].turretExplodeVelocity.add(300, 100, 0);
+                  this.objects[i].cannonExplodeVelocity.add(300, 200, 100);
+                }
                 this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
 
                 this.objects[i].ang.x = 0.01 * random(1, 3)
@@ -417,6 +422,10 @@ class Collision extends Environment {
 
                 this.objects[i].isDead = true;
                 this.objects[g].isDead = true;
+
+                this.objects[i].AIActive = false;
+                this.objects[g].AIActive = false;
+
 
                 this.objects[i].setCollision = false;
 
@@ -458,9 +467,8 @@ class Collision extends Environment {
                   })
 
                 } else continue;
-
+                //SPLICE THE DUMMY SHELL AFTER HIT
                 this.objects.splice(g, 1);
-
               }
               //#endregion 
 
@@ -768,8 +776,8 @@ class Tank extends Elements {
     this.acc2.x = acc2x;
 
     this.bodyExplodeVelocity = createVector(0, 0, 0);
-    this.turretExplodeVelocity = createVector();
-    this.cannonExplodeVelocity = createVector();
+    this.turretExplodeVelocity = createVector(0, 0, 0);
+    this.cannonExplodeVelocity = createVector(0, 0, 0);
 
     this.acc.x += this.bodyExplodeVelocity.x
 
@@ -875,6 +883,11 @@ class Tank extends Elements {
     else if (this.turretAng.y <= -3.125) {
       this.turretAng.y = 3.125
     }
+
+    //EXPLOSION CALCULATION
+    // this.vel.add(this.bodyExplodeVelocity)
+    // this.vel.add(this.bodyExplodeVelocity)
+    // this.vel.add(this.bodyExplodeVelocity)
     //BODY
     push();
     translate(this.pos.x, this.pos.y + 100, this.pos.z);
@@ -940,7 +953,7 @@ class Tank extends Elements {
 
     if (this.ai.forward === true) {                       // AI FORWARD
       this.acc.add(this.dirX * 0.25, 0, -this.dirY * 0.25)
-    }   
+    }
     else if (this.ai.backward) {                          // AI BACKWARD
       this.acc.add(0 - this.dirX * 0.25, 0, this.dirY * 0.25)
     } else {
@@ -1320,7 +1333,8 @@ function setup() {
 
   //CREATE ENEMY TANKS
   for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+    // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
   }
 
   //CREATE SCENERY
@@ -1453,7 +1467,7 @@ function draw() {
     if (object.objectType == `tank`) {
       tankCount++;
     }
-    if (object.AIActive === `AIActive` && object.isDead === false) {
+    if (object.AIActive === `AIActive`) {
       object.AIControlled();
       object.setAI();
       // let heading = object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
