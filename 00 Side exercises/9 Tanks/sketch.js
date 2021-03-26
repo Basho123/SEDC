@@ -1,4 +1,32 @@
 //#region variables
+
+/*
+* p5.js requires declaring variables outside of SETUP and DRAW functions so they can be used in both;
+*
+* p5.js functions:
+*   setup(), camera(),translate(), requestPonterLock(), background(), push(),
+*   pop(),texture(),preload(),exitPointerLock(), dist(), ambientLight(),pointLight(), 
+*   keyIsDown(), keyPressed(), draw(), vector(), .add(), map(), random(), heading() and few more.
+*   
+*
+* setup() creates the canvas and calls the functions once
+* draw() is like setInterval() and refreshes 60 times per second;
+* map() gets a minimum and maximum value of a given variable and maps new parameters ie. let map1 = map(something,0,3.14,0,360)
+* vector() easens working with variables that need to consist 3 parameters example x, y, and z
+* vector.add() adds one vector to another example vector1.add(vector2)
+* camera() creates a camera, and .tilt() and .pan() are also p5.js functions
+* requestPointerLock() locks the mouse on the middle of the screen.
+* ambientLight(),pointLight() creates a light source on the given coordinates;
+* dist() measures distance between 2 given sets of x,y,z locations
+* preload() preloads large files before calling the sketch
+* push() and pop() are used to contain one model properties in 1 place
+* translate() is used to translate the position of the object
+*
+*
+*
+*
+* Almost everything else is hard and honest work of functions.
+*/
 let collisionClass;
 let collision = false;
 let sine;
@@ -67,8 +95,6 @@ let brickSlices = 200;
 let tankModel;
 let t34Texture;
 
-// let headingl
-
 let shellHESH;
 let shellHESHtexture;
 
@@ -83,7 +109,7 @@ let materialVariables = {
 
 }
 
-
+// RANDOM STATE NUMBERS TO BE USED SOMEWHERE IN THE PROGRAM
 let randomState = {
   randomNumber: Math.random() * 10000,
   randomStateArray: [true, false],
@@ -117,7 +143,6 @@ setInterval(() => { randomState7 = randomStateArray[Math.floor(Math.random() * 2
 setInterval(() => { randomState8 = randomStateArray[Math.floor(Math.random() * 2)] }, 8000)
 setInterval(() => { randomState9 = randomStateArray[Math.floor(Math.random() * 2)] }, 9000)
 setInterval(() => { randomState10 = randomStateArray[Math.floor(Math.random() * 2)] }, 12000)
-// console.log(randomNumber.three);
 //#endregion
 //#endregion
 
@@ -141,53 +166,67 @@ let camera = new Camera()
 //#endregion
 
 //#region ENVIRONMENT 
-
+//ENVIROMENT WAS CREATED TO BUILD PHYSICS INTO, BUT WAS NOT UTILISED SO MUCH
 class Environment {
   constructor() {
     this.gravity = [0, 0.981, 0];
     this.sky;
   }
 }
+//ELEMENTS IS CONSISTED OF THE BASIS OF ALL ELEMENTS THAT ARE SHOWN ON THE SKETCH
 class Elements extends Environment {
   constructor(positionX, positionY, positionZ, sizeX = 100, sizeY = 100, sizeZ = 100, color = [255, 255, 255], radius = 100) {
     super();
+    //POSITION AND SPEED OF THE OBJECTS
     this.pos = createVector(positionX, positionY, positionZ);
     this.vel = createVector();
     this.acc = createVector();
 
+    //ROTATION AND ANGULAR SPEED OF OBJECTS
     this.rot = createVector();
     this.ang = createVector();
     this.acc2 = createVector();
 
+    //SIZE IS USED FOR COLLISION PURPOSES
     this.size = createVector(sizeX, sizeY, sizeZ)
     this.collisionColor = color;
+    //COLLISION OFFSET IS USED TO OFFSET THE COLLISION POSITION OF A GIVEN OBJECT
     this.collisionOffset = createVector();
 
+    //RADIUS IS USED FOR MEASURING DISTANCE AND TRIGGER PURPOSEES
     this.radius = radius;
     this.r = radius;
 
+    //THESE ARE USED FOR CALCULATING THE FORWARD MOVEMENT OF THE TANKS AND OTHER OBJECTS
     this.dirX;
     this.dirY;
 
+    //GRAVITY IS ADDED TO ALL OBJECTS FROM THIS POINT ON
     this.acc.add(this.gravity[0], this.gravity[1], this.gravity[2]);
 
+    //COLLISION IS SET TO TRUE FOR ALL OBJECTS BY DEFAULT
     this.setCollision = true;
     this.colided = false;
 
+    //AI IS DISABLED FOR ALL OBJECTS BY DEFAULT
     this.AIActive = false;
+    //EVERY OBJECT GETS ITS OWN ID, BUT TANK SHELLS INHERIT THE PARENT ID
     this.id = random(999999999)
 
+    //OBJECT TYPE IS USED FOR LATER VERIFICATIONS
     this.objectType = `undefined`;
     this.playerTank = false;
-    this.mass = 1;
-
     this.isTank = false;
 
+    //DEFAULT OBJECTS MASS, MASS IS USED FOR PHYSICS
+    this.mass = 1;
+
+    //THIS IS USED FOR SEEKING MISSILES
     this.maxSpeed = 4;
     this.maxForce = 0.25;
 
+    //EVERY OBJECT ISN'T DEAD BY DEFAULT
     this.isDead = false;
-
   }
 
   showCollisionBox() {
@@ -297,12 +336,15 @@ class Elements extends Environment {
     }
   }
 }
+// COLLISION CLASS CONTAINS ALL OBJECTS OF THE MAP IN AN ARRAY AND WORKS WITH THEM TO SPLICE OR ADD OR
+// DO A GIVEN CALCULATION
 class Collision extends Environment {
   constructor() {
     super()
     this.objects = [];
   }
 
+  // THIS IS USED TO MEASURE DISTANCE BETWEEN OBJECTS
   measureDistance() {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
@@ -317,14 +359,17 @@ class Collision extends Environment {
               this.objects[g].pos.z);
 
             //THIS CORRECTS THE ENEMY TANK VERTICAL AIM
-            if (distance < (this.objects[i].radius + this.objects[g].radius) * 10) {
-              this.objects[g].turretAng.x = -distance / 15000
+            if (distance < (this.objects[i].radius + this.objects[g].radius) * 50) {
+              this.objects[g].turretAng.x = -distance / 21000;
+              // pTank.turretAng.x = -distance / 17000
             }
           }
         }
       }
     }
   }
+
+  //THIS IS THE FORMULA THAT IS USED FOR INTERSECTION
   static intersects(
     firstRectPosX, firstRectPosY, firstRectPosZ, firstRectWidth, firstRectHeight, firstRectDepth,
     secondRectPosX, secondRectPosY, secondRectPosZ, secondRectWidth, secondRectHeight, secondRectDepth
@@ -355,6 +400,8 @@ class Collision extends Environment {
     }
     return false;
   }
+
+  //COLLISION IS CALCULATED HERE
   collision() {
     if (this.objects.length > 0) {
       for (let i = 0; i < this.objects.length; i++) {
@@ -412,10 +459,12 @@ class Collision extends Environment {
 
                 if ((this.objects[i] instanceof Tank)) {
                   this.objects[i].bodyExplodeVelocity.add(0, -10, 0);
-                  this.objects[i].turretExplodeVelocity.add(random(-5,5), -15, random(-5,5));
-                  this.objects[i].cannonExplodeVelocity.add(random(-10,10), -20, random(-10,10));
+                  this.objects[i].turretExplodeVelocity.add(random(-5, 5), -15, random(-5, 5));
+                  this.objects[i].cannonExplodeVelocity.add(random(-10, 10), -20, random(-10, 10));
+                  this.objects[i].cannonExplodeRotateAngularVelocity.add(random(0.05), random(-0.1, 0.1), random(0.05));
+                } else {
+                  this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
                 }
-                this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
 
                 this.objects[i].ang.x = 0.01 * random(1, 3)
                 this.objects[i].ang.z = 0.01 * random(1, 3)
@@ -775,6 +824,9 @@ class Tank extends Elements {
     this.cannonExplodePosition = createVector();
     this.cannonExplodeVelocity = createVector();
 
+    this.cannonExplodeRotateAngle = createVector();
+    this.cannonExplodeRotateAngularVelocity = createVector();
+
 
     this.size.x = 100;
     this.size.y = 110;
@@ -791,6 +843,9 @@ class Tank extends Elements {
     this.turretAng = createVector()
     this.turretVel = createVector()
     this.turretAcc = createVector()
+
+    this.dirXRecoil;
+    this.dirYRecoil;
 
     this.driverName = driverName;
     this.playerTank = playerTank;
@@ -909,7 +964,7 @@ class Tank extends Elements {
     this.bodyExplodeVelocity.limit(1000);
     this.bodyExplodePosition.add(this.bodyExplodeVelocity);
 
-    
+
 
     //TURRET
     push();
@@ -928,7 +983,7 @@ class Tank extends Elements {
     model(m1a2Turret);
     pop();
     this.turretExplodeVelocity.limit(1000);
-    this.turretExplodePosition.add(this.turretExplodeVelocity);
+    this.turretExplodePosition.add(this.turretExplodeVelocity);  
 
     //  CANNON
     push();
@@ -937,10 +992,10 @@ class Tank extends Elements {
       this.pos.y + 100 + this.cannonExplodePosition.y,
       this.pos.z + this.cannonExplodePosition.z
     );
-    rotateY(PI / 2 + this.turretAng.y);
-    rotateZ(this.ang.z + PI + this.turretAng.x);
+    rotateY(PI / 2 + this.turretAng.y + this.cannonExplodeRotateAngle.y);
+    rotateZ(this.ang.z + PI + this.turretAng.x + this.cannonExplodeRotateAngle.x);
     this.turretAng.x > 0.03 ? this.turretAng.x = 0.03 :
-      this.turretAng.x < -0.15 ? this.turretAng.x = -0.15 : null
+      this.turretAng.x < -0.35 ? this.turretAng.x = -0.35 : null
     scale(this.scale);
     noStroke();
     ambientMaterial(100);
@@ -950,11 +1005,52 @@ class Tank extends Elements {
     this.cannonExplodeVelocity.limit(1000);
     this.cannonExplodePosition.add(this.cannonExplodeVelocity);
 
-    if (this.isDead){
-      this.bodyExplodeVelocity.add(0,0.3,0);
-      this.cannonExplodeVelocity.add(0,0.3,0);
-      this.turretExplodeVelocity.add(0,0.3,0);
+    this.cannonExplodeRotateAngle.add(this.cannonExplodeRotateAngularVelocity);
+
+
+
+    if (this.isDead) {
+      this.bodyExplodeVelocity.add(0, 0.3, 0);
+      this.cannonExplodeVelocity.add(0, 0.3, 0);
+      this.turretExplodeVelocity.add(0, 0.3, 0);
+
+      this.bodyExplodePosition.y > 0 ? this.bodyExplodeVelocity.y *= -0.3 : null;
+      this.turretExplodePosition.y > 30 ? this.turretExplodeVelocity.y *= -0.3 : null;
+      if (this.cannonExplodePosition.y > 50) {
+        this.cannonExplodeVelocity.y *= -0.3;
+        this.cannonExplodeRotateAngle.x = 0;
+      }
+
+      this.bodyExplodeVelocity.div(1.01, 1, 1.01);
+      this.cannonExplodeVelocity.div(1.01, 1, 1.01);
+      this.turretExplodeVelocity.div(1.01, 1, 1.01);
+
     }
+
+    //THIS IS USED FOR RECOIL CALCULATION
+
+    if (!this.isDead) {
+      this.cannonExplodeVelocity.z /= 1.1
+      this.cannonExplodeVelocity.x /= 1.1
+
+      this.cannonExplodePosition.z /= 1.1
+      this.cannonExplodePosition.x /= 1.1
+
+      this.bodyExplodeVelocity.z /= 1.1
+      this.bodyExplodeVelocity.x /= 1.1
+
+      this.bodyExplodePosition.z /= 1.1
+      this.bodyExplodePosition.x /= 1.1
+
+      this.turretExplodeVelocity.z /= 1.1
+      this.turretExplodeVelocity.x /= 1.1
+
+      this.turretExplodePosition.z /= 1.1
+      this.turretExplodePosition.x /= 1.1
+    }
+      
+    this.dirXRecoil = map(sin(-this.turretAng.y), 0, 6.28, 0, 360);
+    this.dirYRecoil = map(cos(-this.turretAng.y), 0, 6.28, 0, 360);
   }
 
   AIControlled() {
@@ -998,8 +1094,10 @@ class Tank extends Elements {
     this.rot.add(this.ang);
     this.acc2.set(0);
 
+
+
     this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360); 
   }
   setAI() {
 
@@ -1018,6 +1116,17 @@ class Tank extends Elements {
 
   fire() {
     if (!this.isDead) {
+      //THIS ADDS RECOIL TO THE TANK
+      this.bodyExplodeVelocity.z = this.dirYRecoil/200 
+      this.bodyExplodeVelocity.x = -this.dirXRecoil/200;
+
+      this.turretExplodeVelocity.z = this.dirYRecoil/200 
+      this.turretExplodeVelocity.x = -this.dirXRecoil/200 
+
+      this.cannonExplodeVelocity.z = this.dirYRecoil/10 
+      this.cannonExplodeVelocity.x = -this.dirXRecoil/10;
+      // this.cannonExplodeVelocity.add
+
       Shell.isFired(
         this.pos.x,
         this.pos.y,
@@ -1134,8 +1243,8 @@ class Shell extends Tank {
     // this.acc.z = -this.dirY*100;
     // this.acc.x = this.dirX*100;
 
-    this.vel.z = -this.dirY * 200
-    this.vel.x = this.dirX * 200;
+    this.vel.z = -this.dirY * 150
+    this.vel.x = this.dirX * 150;
   }
 
   static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
@@ -1264,6 +1373,7 @@ class DummyShellBody extends Tank {
   }
 }
 //#endregion
+//#endregion
 
 //#region PRELOAD
 function preload() {
@@ -1357,7 +1467,7 @@ function setup() {
   // }, 2000);
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 2; tankCount++) {
+  for (let tankCount = 0; tankCount < 1; tankCount++) {
     // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
     collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
   }
