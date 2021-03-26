@@ -54,6 +54,8 @@ let howitzerTurret
 let howitzerCannon;
 let howitzerRadar;
 
+let particles = [];
+
 let sky1;
 let sand1;
 let brick;
@@ -453,6 +455,14 @@ class Collision extends Environment {
               //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
               if ((this.objects[g] instanceof Shell || this.objects[i] instanceof Shell)) {
                 this.objects[i].vel.limit(1000);
+                for (let i = 0; i < 100; i++) {
+                  let p = new Particles(
+                    this.objects[g].pos.x,
+                    this.objects[g].pos.y,
+                    this.objects[g].pos.z)
+                  particles.push(p);
+                }              
+                Particles.remove();
 
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                 this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
@@ -983,7 +993,7 @@ class Tank extends Elements {
     model(m1a2Turret);
     pop();
     this.turretExplodeVelocity.limit(1000);
-    this.turretExplodePosition.add(this.turretExplodeVelocity);  
+    this.turretExplodePosition.add(this.turretExplodeVelocity);
 
     //  CANNON
     push();
@@ -1048,7 +1058,7 @@ class Tank extends Elements {
       this.turretExplodePosition.z /= 1.1
       this.turretExplodePosition.x /= 1.1
     }
-      
+
     this.dirXRecoil = map(sin(-this.turretAng.y), 0, 6.28, 0, 360);
     this.dirYRecoil = map(cos(-this.turretAng.y), 0, 6.28, 0, 360);
   }
@@ -1097,7 +1107,7 @@ class Tank extends Elements {
 
 
     this.dirX = map(sin(this.rot.x / 100), 0, 628, 0, 360);
-    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360); 
+    this.dirY = map(cos(this.rot.x / 100), 0, 628, 0, 360);
   }
   setAI() {
 
@@ -1117,14 +1127,14 @@ class Tank extends Elements {
   fire() {
     if (!this.isDead) {
       //THIS ADDS RECOIL TO THE TANK
-      this.bodyExplodeVelocity.z = this.dirYRecoil/200 
-      this.bodyExplodeVelocity.x = -this.dirXRecoil/200;
+      this.bodyExplodeVelocity.z = this.dirYRecoil / 200
+      this.bodyExplodeVelocity.x = -this.dirXRecoil / 200;
 
-      this.turretExplodeVelocity.z = this.dirYRecoil/200 
-      this.turretExplodeVelocity.x = -this.dirXRecoil/200 
+      this.turretExplodeVelocity.z = this.dirYRecoil / 200
+      this.turretExplodeVelocity.x = -this.dirXRecoil / 200
 
-      this.cannonExplodeVelocity.z = this.dirYRecoil/10 
-      this.cannonExplodeVelocity.x = -this.dirXRecoil/10;
+      this.cannonExplodeVelocity.z = this.dirYRecoil / 10
+      this.cannonExplodeVelocity.x = -this.dirXRecoil / 10;
       // this.cannonExplodeVelocity.add
 
       Shell.isFired(
@@ -1374,6 +1384,33 @@ class DummyShellBody extends Tank {
 }
 //#endregion
 //#endregion
+class Particles extends Elements {
+  constructor(x, y, z) {
+    super(x, y, z);
+    this.vel = p5.Vector.random3D().normalize().mult(random(15, 25))
+    this.color = [255, random(200, 255), random(0, 200)]
+  }
+  update() {
+    this.pos.add(this.vel)
+  }
+  show() {
+    push();
+
+    noStroke();
+    this.vel.add(this.gravity[0], this.gravity[1] / 10, this.gravity[2]);
+    translate(this.pos.x, this.pos.y, this.pos.z)
+    emissiveMaterial(this.color[0], this.color[1], this.color[2], 255);
+    sphere(5, 3, 2);
+
+    pop();
+  }
+
+  static remove(){
+    setTimeout(() => {    
+      particles = [];      
+    }, 100)
+  }
+}
 
 //#region PRELOAD
 function preload() {
@@ -1467,7 +1504,7 @@ function setup() {
   // }, 2000);
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 1; tankCount++) {
+  for (let tankCount = 0; tankCount < 5; tankCount++) {
     // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
     collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
   }
@@ -1521,13 +1558,15 @@ function draw() {
   ambientLight(255);
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
-
+ 
 
   // oTank.show();
   // oTank.updateOther();
   // oTank.edges()
   collisionClass.collision();
   collisionClass.measureDistance();
+
+
 
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
   // directionalLight(255, 255, 255, 0, 50, 0)
@@ -1633,8 +1672,15 @@ function draw() {
     document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
   }
 
+  //SHOW SKY AND SET POSITION OF SKY
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
+
+  //SHOW PARTICLES LAST BECAUSE OF TRANSPARENCY
+  particles.forEach((particle)=>{
+    particle.update();
+    particle.show();   
+  }) 
 }
 
 //#endregion
@@ -1652,7 +1698,6 @@ function keyCommands() {
 
 //#endregion
 
-
 //CHANGE CAMERA
 keyPressed = () => {
   keyCode === 67 ? camera.mode++ : null;  //C KEY
@@ -1662,4 +1707,9 @@ keyPressed = () => {
   // keyCode === 32 ? pTank.scanTurret(true) : null;  //SPACE KEY
   //keyCode === 32 ? pTank.scanBody(true) : null;  //SPACE KEY
 }
+
+//REGULARRY CLEAR PARTICLES
+setInterval(() => {    
+  particles = [];      
+}, 1000)
 
