@@ -364,7 +364,7 @@ class Collision extends Environment {
 
           if (
             this.objects[g].pos.x > globalExistenceDistanceLimit ||
-            this.objects[g].pos.y >= 100 || //GROUND
+            this.objects[g].pos.y > 100 || //GROUND
             this.objects[g].pos.z > globalExistenceDistanceLimit ||
             this.objects[g].pos.x < -globalExistenceDistanceLimit ||
             this.objects[g].pos.y < -globalExistenceDistanceLimit ||
@@ -404,12 +404,17 @@ class Collision extends Environment {
               // this.objects[i].showCollisionBox();
 
               //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
-              if ((this.objects[g] instanceof Shell)) {
+              if ((this.objects[g] instanceof Shell || this.objects[i] instanceof Shell)) {
                 this.objects[i].vel.limit(1000);
 
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                 this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
 
+                if ((this.objects[i] instanceof Tank)) {
+                  this.objects[i].bodyExplodeVelocity.add(0, -10, 0);
+                  this.objects[i].turretExplodeVelocity.add(random(-5,5), -15, random(-5,5));
+                  this.objects[i].cannonExplodeVelocity.add(random(-10,10), -20, random(-10,10));
+                }
                 this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
 
                 this.objects[i].ang.x = 0.01 * random(1, 3)
@@ -417,6 +422,10 @@ class Collision extends Environment {
 
                 this.objects[i].isDead = true;
                 this.objects[g].isDead = true;
+
+                this.objects[i].AIActive = false;
+                this.objects[g].AIActive = false;
+
 
                 this.objects[i].setCollision = false;
 
@@ -458,9 +467,8 @@ class Collision extends Environment {
                   })
 
                 } else continue;
-
+                //SPLICE THE DUMMY SHELL AFTER HIT
                 this.objects.splice(g, 1);
-
               }
               //#endregion 
 
@@ -608,7 +616,6 @@ class Tree extends Elements {
     this.mass = 5 + this.scale;
   }
 }
-
 class YellowTree extends Tree {
   constructor(x, y, z) {
     super();
@@ -660,7 +667,6 @@ class YellowTree extends Tree {
     pop();
   }
 }
-
 class PalmTree extends Tree {
   constructor(x, y, z) {
     super();
@@ -760,20 +766,22 @@ class Tank extends Elements {
     this.randomNumber = random(100);
 
 
+    this.bodyExplodePosition = createVector();
+    this.bodyExplodeVelocity = createVector();
+
+    this.turretExplodePosition = createVector();
+    this.turretExplodeVelocity = createVector();
+
+    this.cannonExplodePosition = createVector();
+    this.cannonExplodeVelocity = createVector();
+
+
     this.size.x = 100;
     this.size.y = 110;
     this.size.z = 100;
 
     this.collisionOffset.y = 90;
     this.acc2.x = acc2x;
-
-    this.bodyExplodeVelocity = createVector(0, 0, 0);
-    this.turretExplodeVelocity = createVector();
-    this.cannonExplodeVelocity = createVector();
-
-    this.acc.x += this.bodyExplodeVelocity.x
-
-
 
     // this.ang.y = angle
     this.radius = 80;
@@ -875,9 +883,19 @@ class Tank extends Elements {
     else if (this.turretAng.y <= -3.125) {
       this.turretAng.y = 3.125
     }
-    //BODY
+
+    //EXPLOSION CALCULATION
+    // this.vel.add(this.bodyExplodeVelocity)
+    // this.vel.add(this.bodyExplodeVelocity)
+    // this.vel.add(this.bodyExplodeVelocity)
+
+    //BODY   
     push();
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    translate(
+      this.pos.x + this.bodyExplodePosition.x,
+      this.pos.y + 100 + this.bodyExplodePosition.y,
+      this.pos.z + this.bodyExplodePosition.z
+    );
     rotateY(-this.rot.x / 100);
     rotateZ(PI);
     rotateY(-PI / 2 + this.ang.y)
@@ -888,10 +906,18 @@ class Tank extends Elements {
     texture(m1a2BodyTexture);
     model(m1a2Body);
     pop();
+    this.bodyExplodeVelocity.limit(1000);
+    this.bodyExplodePosition.add(this.bodyExplodeVelocity);
+
+    
 
     //TURRET
     push();
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    translate(
+      this.pos.x + this.turretExplodePosition.x,
+      this.pos.y + 100 + this.turretExplodePosition.y,
+      this.pos.z + this.turretExplodePosition.z
+    );
     // this.turretAng.x += -movedX * 0.002 //MOVE BY MOUSE
     rotateY(PI / 2 + this.ang.y + this.turretAng.y);
     rotateZ(this.ang.z + PI);
@@ -901,27 +927,39 @@ class Tank extends Elements {
     texture(m1a2TurretTexture);
     model(m1a2Turret);
     pop();
+    this.turretExplodeVelocity.limit(1000);
+    this.turretExplodePosition.add(this.turretExplodeVelocity);
 
     //  CANNON
     push();
-    translate(this.pos.x, this.pos.y + 100, this.pos.z);
+    translate(
+      this.pos.x + this.cannonExplodePosition.x,
+      this.pos.y + 100 + this.cannonExplodePosition.y,
+      this.pos.z + this.cannonExplodePosition.z
+    );
     rotateY(PI / 2 + this.turretAng.y);
     rotateZ(this.ang.z + PI + this.turretAng.x);
-
     this.turretAng.x > 0.03 ? this.turretAng.x = 0.03 :
       this.turretAng.x < -0.15 ? this.turretAng.x = -0.15 : null
-
     scale(this.scale);
     noStroke();
     ambientMaterial(100);
     texture(t34Texture);
     model(m1a2Cannon);
     pop();
-  }
-  AIControlled() {
+    this.cannonExplodeVelocity.limit(1000);
+    this.cannonExplodePosition.add(this.cannonExplodeVelocity);
 
+    if (this.isDead){
+      this.bodyExplodeVelocity.add(0,0.3,0);
+      this.cannonExplodeVelocity.add(0,0.3,0);
+      this.turretExplodeVelocity.add(0,0.3,0);
+    }
+  }
+
+  AIControlled() {
     this.vel.limit(5);         // TANK SPEED
-    this.ang.limit(0.4)        //TANK ROTATION SPEED
+    this.ang.limit(0.4)        // TANK ROTATION SPEED
     this.turretVel.limit(0.01) // TURRET ROTATION SPEED
 
     this.ai.cannonUp ? this.turretAcc.x -= 0.0005          // AI CANNON UP
@@ -932,15 +970,15 @@ class Tank extends Elements {
       : this.ai.turretRight ? this.turretAcc.y -= 0.0005   // AI TURRET RIGHT
         : this.turretVel.y /= 5;
 
-
     this.ai.rotateLeft ? this.acc2.x -= 0.5               // AI ROTATE LEFT    
       : this.ai.rotateRight ? this.acc2.x += 0.5          // AI ROTATE RIGHT
         : this.ang.x /= 1.1
 
 
+
     if (this.ai.forward === true) {                       // AI FORWARD
       this.acc.add(this.dirX * 0.25, 0, -this.dirY * 0.25)
-    }   
+    }
     else if (this.ai.backward) {                          // AI BACKWARD
       this.acc.add(0 - this.dirX * 0.25, 0, this.dirY * 0.25)
     } else {
@@ -1319,8 +1357,9 @@ function setup() {
   // }, 2000);
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 5; tankCount++) {
-    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+  for (let tankCount = 0; tankCount < 2; tankCount++) {
+    // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
   }
 
   //CREATE SCENERY
@@ -1453,7 +1492,7 @@ function draw() {
     if (object.objectType == `tank`) {
       tankCount++;
     }
-    if (object.AIActive === `AIActive` && object.isDead === false) {
+    if (object.AIActive === `AIActive`) {
       object.AIControlled();
       object.setAI();
       // let heading = object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
