@@ -41,6 +41,7 @@ let environment;
 let m1a2Body;
 let m1a2Turret;
 let m1a2Cannon;
+let steelBlockadeModel;
 
 let box1;
 let box2;
@@ -107,9 +108,7 @@ let otherTanks = [];
 let shells = [];
 
 let lockOn = false;
-let materialVariables = {
 
-}
 
 // RANDOM STATE NUMBERS TO BE USED SOMEWHERE IN THE PROGRAM
 let randomState = {
@@ -129,22 +128,6 @@ let randomState = {
 }
 let { randomStateArray, randomState1, randomState2, randomState3, randomState4, randomState5, randomState6, randomState7, randomState8, randomState9, randomState10 } = randomState;
 
-setInterval(() => {
-  let randomNumber = Math.random() * 100
-  if (randomNumber < 5) {
-    randomState1 = true;
-    setTimeout(() => { randomState1 = false }, randomNumber * 100)
-  }
-}, 100)
-setInterval(() => { randomState2 = randomStateArray[Math.floor(Math.random() * 2)] }, 500)
-setInterval(() => { randomState3 = randomStateArray[Math.floor(Math.random() * 2)] }, 1000)
-setInterval(() => { randomState4 = randomStateArray[Math.floor(Math.random() * 2)] }, 2000)
-setInterval(() => { randomState5 = randomStateArray[Math.floor(Math.random() * 2)] }, 4000)
-setInterval(() => { randomState6 = randomStateArray[Math.floor(Math.random() * 2)] }, 6000)
-setInterval(() => { randomState7 = randomStateArray[Math.floor(Math.random() * 2)] }, 7000)
-setInterval(() => { randomState8 = randomStateArray[Math.floor(Math.random() * 2)] }, 8000)
-setInterval(() => { randomState9 = randomStateArray[Math.floor(Math.random() * 2)] }, 9000)
-setInterval(() => { randomState10 = randomStateArray[Math.floor(Math.random() * 2)] }, 12000)
 //#endregion
 //#endregion
 
@@ -461,7 +444,7 @@ class Collision extends Environment {
                     this.objects[g].pos.y,
                     this.objects[g].pos.z)
                   particles.push(p);
-                }              
+                }
                 Particles.remove();
 
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
@@ -628,7 +611,7 @@ class Grass extends Elements {
     this.rotateX = rotateX;
     this.rotateY = rotateY;
     this.radius = 100;
-    this.scale = random(1, 50)
+    this.scale = random(1, 80)
     // this.scale = 1;
 
     this.setCollision = false;
@@ -810,7 +793,7 @@ class Walls extends Elements {
     rotateZ(this.rot.z);
 
     noStroke();
-    ambientMaterial(0);
+    //ambientMaterial(0);
     texture(this.texture);
     box(10, 100, 200);
     noFill();
@@ -1244,8 +1227,9 @@ class Shell extends Tank {
     rotateX(this.vel.y / 75)
     scale(2);
     noStroke();
-    ambientMaterial(100);
-    texture(shellHESHtexture);
+    specularMaterial(255,230,50);
+    // texture(shellHESHtexture);
+
     model(shellHESH);
     pop();
 
@@ -1388,7 +1372,10 @@ class Particles extends Elements {
   constructor(x, y, z) {
     super(x, y, z);
     this.vel = p5.Vector.random3D().normalize().mult(random(15, 25))
-    this.color = [255, random(200, 255), random(0, 200)]
+    // this.color = [255, random(200, 255), random(0, 200)]
+    let p = 255;
+    this.color = [p, p, p]
+
   }
   update() {
     this.pos.add(this.vel)
@@ -1402,12 +1389,13 @@ class Particles extends Elements {
     emissiveMaterial(this.color[0], this.color[1], this.color[2], 255);
     sphere(5, 3, 2);
 
+
     pop();
   }
 
-  static remove(){
-    setTimeout(() => {    
-      particles = [];      
+  static remove() {
+    setTimeout(() => {
+      particles = [];
     }, 100)
   }
 }
@@ -1444,14 +1432,11 @@ function preload() {
 
 
 
-  // wire = loadModel("files/models/scenery/objects/barbedWire.obj");
+  steelBlockadeModel = loadModel("files/models/scenery/objects/steelBlockade.obj");
 
   // grass = loadModel("files/models/scenery/grass/Grass.obj");
   grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
   shellHESH = loadModel("files/models/tanks/tankShells/g1.obj");
-
-  // tankModel = loadModel("files/models/tankModels/M1A1/M1A1.obj");
-  // tankModel = loadModel("files/models/scenery/objects/sandBag.obj");
 
   t34Texture = loadImage("files/textures/t34Texture.jpg");
   shellHESHtexture = loadImage("files/textures/HESH.png");
@@ -1468,7 +1453,7 @@ function preload() {
 
 //#region SETUP
 function setup() {
-
+  setAttributes('antialias', true);
   createCanvas(windowWidth, windowHeight, WEBGL);
 
   //CREATE CAMERA
@@ -1487,7 +1472,7 @@ function setup() {
   //CREATE ESSENTIALS
   collisionClass = new Collision();
   environment = new Environment();
-  terrain = new Terrain(0, 0, 15000, 15000, sand1)
+  terrain = new Terrain(0, 0, 25000, 25000, sand1)
   environment.sky = new Sky(0, 0, 0);
   //CREATE PLAYER TANK
   pTank = new Tank(0, -100, 0, true, `BASHO`, 1, false, 0);
@@ -1504,38 +1489,22 @@ function setup() {
   // }, 2000);
 
   //CREATE ENEMY TANKS
-  for (let tankCount = 0; tankCount < 5; tankCount++) {
-    // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
-    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
+  for (let tankCount = 0; tankCount < 3; tankCount++) {
+    collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+    // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
   }
 
   //CREATE SCENERY
-  for (let grassCount = 0; grassCount < 100; grassCount++) {
-    collisionClass.objects.push(new Grass(random(-5000, 5000), 0, random(-5000, 5000), PI))
+  for (let grassCount = 0; grassCount < 150; grassCount++) {
+    collisionClass.objects.push(new Grass(random(-10000, 10000), 0, random(-10000, 10000), PI))
   }
   for (let treeCount = 0; treeCount < 60; treeCount++) {
-    collisionClass.objects.push(new YellowTree(random(-6000, 6000), 0, random(-5000, 5000)))
+    collisionClass.objects.push(new YellowTree(random(-10000, 10000), 0, random(-10000, 10000)))
   }
-  let horizontalWallPosition = 0;
-  let verticalWallPosition = 0;
-
-  for (let blocks = 1; blocks < 20; blocks++) {
-    let piArray = [PI, PI / 2];
-    let randomPi = piArray[Math.floor(Math.random() * 2)]
-
-    if (randomPi == PI) {
-      let phaseShifter = [-1, 1];
-      let randomPhase = phaseShifter[Math.floor(Math.random() * 2)]
-      horizontalWallPosition += 1000 * (Math.random() + 0.1) * randomPhase;
-      collisionClass.objects.push(new Walls(horizontalWallPosition, 50, verticalWallPosition, PI / 2))
-    }
-    else {
-      let phaseShifter = [-1, 1];
-      let randomPhase = phaseShifter[Math.floor(Math.random() * 2)]
-      verticalWallPosition += 1000 * (Math.random() + 0.1) * randomPhase
-      collisionClass.objects.push(new Walls(horizontalWallPosition, 50, verticalWallPosition, PI))
-    }
-  }
+  // for (let blocks = 1; blocks < 30; blocks++) {  
+  //   //   collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI / 2,PI / 2,PI / 2))    
+  //   //  collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI,PI / 2))    
+  // }
 }
 //#endregion
 
@@ -1555,23 +1524,34 @@ function draw() {
 
   // pTank.showCollisionBox();
   //LIGHT
-  ambientLight(255);
+  ambientLight(230,240,250);
+
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
- 
+  particles.forEach((particle) => {
+    particle.update();
+    particle.show();
+  })
+  if (particles.length > 0) {
+    pointLight(250, 240, 200, particles[0].pos.x, particles[0].pos.y, particles[0].pos.z);
+  }
 
-  // oTank.show();
-  // oTank.updateOther();
-  // oTank.edges()
+
   collisionClass.collision();
   collisionClass.measureDistance();
 
 
 
   // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
-  // directionalLight(255, 255, 255, 0, 50, 0)
-  // spotLight(0, 250, 0, locX, locY, 100, 0, 0, -1, Math.PI / 16);
-
+  // let lightRot = -pTank.rot.x / 100
+  // let lightFlip = 1;
+  // if (lightRot < -1.57 || lightRot > 1.57){
+  //   // lightFlip = 1;
+  //   // lightRot*= -1;
+  // }
+  // else lightFlip = -1;
+  // spotLight(0, 250, 255, pTank.pos.x, pTank.turretAng.x * 1000 + 50, pTank.pos.z, lightRot, 0, lightFlip, 0.9, 1);
+  // console.log(lightRot);
   // box1.showCollisionBox();
   // box2.showCollisionBox();
   // box1.pos.x = mouseX * 3 - 1200;
@@ -1667,7 +1647,7 @@ function draw() {
   if (pTank.isDead === true) {
     document.getElementById(`centerText`).style.display = `flex`;
   }
-  if (tankCount - 1 === 0) {
+  if (tankCount - 1 === 0 && pTank.isDead == false) {
     document.getElementById(`centerText`).style.display = `flex`;
     document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
   }
@@ -1677,10 +1657,7 @@ function draw() {
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 
   //SHOW PARTICLES LAST BECAUSE OF TRANSPARENCY
-  particles.forEach((particle)=>{
-    particle.update();
-    particle.show();   
-  }) 
+
 }
 
 //#endregion
@@ -1709,7 +1686,7 @@ keyPressed = () => {
 }
 
 //REGULARRY CLEAR PARTICLES
-setInterval(() => {    
-  particles = [];      
+setInterval(() => {
+  particles = [];
 }, 1000)
 
