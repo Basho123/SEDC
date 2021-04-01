@@ -55,7 +55,7 @@ let howitzerTurret
 let howitzerCannon;
 let howitzerRadar;
 
-let particles = [];
+// let particles = [];
 
 let sky1;
 let sand1;
@@ -403,19 +403,19 @@ class Collision extends Environment {
             this.objects.splice(g, 1);
             break;
           }
-            else if( this.objects[g].pos.y > 100 ) {
-              if((this.objects[g] instanceof Shell)){
-                for (let i = 0; i < 100; i++) {
-                  let p = new Particles(
-                    this.objects[g].pos.x,
-                    this.objects[g].pos.y,
-                    this.objects[g].pos.z)
-                  particles.push(p);
-                }
-              }              
+          else if (this.objects[g].pos.y > 100) {
+            if ((this.objects[g] instanceof Shell)) {
+              for (let i = 0; i < 100; i++) {
+                let p = new Particles(
+                  this.objects[g].pos.x,
+                  this.objects[g].pos.y,
+                  this.objects[g].pos.z)
+                particles.container.push(p);
+              }
+            }
             this.objects.splice(g, 1);
             break;
-            }
+          }
 
           else if (this.objects[i].isTank === true) {
             this.objects[i].pos.x < -globalBoundry ? this.objects[i].pos.x += 10
@@ -455,7 +455,7 @@ class Collision extends Environment {
                     this.objects[g].pos.x,
                     this.objects[g].pos.y,
                     this.objects[g].pos.z)
-                  particles.push(p);
+                  particles.container.push(p);
                 }
                 // PARTICLES ARE REMOVED FROM THE ARRAY 48LATER THROUGH DRAW
 
@@ -1198,6 +1198,7 @@ class Shell extends Tank {
     this.pos.x = x;
     this.pos.y = y + 60;
     this.pos.z = z;
+   
 
     this.id = id;
     this.isTank = false;
@@ -1223,7 +1224,7 @@ class Shell extends Tank {
 
     this.playerShell = playerTank;
 
-    this.setCollision = true;
+    this.setCollision = true;  
   }
 
   show() {
@@ -1243,6 +1244,10 @@ class Shell extends Tank {
     // MULTIPLY THESE TO MAKE MISSILE PHYSICS 
     // this.acc.z = -this.dirY*100;
     // this.acc.x = this.dirX*100;
+
+    // UNCOMMENT THESE TO INCREASE SHELL SPEED
+    // this.pos.x += -this.dirX * 150;
+    // this.pos.z += this.dirY * 150;
 
     this.vel.z = -this.dirY * 150
     this.vel.x = this.dirX * 150;
@@ -1383,21 +1388,23 @@ class Particles extends Elements {
     let p = 255;
     this.color = [p, p, p]
 
+    this.container = [];
+
   }
   update() {
     this.pos.add(this.vel)
   }
   show() {
     push();
-
     noStroke();
     this.vel.add(this.gravity[0], this.gravity[1] / 10, this.gravity[2]);
     translate(this.pos.x, this.pos.y, this.pos.z)
     emissiveMaterial(this.color[0], this.color[1], this.color[2], 255);
     sphere(5, 3, 2);
-
-
     pop();
+  }
+  delete(frames) {
+  frameCount % frames == 0 ? this.container = [] : null;
   }
 }
 
@@ -1475,6 +1482,7 @@ function setup() {
   environment = new Environment();
   terrain = new Terrain(0, 0, 25000, 25000, sand1)
   environment.sky = new Sky(0, 0, 0);
+  particles = new Particles();
   //CREATE PLAYER TANK
   pTank = new Tank(0, -100, 0, true, `BASHO`, 1, false, 0);
   collisionClass.objects.push(pTank);
@@ -1529,12 +1537,12 @@ function draw() {
 
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
-  particles.forEach((particle) => {
+  particles.container.forEach((particle) => {
     particle.update();
     particle.show();
   })
-  if (particles.length > 0) {
-    pointLight(250, 240, 200, particles[0].pos.x, particles[0].pos.y, particles[0].pos.z);
+  if (particles.container.length > 0) {
+    pointLight(250, 240, 200, particles.container[0].pos.x, particles.container[0].pos.y, particles.container[0].pos.z);
   }
 
 
@@ -1611,7 +1619,7 @@ function draw() {
 
 
 
- 
+
 
   let tankCount = 0;
   collisionClass.objects.forEach((object) => {
@@ -1655,7 +1663,7 @@ function draw() {
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 
-  frameCount % 30 == 0 ? particles = [] : null;
+  particles.delete(60);
   frameCount % 300 == 0 ? collisionClass.objects.forEach((object, index) => object.isDead ? collisionClass.objects.splice(index, 1) : null) : null;
 }
 
