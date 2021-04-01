@@ -396,7 +396,6 @@ class Collision extends Environment {
 
           if (
             this.objects[g].pos.x > globalExistenceDistanceLimit ||
-            this.objects[g].pos.y > 100 || //GROUND
             this.objects[g].pos.z > globalExistenceDistanceLimit ||
             this.objects[g].pos.x < -globalExistenceDistanceLimit ||
             this.objects[g].pos.y < -globalExistenceDistanceLimit ||
@@ -404,6 +403,19 @@ class Collision extends Environment {
             this.objects.splice(g, 1);
             break;
           }
+            else if( this.objects[g].pos.y > 100 ) {
+              if((this.objects[g] instanceof Shell)){
+                for (let i = 0; i < 100; i++) {
+                  let p = new Particles(
+                    this.objects[g].pos.x,
+                    this.objects[g].pos.y,
+                    this.objects[g].pos.z)
+                  particles.push(p);
+                }
+              }              
+            this.objects.splice(g, 1);
+            break;
+            }
 
           else if (this.objects[i].isTank === true) {
             this.objects[i].pos.x < -globalBoundry ? this.objects[i].pos.x += 10
@@ -445,7 +457,7 @@ class Collision extends Environment {
                     this.objects[g].pos.z)
                   particles.push(p);
                 }
-                Particles.remove();
+                // PARTICLES ARE REMOVED FROM THE ARRAY 48LATER THROUGH DRAW
 
                 this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                 this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
@@ -472,13 +484,8 @@ class Collision extends Environment {
                 this.objects[i].setCollision = false;
 
                 //SHELL IS ALWAYS SECOND OBJECT BECAUSE IS CREATED LATER IN ARRAY
-                this.objects.splice(g, 1);
 
-                //TIMEOUT TO SPLICE THE OBJECT FROM THE ARRAY AFTER SOME ANIMATION
-                setTimeout(() => {
-                  this.objects.splice(i, 1);
-
-                }, 3000)
+                //THE OTHER OBJECT IS SET TO DEAD, AND IT IS SPLICED LATER
 
                 continue;
               } else null;
@@ -1227,7 +1234,7 @@ class Shell extends Tank {
     rotateX(this.vel.y / 75)
     scale(2);
     noStroke();
-    specularMaterial(255,230,50);
+    specularMaterial(255, 230, 50);
     // texture(shellHESHtexture);
 
     model(shellHESH);
@@ -1392,12 +1399,6 @@ class Particles extends Elements {
 
     pop();
   }
-
-  static remove() {
-    setTimeout(() => {
-      particles = [];
-    }, 100)
-  }
 }
 
 //#region PRELOAD
@@ -1524,7 +1525,7 @@ function draw() {
 
   // pTank.showCollisionBox();
   //LIGHT
-  ambientLight(230,240,250);
+  ambientLight(230, 240, 250);
 
   // lightFalloff(1, 0, 0);
   pointLight(250, 250, 250, pTank.pos.x - 3000, -600, pTank.pos.z + 500);
@@ -1610,9 +1611,7 @@ function draw() {
 
 
 
-  // for (tanks in collisionClass.objects.playerTank) {
-  //   console.log(tanks);
-  // }
+ 
 
   let tankCount = 0;
   collisionClass.objects.forEach((object) => {
@@ -1656,22 +1655,22 @@ function draw() {
   environment.sky.show();
   environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 
-  //SHOW PARTICLES LAST BECAUSE OF TRANSPARENCY
-
+  frameCount % 30 == 0 ? particles = [] : null;
+  frameCount % 300 == 0 ? collisionClass.objects.forEach((object, index) => object.isDead ? collisionClass.objects.splice(index, 1) : null) : null;
 }
 
 //#endregion
 
 //#region KEYCOMMANDS
-function keyCommands() {
-  if (keyIsDown(105)) {
-    camera.yPositionSpeed = 5;
-  }
-  else { camera.yPositionSpeed = 0 }
-  if (keyIsDown(99)) {
-    camera.yPositionSpeed = -5;
-  }
-}
+// function keyCommands() {
+//   if (keyIsDown(105)) {
+//     camera.yPositionSpeed = 5;
+//   }
+//   else { camera.yPositionSpeed = 0 }
+//   if (keyIsDown(99)) {
+//     camera.yPositionSpeed = -5;
+//   }
+// }
 
 //#endregion
 
@@ -1684,9 +1683,4 @@ keyPressed = () => {
   // keyCode === 32 ? pTank.scanTurret(true) : null;  //SPACE KEY
   //keyCode === 32 ? pTank.scanBody(true) : null;  //SPACE KEY
 }
-
-//REGULARRY CLEAR PARTICLES
-setInterval(() => {
-  particles = [];
-}, 1000)
 
