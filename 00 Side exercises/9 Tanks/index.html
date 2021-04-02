@@ -10,21 +10,50 @@
 </head>
 
 <body>
+  <div id="mainMenu">
+
+    <div id="mainMenuHeader">
+      <h1 id="mainMenuHeadline">TANKS</h1>
+    </div>
+
+    <div id="mainMenuBody">
+      <div id="mainMenuButtonsContainer">
+        <button class= "mainMenuButtons" id="newGame">NEW GAME</button>
+        <button class= "mainMenuButtons" id="continueGame">CONTINUE GAME</button>
+        <button class= "mainMenuButtons" id="options">OPTIONS</button>       
+      </div>
+      <div id="optionsContainer">
+        <button class= "mainMenuButtons" id="detailLevel">DETAIL LEVEL: <span id="detailSpan"></span></button>
+        <button class= "mainMenuButtons" id="difficulty">DIFFICULTY: <span id="difficultySpan"></span></button>
+        <button class= "mainMenuButtons" id="back">BACK</button>
+      </div>     
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
   <div id="HUDContainer">
     <div id="HUDtopRight">
       <h2>ENEMY TANKS:<span id="enemyTanksValue">0</span></h2>
     </div>
-    <!-- <div id="HUDtopLeft">
-      <h2>ENEMIES COUNT:</h2>
-    </div> -->
   </div>
-
   <div id="centerText">
     <h1>YOU ARE DESTROYED!!!</h1>
   </div>
 
 
   <!-- <script src="p5.sound.min.js"></script> -->
+  <script src="mainMenu.js"></script>
   <script src="sketch.js"></script>
 </body>
 
