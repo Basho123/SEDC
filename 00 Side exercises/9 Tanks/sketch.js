@@ -1506,7 +1506,7 @@ if (main.level > 0) {
         break;
       case 2:
         skyTexture = loadImage("files/background/sky1.jpg");
-        terrainTexture = loadImage("files/background/sand.jpg");
+        terrainTexture = loadImage("files/background/sand.png");
         brick = loadImage("files/background/brick.jpg");
 
         //TREE1  
