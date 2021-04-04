@@ -109,7 +109,6 @@ let shells = [];
 
 let lockOn = false;
 
-
 // RANDOM STATE NUMBERS TO BE USED SOMEWHERE IN THE PROGRAM
 let randomState = {
   randomNumber: Math.random() * 10000,
@@ -296,8 +295,8 @@ if (main.level > 0) {
     playerControlled() {
       if (this.isDead === false && this.playerTank) {
 
-        this.vel.limit(5);         // TANK SPEED
-        this.ang.limit(0.4)        //TANK ROTATION SPEED
+        this.vel.limit(5 * (1 + hangar.tankUpgrades.getEngineValue() / 30));         // TANK SPEED
+        this.ang.limit(0.4 * (1 + (hangar.tankUpgrades.getEngineValue() / 30)));        //TANK ROTATION SPEED
         this.turretVel.limit(0.01) // TURRET ROTATION SPEED
 
         keyIsDown(104) ? this.turretAcc.x -= 0.0005//NUM 8 KEY CANNON UP
@@ -305,8 +304,8 @@ if (main.level > 0) {
             : this.turretVel.x /= 1.2; // 
 
 
-        keyIsDown(100) ? this.turretAcc.y += 0.0005 :   // NUM 4 KEY TURRET LEFT
-          keyIsDown(102) ? this.turretAcc.y -= 0.0005 :   // NUM 6 KEY TURRET RIGHT
+        keyIsDown(100) ? this.turretAcc.y += 0.0005 * hangar.tankUpgrades.getServoMotorsValue() :   // NUM 4 KEY TURRET LEFT
+          keyIsDown(102) ? this.turretAcc.y -= 0.0005 * hangar.tankUpgrades.getServoMotorsValue() :   // NUM 6 KEY TURRET RIGHT
             this.turretVel.y /= 5;
 
 
@@ -508,6 +507,13 @@ if (main.level > 0) {
                 // this.objects[g].showCollisionBox();
                 // this.objects[i].showCollisionBox();
 
+                if (this.objects[g].playerShell == true) {
+                  (this.objects[i] instanceof Tank) && this.objects[i].playerTank == false ? playerEconomy.addMoney(100)
+                    : (this.objects[i] instanceof Tree) ? playerEconomy.addMoney(50)
+                      : null;
+                }
+
+
                 //#region 1. TANK SHELL INTERACTS WITH OBJECTS             
                 if ((this.objects[g] instanceof Shell || this.objects[i] instanceof Shell)) {
                   this.objects[i].vel.limit(1000);
@@ -518,7 +524,7 @@ if (main.level > 0) {
                       this.objects[g].pos.z)
                     particles.container.push(p);
                   }
-                  // PARTICLES ARE REMOVED FROM THE ARRAY 48LATER THROUGH DRAW
+                  // PARTICLES ARE REMOVED FROM THE ARRAY LATER THROUGH DRAW
 
                   this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                   this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
@@ -611,7 +617,7 @@ if (main.level > 0) {
 
 
                 }
-                // endregion 
+                // endregion               
 
               }
               else null;
@@ -624,6 +630,7 @@ if (main.level > 0) {
     }
   }
   //#endregion
+
   //#endregion
   //#region SCENERY
   class Terrain extends Environment {
@@ -1316,9 +1323,15 @@ if (main.level > 0) {
       // UNCOMMENT THESE TO INCREASE SHELL SPEED
       // this.pos.x += -this.dirX * 150;
       // this.pos.z += this.dirY * 150;
+   
 
       this.vel.z = -this.dirY * 150
       this.vel.x = this.dirX * 150;
+
+      if (this.playerShell) {
+        this.pos.x += this.dirX * hangar.tankUpgrades.getCannonValue()*5;
+        this.pos.z += -this.dirY * hangar.tankUpgrades.getCannonValue()*5;
+      }
     }
 
     static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
@@ -1748,10 +1761,16 @@ if (main.level > 0) {
       object.show();
     })
 
-    let enemyTanksHTML = document.getElementById(`enemyTanksValue`)
-    enemyTanksHTML.innerHTML = tankCount - 1;
+    //HUD AND HANGAR
+
+    hud.enemyTanks.innerHTML = tankCount - 1;
+    hud.moneyValue.innerText = playerEconomy.getMoneyCount();
+
     if (pTank.isDead === true) {
       document.getElementById(`centerText`).style.display = `flex`;
+
+      hangar.tankUpgrades.resetAll();
+
       if (frameCount % 500 == 0) {
         window.location.reload();
       }
@@ -1764,6 +1783,7 @@ if (main.level > 0) {
       if (frameCount % 500 == 0) {
         Main.nextLevel();
         Main.save(+localStorage.getItem('level'));
+        hangar.go();
         window.location.reload();
       }
     }
@@ -1797,7 +1817,8 @@ if (main.level > 0) {
     keyCode === 67 ? camera.mode++ : null;  //C KEY
     camera.mode === 4 ? camera.mode = 0 : null; //RESET CAMERA TO FIRST MODE
 
-    keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY
+    keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY    
+    
     // keyCode === 32 ? pTank.scanTurret(true) : null;  //SPACE KEY
     //keyCode === 32 ? pTank.scanBody(true) : null;  //SPACE KEY
   }
