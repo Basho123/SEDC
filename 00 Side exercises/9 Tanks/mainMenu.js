@@ -9,13 +9,19 @@ playerMoneyStorage == null || isNaN(playerMoneyStorage) ? localStorage.setItem('
 detailsStorage == null || isNaN(detailsStorage) ? localStorage.setItem('details', 1) : null;
 difficultyStorage == null || isNaN(difficultyStorage) ? localStorage.setItem('difficulty', 1) : null;
 
+//MAIN MENU DOM
 let menu = {
     mainMenu: document.getElementById('mainMenu'),
     firstMenu: document.getElementById('mainMenuButtonsContainer'),
     optionsMenu: document.getElementById('optionsContainer'),
+    controlsMenu: document.getElementById('controlsContainer'),
+    loadingScreen: document.getElementById('p5_loading'),
+    canvas: document.getElementsByTagName('canvas'),
 
-    newGameButton: document.getElementById('newGame'),
     continueGameButton: document.getElementById('continueGame'),
+    newGameButton: document.getElementById('newGame'),
+    loadGameButton: document.getElementById('loadGame'),
+    controlsButton: document.getElementById('controlsButton'),
     optionsButton: document.getElementById('options'),
 
     detailLevelButton: document.getElementById('detailLevel'),
@@ -31,20 +37,25 @@ let menu = {
     getDifficulty: () => +localStorage.getItem('difficulty'),
 
     backButton: document.getElementById('back'),
+    backButtonControls: document.getElementById('backControls'),
+
 }
 
+//HUD
 let hud = {
+    container: document.getElementById('HUDContainer'),
     enemyTanks: document.getElementById(`enemyTanksValue`),
     moneyValue: document.getElementById(`moneyValue`),
 }
 
+//MONEY METHODS FOR PLAYER
 let playerEconomy = {
     getMoneyCount: () => +localStorage.getItem('playerMoney'),
     addMoney: number => localStorage.setItem('playerMoney', playerEconomy.getMoneyCount() + number),
     deductMoney: number => localStorage.setItem('playerMoney', playerEconomy.getMoneyCount() - number),
 }
 
-
+//HANGAR DOM AND ALL UPGRADES AND UPGRADE METHODS
 let hangar = {
     mainDiv: document.getElementById('hangarMainDiv'),
     leaveButton: document.getElementById('leaveHangar'),
@@ -73,7 +84,6 @@ let hangar = {
         hangar.cannonUpgradePriceSpan.innerText = hangar.tankUpgrades.getCannonUpgradeCost();
 
     },
-
 
     tankUpgrades: {
         servoMotors: localStorage.getItem('servoMotorsUpgrade') == null ? localStorage.setItem('servoMotorsUpgrade', 1) : localStorage.getItem('servoMotorsUpgrade'),
@@ -104,6 +114,7 @@ let hangar = {
         },
     },
 
+    //SEND TANK TO HANGAR
     go: () => {
         let saveValue = +localStorage.getItem('save');
         if (saveValue > 0) {
@@ -113,6 +124,7 @@ let hangar = {
         else console.log('Tank is already at hangar');
 
     },
+    //COMMAND TANK TO LEAVE HANGAR
     leave: () => {
         let saveValue = +localStorage.getItem('save');
         if (saveValue < 0) {
@@ -123,15 +135,18 @@ let hangar = {
     },
 
 }
+//REFRESHES VALUES SO TO SHOW CORRECT
 hangar.refreshUpgradeValues();
 
-
-
+//HIDE MOST OF THE MENU ELEMENTS AND SHOW THEM WHEN CALLED
+menu.continueGameButton.style.display = 'none';
+hud.container.style.display = 'none';
+menu.loadingScreen.style.display = 'none';
+menu.optionsMenu.style.display = 'none';
+menu.controlsMenu.style.display = 'none';
 
 level == 0 ? menu.mainMenu.style.display = 'flex' : menu.mainMenu.style.display = 'none';
 level < 0 ? hangar.mainDiv.style.display = 'flex' : hangar.mainDiv.style.display = 'none';
-
-menu.optionsMenu.style.display = 'none';
 
 //#region  HANGAR MENU
 //UPGRADES
@@ -148,7 +163,7 @@ hangar.engineUpgradeButton.addEventListener('click', () => {
 });
 
 hangar.servoMotorsUpgradeButton.addEventListener('click', () => {
-    if (playerEconomy.getMoneyCount() > 2000 * hangar.tankUpgrades.getServoMotorsValue()) {
+    if (playerEconomy.getMoneyCount() > 1000 * hangar.tankUpgrades.getServoMotorsValue()) {
         playerEconomy.deductMoney(hangar.tankUpgrades.getServoMotorsUpgradeCost());
         hangar.tankUpgrades.upgradeServoMotors();
         hangar.refreshUpgradeValues();
@@ -158,7 +173,7 @@ hangar.servoMotorsUpgradeButton.addEventListener('click', () => {
 });
 
 hangar.cannonUpgradeButton.addEventListener('click', () => {
-    if (playerEconomy.getMoneyCount() > 2000 * hangar.tankUpgrades.getCannonValue()) {
+    if (playerEconomy.getMoneyCount() > 1000 * hangar.tankUpgrades.getCannonValue()) {
         playerEconomy.deductMoney(hangar.tankUpgrades.getCannonUpgradeCost());
         hangar.tankUpgrades.upgradeCannon();
         hangar.refreshUpgradeValues();
@@ -168,7 +183,7 @@ hangar.cannonUpgradeButton.addEventListener('click', () => {
 
 
 
-//LEAVE HANGAR
+//LEAVE HANGAR TO ENTER BATTLEFIELD
 hangar.leaveButton.addEventListener('click', () => {
     hangar.leave();
     window.location.reload();
@@ -187,11 +202,17 @@ menu.newGameButton.addEventListener('click', () => {
 })
 
 //CONTINUE GAME
-menu.continueGameButton.addEventListener('click', () => {
+menu.loadGameButton.addEventListener('click', () => {
     let saveValue = +localStorage.getItem('save');
     localStorage.setItem('level', saveValue);
     hangar.go();
     window.location.reload();
+})
+
+//CONTROLS
+menu.controlsButton.addEventListener('click', ()=>{
+    menu.firstMenu.style.display = 'none';
+    menu.controlsMenu.style.display = 'block';
 })
 
 //OPTIONS
@@ -278,10 +299,15 @@ menu.difficultyButton.addEventListener('click', () => {
     }
 })
 
-//BACK
+//BACK BUTTON IN OPTIONS
 menu.backButton.addEventListener('click', () => {
     menu.firstMenu.style.display = 'block';
     menu.optionsMenu.style.display = 'none';
+})
+//BACK BUTTON IN CONTROLS
+menu.backButtonControls.addEventListener('click', () => {
+    menu.firstMenu.style.display = 'block';
+    menu.controlsMenu.style.display = 'none';
 })
 //#endregion
 

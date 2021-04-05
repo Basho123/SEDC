@@ -109,7 +109,7 @@ let shells = [];
 
 let lockOn = false;
 
-// RANDOM STATE NUMBERS TO BE USED SOMEWHERE IN THE PROGRAM
+// RANDOM STATE NUMBERS ARE CALLED IN THE AI OF THE ENEMY TANKS
 let randomState = {
   randomNumber: Math.random() * 10000,
   randomStateArray: [true, false],
@@ -134,6 +134,7 @@ console.log(`You are at level ${localStorage.getItem('level')}`);
 class Main {
   constructor() {
     this.level = localStorage.getItem('level');
+    this.isPaused = true;
   }
   static level(number) {
     localStorage.setItem('level', number);
@@ -146,9 +147,23 @@ class Main {
   static save(number) {
     localStorage.setItem('save', number);
   }
+  static toggleMenu() {
+    this.isPaused = !this.isPaused;
+    if (this.isPaused) {
+      menu.continueGameButton.style.display = 'block';
+      menu.canvas[0].style.display = 'none';
+      menu.mainMenu.style.display = 'flex';
+      frameRate(0);
+    }
+    else {
+      frameRate(60);
+      menu.canvas[0].style.display = 'block';
+      menu.mainMenu.style.display = 'none'
+    }
+  }
 }
 let main = new Main();
-
+//GAME IS STARTED
 if (main.level > 0) {
   //#region OPTIONS
   options = {
@@ -295,8 +310,8 @@ if (main.level > 0) {
     playerControlled() {
       if (this.isDead === false && this.playerTank) {
 
-        this.vel.limit(5 * (1 + hangar.tankUpgrades.getEngineValue() / 30));         // TANK SPEED
-        this.ang.limit(0.4 * (1 + (hangar.tankUpgrades.getEngineValue() / 30)));        //TANK ROTATION SPEED
+        this.vel.limit(5 * (1 + hangar.tankUpgrades.getEngineValue() / 20));         // TANK SPEED
+        this.ang.limit(0.4 * (1 + (hangar.tankUpgrades.getEngineValue() / 20)));        //TANK ROTATION SPEED
         this.turretVel.limit(0.01) // TURRET ROTATION SPEED
 
         keyIsDown(104) ? this.turretAcc.x -= 0.0005//NUM 8 KEY CANNON UP
@@ -304,8 +319,8 @@ if (main.level > 0) {
             : this.turretVel.x /= 1.2; // 
 
 
-        keyIsDown(100) ? this.turretAcc.y += 0.0005 * hangar.tankUpgrades.getServoMotorsValue() :   // NUM 4 KEY TURRET LEFT
-          keyIsDown(102) ? this.turretAcc.y -= 0.0005 * hangar.tankUpgrades.getServoMotorsValue() :   // NUM 6 KEY TURRET RIGHT
+        keyIsDown(100) ? this.turretAcc.y += 0.0005 * hangar.tankUpgrades.getServoMotorsValue() * 2 :   // NUM 4 KEY TURRET LEFT
+          keyIsDown(102) ? this.turretAcc.y -= 0.0005 * hangar.tankUpgrades.getServoMotorsValue() * 2 :   // NUM 6 KEY TURRET RIGHT
             this.turretVel.y /= 5;
 
 
@@ -316,10 +331,10 @@ if (main.level > 0) {
 
 
         if (keyIsDown(87)) {                  // W KEY TANK FORWARD
-          this.acc.add(this.dirX * 0.25, 0, -this.dirY * 0.25)
+          this.acc.add(this.dirX * 0.25 * hangar.tankUpgrades.getEngineValue(), 0, -this.dirY * 0.25 * hangar.tankUpgrades.getEngineValue())
         }
         else if (keyIsDown(83)) {                  // S KEY TANK BACKWARD
-          this.acc.add(0 - this.dirX * 0.25, 0, this.dirY * 0.25)
+          this.acc.add(0 - this.dirX * 0.25 * hangar.tankUpgrades.getEngineValue(), 0, this.dirY * 0.25 * hangar.tankUpgrades.getEngineValue())
         } else {
           this.vel.z /= 1.1;
           this.vel.x /= 1.1;
@@ -563,11 +578,8 @@ if (main.level > 0) {
                 //#region 2.1 BODY TANK DUMMY CHECK
 
                 if ((this.objects[g] instanceof DummyShellBody)) {
-                  if ((this.objects[i] instanceof YellowTree)) {
-                  }
-                  else if ((this.objects[i] instanceof Tank))
+                  if ((this.objects[i] instanceof Tank))
                     this.objects[i].turretAng.y = -this.objects[i].rot.x / 100
-
                 }
                 //#endregion
                 //#endregion
@@ -675,7 +687,7 @@ if (main.level > 0) {
       translate(this.position.x, this.position.y, this.position.z);
       noStroke();
       texture(this.textureFileUrl);
-      sphere(((width + height) / 2) * 20, 24, 24);
+      sphere(((width + height) / 2) * 15, 24, 24);
 
       noFill();
       pop();
@@ -690,7 +702,6 @@ if (main.level > 0) {
       this.rotateY = rotateY;
       this.radius = 100;
       this.scale = random(1, 80) * options.grassScale;
-      // this.scale = 1;
 
       this.setCollision = false;
       this.model = model;
@@ -703,7 +714,6 @@ if (main.level > 0) {
       rotateX(this.rotateX);
       scale(this.scale);
       noStroke();
-      // ambientMaterial(0);
       texture(grassTexture);
       model(this.model);
       noFill();
@@ -787,6 +797,7 @@ if (main.level > 0) {
       pop();
     }
   }
+  //NOT USED
   class PalmTree extends Tree {
     constructor(x, y, z) {
       super();
@@ -839,6 +850,7 @@ if (main.level > 0) {
     }
   }
   //#endregion
+  //NOT USED
   class Walls extends Elements {
     constructor(x = 0, y = 50, z = 0, rotateY = 0, rotateX = 0, rotateZ = 0, texture = brick) {
       super(x, y, z);
@@ -884,9 +896,6 @@ if (main.level > 0) {
   class Tank extends Elements {
     constructor(x, y, z, playerTank = false, driverName = `AI`, angle = 0, AIActive = `AIDisabled`, acc2x = 0) {
       super(x, y, z);
-
-      this.randomNumber = random(100);
-
 
       this.bodyExplodePosition = createVector();
       this.bodyExplodeVelocity = createVector();
@@ -1323,14 +1332,14 @@ if (main.level > 0) {
       // UNCOMMENT THESE TO INCREASE SHELL SPEED
       // this.pos.x += -this.dirX * 150;
       // this.pos.z += this.dirY * 150;
-   
+
 
       this.vel.z = -this.dirY * 150
       this.vel.x = this.dirX * 150;
 
       if (this.playerShell) {
-        this.pos.x += this.dirX * hangar.tankUpgrades.getCannonValue()*5;
-        this.pos.z += -this.dirY * hangar.tankUpgrades.getCannonValue()*5;
+        this.pos.x += this.dirX * hangar.tankUpgrades.getCannonValue() * 5;
+        this.pos.z += -this.dirY * hangar.tankUpgrades.getCannonValue() * 5;
       }
     }
 
@@ -1463,12 +1472,9 @@ if (main.level > 0) {
     constructor(x, y, z) {
       super(x, y, z);
       this.vel = p5.Vector.random3D().normalize().mult(random(15, 25))
-      // this.color = [255, random(200, 255), random(0, 200)]
       let p = 255;
       this.color = [p, p, p]
-
       this.container = [];
-
     }
     update() {
       this.pos.add(this.vel)
@@ -1489,10 +1495,17 @@ if (main.level > 0) {
   //#endregion
   //#region PRELOAD
   function preload() {
+    //THIS FUNCTION LOADS ALL DATA BEFORE STARTING THE SKETCH
     //PRELOAD ALL DATA
     //TEXTURES TO LOAD DEPENDING ON LEVEL WHICH IS ON
+    menu.loadingScreen.style.display = 'block';
+
+    // ONLY 2 DIFFERENT LEVELS FOR NOW
     switch (+main.level) {
       case 1:
+      case 3:
+      case 5:
+
         skyTexture = loadImage("files/background/sky2.jpg");
         terrainTexture = loadImage("files/background/sand.png");
         brick = loadImage("files/background/brick.jpg");
@@ -1504,12 +1517,12 @@ if (main.level > 0) {
         complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
 
 
-        grass = loadModel("files/models/nothing.obj");
-        options.grassScale = 0;
-        options.grassCount = 0;
-        options.treesCount = 2;
+        grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
+        grassTexture = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
 
-        // options.ambientLight = [150, 100, 80];
+        options.grassScale = 1;
+        options.grassCount = 0.7;
+        options.treesCount = 2;
         options.ambientLight = [30, 30, 20];
 
         options.sunReflectionOffset = [100, -5000, -2000];
@@ -1518,6 +1531,9 @@ if (main.level > 0) {
 
         break;
       case 2:
+      case 4:
+      case 6:
+
         skyTexture = loadImage("files/background/sky1.jpg");
         terrainTexture = loadImage("files/background/sand.png");
         brick = loadImage("files/background/brick.jpg");
@@ -1540,14 +1556,10 @@ if (main.level > 0) {
         options.ambientLight = [230, 240, 250];
         options.sunReflectionOffset = [4000, 0, 0];
         options.sunReflectionColor = [255, 255, 255];
-
-
-
         break;
       default:
         break;
     }
-
 
     tankModel = loadModel("files/models/t34.obj");
 
@@ -1559,17 +1571,9 @@ if (main.level > 0) {
     m1a2CannonTexture = loadImage("files/textures/m1a2texture.jpg")
     m1a2TurretTexture = loadImage("files/textures/m1a2texture.jpg")
 
-    // tankModel = loadModel("files/models/t34.obj");
     tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
     tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
-
-
-
-
     steelBlockadeModel = loadModel("files/models/scenery/objects/steelBlockade.obj");
-
-    // grass = loadModel("files/models/scenery/grass/Grass.obj");
-
 
     shellHESH = loadModel("files/models/tanks/tankShells/g1.obj");
 
@@ -1580,14 +1584,16 @@ if (main.level > 0) {
     tree1Texture = loadImage("files/models/scenery/trees/tree1noleaves/tree1.jpg");
     treeModel1Texture = loadImage("files/models/scenery/trees/treeWithLeaves/bark1.jpg");
     tree3Texture = loadImage("files/models/scenery/trees/treeBoomDobro/bladeren.jpg");
-
-
   }
   //#endregion
   //#region SETUP
   function setup() {
     setAttributes('antialias', true);
     createCanvas(windowWidth, windowHeight, WEBGL);
+    menu.canvas[0].style.display = 'block';
+    hud.container.style.display = 'flex';
+    menu.loadingScreen.style.display = 'none';
+
 
     //CREATE CAMERA
     camera.body = createCamera();
@@ -1618,9 +1624,10 @@ if (main.level > 0) {
     for (let treeCount = 0; treeCount < 60 * options.sceneryCount * options.treesCount; treeCount++) {
       collisionClass.objects.push(new YellowTree(random(-10000, 10000), 0, random(-10000, 10000)))
     }
+    //CREATE WALLS, BUT GRAPHICS IS GLITCHY SO THEY ARE NOT CREATED
     // for (let blocks = 1; blocks < 30; blocks++) {  
-    //   //   collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI / 2,PI / 2,PI / 2))    
-    //   //  collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI,PI / 2))    
+    //     collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI / 2,PI / 2,PI / 2))    
+    //    collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI,PI / 2))    
     // }
   }
   //#endregion
@@ -1631,15 +1638,8 @@ if (main.level > 0) {
     background(125, 195, 255);
     //FRAMERATE DROPPING FOR DEBUGGING
     // frameCount(1);
-    // frameRate(0.0025)  
-    // THIS IS TEMPORARY
-    // camera.body.eyeX = 0
-    // camera.body.eyeY = -3197
-    // camera.body.eyeZ = 2589
-    // camera.mode = 0;
-    // ////////
+    // frameRate(0.0025)     
 
-    // pTank.showCollisionBox();
     //LIGHT
     // lightFalloff(1, 0, 0);
     //SHOW SKY AND SET POSITION OF SKY
@@ -1662,22 +1662,6 @@ if (main.level > 0) {
     collisionClass.measureDistance();
 
 
-
-    // pointLight(250, 250, 250, pTank.pos.x-3000, -200, pTank.pos.z+500);
-    // let lightRot = -pTank.rot.x / 100
-    // let lightFlip = 1;
-    // if (lightRot < -1.57 || lightRot > 1.57){
-    //   // lightFlip = 1;
-    //   // lightRot*= -1;
-    // }
-    // else lightFlip = -1;
-    // spotLight(0, 250, 255, pTank.pos.x, pTank.turretAng.x * 1000 + 50, pTank.pos.z, lightRot, 0, lightFlip, 0.9, 1);
-    // console.log(lightRot);
-    // box1.showCollisionBox();
-    // box2.showCollisionBox();
-    // box1.pos.x = mouseX * 3 - 1200;
-    // box1.pos.z = mouseY * 3 - 1200;
-
     //#region CAMERA
     //CLICK MOUSE TO LOOK AROUND
     if (lockOn) {
@@ -1685,7 +1669,7 @@ if (main.level > 0) {
       camera.body.tilt(movedY * 0.002);
     }
 
-    //MOVE AROUND WITH NUMPAD KEYS
+    //MOVE AROUND WITH NUMPAD KEYS IN CERTAIN CAMERA MODES
     keyIsDown(104) ? camera.body.move(0, 0, -5) : false;  //NUM 8  FORWARD
     keyIsDown(101) ? camera.body.move(0, 0, 5) : false;   //NUM 5  BACKWARD
     keyIsDown(100) ? camera.body.move(-5, 0, 0) : false;  //NUM 4  LEFT
@@ -1698,13 +1682,11 @@ if (main.level > 0) {
 
     //FREE MOVING CAMERA CONDITIONS
     camera.mode === 0 ? camera.body.setPosition(camera.body.eyeX, camera.body.eyeY, camera.body.eyeZ) // FREE LOOK
-      : camera.mode === 1 ? camera.body.setPosition(camera.body.eyeX, 0, camera.body.eyeZ) //GROUND LOOK
+      : camera.mode === 1 ? camera.body.setPosition(pTank.pos.x, camera.body.eyeY = -4197, pTank.pos.z) //BIRD EYE LOOK
         : camera.mode === 2 ? camera.body.setPosition(pTank.pos.x, pTank.pos.y, pTank.pos.z) //FIRST PERSON
           : false;
 
-    //FPS CAMERA CONDITIONS
-
-
+   
     keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
     keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
     //#endregion
@@ -1715,11 +1697,7 @@ if (main.level > 0) {
     terrain.show();
 
     //MOUSE PRESSED
-    if (mouseIsPressed) {
-      //WIND EXAMPLE
-      // let wind = createVector(0.01, 0, 0);
-      // pTank.applyForce(wind);
-      //requestPointerLock();
+    if (mouseIsPressed) { 
       if (!lockOn) {
         lockOn = true;
         requestPointerLock();
@@ -1729,11 +1707,8 @@ if (main.level > 0) {
       }
     }
 
-
-
-
-
     let tankCount = 0;
+    //LOOP FOR REDRAWING CLASS METHODS
     collisionClass.objects.forEach((object) => {
       object.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
 
@@ -1742,18 +1717,9 @@ if (main.level > 0) {
       }
       if (object.AIActive === `AIActive`) {
         object.AIControlled();
-        object.setAI();
-        // let heading = object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
-        // object.turretAng.y = heading;
-
-        // pTank.getTurretHeading(pTank.pos.x, object.pos.x, pTank.pos.z, object.pos.z)
-        object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
-
-        // pTank.turretAng.y = heading;
-        // this.ai.turretLeft ? this.turretAcc.y += 0.005 : this.turretVel.y /= 5;
+        object.setAI();           
+        object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)    
       }
-
-
       object.playerTank === true ? object.playerControlled() : null;
       object.AIActive === false && object.playerTank === false ? object.updateOther() : null;
 
@@ -1762,7 +1728,6 @@ if (main.level > 0) {
     })
 
     //HUD AND HANGAR
-
     hud.enemyTanks.innerHTML = tankCount - 1;
     hud.moneyValue.innerText = playerEconomy.getMoneyCount();
 
@@ -1770,8 +1735,8 @@ if (main.level > 0) {
       document.getElementById(`centerText`).style.display = `flex`;
 
       hangar.tankUpgrades.resetAll();
-
-      if (frameCount % 500 == 0) {
+      //SOME TIMEOUT AFTER DEATH TO RETURN TO MAIN MENU
+      if (frameCount % 600 == 0) {
         window.location.reload();
       }
 
@@ -1779,7 +1744,7 @@ if (main.level > 0) {
     if (tankCount - 1 === 0 && pTank.isDead == false) {
       document.getElementById(`centerText`).style.display = `flex`;
       document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
-
+      //SOME TIMEOUT AFTER WINNING BEFORE GO TO NEXT LEVEL
       if (frameCount % 500 == 0) {
         Main.nextLevel();
         Main.save(+localStorage.getItem('level'));
@@ -1788,42 +1753,32 @@ if (main.level > 0) {
       }
     }
 
-
-
-    particles.delete(60);
+    //DELETE PARTICLES AFTER 30 FRAMES OR 0.5 SECOND
+    particles.delete(30);
+    //REGULARY DELETE DEAD OBJECTS FROM ARRAY
     frameCount % 300 == 0 ? collisionClass.objects.forEach((object, index) => object.isDead ? collisionClass.objects.splice(index, 1) : null) : null;
   }
 
   //#endregion
 
 
-
-
-  //#region KEYCOMMANDS
-  // function keyCommands() {
-  //   if (keyIsDown(105)) {
-  //     camera.yPositionSpeed = 5;
-  //   }
-  //   else { camera.yPositionSpeed = 0 }
-  //   if (keyIsDown(99)) {
-  //     camera.yPositionSpeed = -5;
-  //   }
-  // }
-
-  //#endregion
-
-  //CHANGE CAMERA
+  //SOME OTHER KEYBOARD KEY COMMANDS
   keyPressed = () => {
     keyCode === 67 ? camera.mode++ : null;  //C KEY
-    camera.mode === 4 ? camera.mode = 0 : null; //RESET CAMERA TO FIRST MODE
+    camera.mode === 4 ? camera.mode = 0 : null; //CYCLE CAMERA TO FIRST MODE
 
     keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY    
-    
-    // keyCode === 32 ? pTank.scanTurret(true) : null;  //SPACE KEY
-    //keyCode === 32 ? pTank.scanBody(true) : null;  //SPACE KEY
+    if (keyCode === 27) { // ESCAPE KEY
+      Main.toggleMenu();
+    }
   }
+
+  menu.continueGameButton.addEventListener('click', () => {
+    Main.toggleMenu();
+  })
 }
 
+//RESET THE COUNTER TO ZERO SO WHEN PAGE IS REFRESHED IT RETURNS TO ZERO
 Main.level(0);
 
 

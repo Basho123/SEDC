@@ -17,14 +17,71 @@
 
     <div id="mainMenuBody">
       <div id="mainMenuButtonsContainer">
+        <button class="mainMenuButtons" id="continueGame">CONTINUE</button>
         <button class="mainMenuButtons" id="newGame">NEW GAME</button>
-        <button class="mainMenuButtons" id="continueGame">CONTINUE GAME</button>
+        <button class="mainMenuButtons" id="loadGame">LOAD GAME</button>
+        <button class="mainMenuButtons" id="controlsButton">CONTROLS</button>
         <button class="mainMenuButtons" id="options">OPTIONS</button>
       </div>
       <div id="optionsContainer">
         <button class="mainMenuButtons" id="detailLevel">DETAIL LEVEL: <span id="detailSpan"></span></button>
         <button class="mainMenuButtons" id="difficulty">DIFFICULTY: <span id="difficultySpan"></span></button>
         <button class="mainMenuButtons" id="back">BACK</button>
+      </div>
+      <div id="controlsContainer">
+        <table id="controlsTable">
+          <tbody>
+            <tr>
+              <td class="tableElementLeft">FORWARD:</td>
+              <td class="tableElementRight">W</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">BACKWARD:</td>
+              <td class="tableElementRight">S</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">TANK ROTATE LEFT:</td>
+              <td class="tableElementRight">A</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">TANK ROTATE RIGHT:</td>
+              <td class="tableElementRight">D</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">TURRET ROTATE LEFT:</td>
+              <td class="tableElementRight">NUM 4</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">TURRET ROTATE RIGHT:</td>
+              <td class="tableElementRight">NUM 6</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">CANNON UP:</td>
+              <td class="tableElementRight">NUM 8</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">CANNON DOWN:</td>
+              <td class="tableElementRight">NUM 2</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">FIRE:</td>
+              <td class="tableElementRight">SPACE</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">MAIN MENU:</td>
+              <td class="tableElementRight">ESCAPE BUTTON</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">TOGGLE CAMERA:</td>
+              <td class="tableElementRight">C</td>
+            </tr>
+            <tr>
+              <td class="tableElementLeft">FREE CAMERA LOOK:</td>
+              <td class="tableElementRight">MOUSE LEFT CLICK</td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="mainMenuButtons" id="backControls">BACK</button>
       </div>
     </div>
   </div>
@@ -33,22 +90,25 @@
     <div id="hangarBody">
       <div id="hangarHeader">
         <h1 id="hangarHeadline">HANGAR</h1>
-        <h2>Money <span id="hangarMoneyValueSpan">1</span> $</h2>
         <h2>Engine Speed <span id="engineSpeedValueSpan">1</span></h2>
         <h2>Servo Motors <span id="servoMotorsValueSpan">1</span></h2>
         <h2>Cannon Power <span id="cannonPowerValueSpan">1</span></h2>
+        <h2 id="hangarMoney">Money <span id="hangarMoneyValueSpan">1</span> $</h2>
+
 
       </div>
       <div id="hangarButtonsContainer">
-        <button class="hangarButtons" id="engineUpgradeButton">Engine Upgrade <span id="engineUpgradePriceSpan">0</span>
+        <button class="hangarButtons" id="engineUpgradeButton">Engine Upgrade <span class="buttonPrice"
+            id="engineUpgradePriceSpan">0</span>
           $</button>
-        <button class="hangarButtons" id="servoMotorsUpgradeButton">Servo Motors Upgrade <span
+        <button class="hangarButtons" id="servoMotorsUpgradeButton">Servo Motors Upgrade <span class="buttonPrice"
             id="servoMotorsUpgradePriceSpan">0</span> $</button>
-        <button class="hangarButtons" id="cannonUpgradeButton">Cannon Upgrade <span id="cannonUpgradePriceSpan">0</span>
+        <button class="hangarButtons" id="cannonUpgradeButton">Cannon Upgrade <span class="buttonPrice"
+            id="cannonUpgradePriceSpan">0</span>
           $</button>
       </div>
       <div id="hangarFooter">
-        <button class="hangarButtons" id="leaveHangar">Leave Hangar</button>
+        <button id="leaveHangar">Leave Hangar</button>
       </div>
     </div>
   </div>
@@ -63,6 +123,12 @@
   </div>
   <div id="centerText">
     <h1>YOU ARE DESTROYED!!!</h1>
+  </div>
+
+
+  <div id="p5_loading" class="loadingclass">
+    <img id="loadingGif" src="menuImages/loading.gif" alt="" width="500px">
+    <img id="loadingImage" src="menuImages/sherman1942.jpg" width="100%">
   </div>
 
 
