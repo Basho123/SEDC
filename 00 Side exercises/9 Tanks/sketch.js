@@ -109,6 +109,15 @@ let shells = [];
 
 let lockOn = false;
 
+let sounds = {
+  playerCannon: "",
+  otherCannon: "",
+  distantExplosion1: "",
+  distantExplosion2: "",
+  nearExplosion1: "",
+  nearExplosion2: "",
+}
+
 // RANDOM STATE NUMBERS ARE CALLED IN THE AI OF THE ENEMY TANKS
 let randomState = {
   randomNumber: Math.random() * 10000,
@@ -153,10 +162,10 @@ class Main {
       menu.continueGameButton.style.display = 'block';
       menu.canvas[0].style.display = 'none';
       menu.mainMenu.style.display = 'flex';
-      frameRate(0);
+      // frameRate(0);
     }
     else {
-      frameRate(60);
+      // frameRate(60);
       menu.canvas[0].style.display = 'block';
       menu.mainMenu.style.display = 'none'
     }
@@ -487,6 +496,10 @@ if (main.level > 0) {
                     this.objects[g].pos.z)
                   particles.container.push(p);
                 }
+                this.objects[g].playerShell
+                  ? random(100) < 50 ? sounds.distantExplosion1.play() : sounds.distantExplosion2.play()
+                  : random(100) < 50 ? sounds.nearExplosion1.play() : sounds.nearExplosion2.play()
+
               }
               this.objects.splice(g, 1);
               break;
@@ -541,6 +554,8 @@ if (main.level > 0) {
                   }
                   // PARTICLES ARE REMOVED FROM THE ARRAY LATER THROUGH DRAW
 
+
+
                   this.objects[i].vel.x = this.objects[g].vel.x / this.objects[i].mass / 50
                   this.objects[i].vel.z = this.objects[g].vel.z / this.objects[i].mass / 50
 
@@ -549,6 +564,12 @@ if (main.level > 0) {
                     this.objects[i].turretExplodeVelocity.add(random(-5, 5), -15, random(-5, 5));
                     this.objects[i].cannonExplodeVelocity.add(random(-10, 10), -20, random(-10, 10));
                     this.objects[i].cannonExplodeRotateAngularVelocity.add(random(0.05), random(-0.1, 0.1), random(0.05));
+                    // TANK EXPLODES SOUND
+                    this.objects[i].playerTank
+                      ? (random(100) < 50 ? sounds.nearExplosion1.play() : sounds.nearExplosion2.play())
+                      : (random(100) < 50 ? sounds.distantExplosion1.play() : sounds.distantExplosion2.play());
+
+
                   } else {
                     this.objects[i].vel.y = random(0, 30) + 100 / this.objects[i].mass / 5
                   }
@@ -566,7 +587,7 @@ if (main.level > 0) {
                   this.objects[i].setCollision = false;
 
                   //SHELL IS ALWAYS SECOND OBJECT BECAUSE IS CREATED LATER IN ARRAY
-
+                  this.objects.splice(g, 1);
                   //THE OTHER OBJECT IS SET TO DEAD, AND IT IS SPLICED LATER
 
                   continue;
@@ -914,6 +935,8 @@ if (main.level > 0) {
       this.size.y = 110;
       this.size.z = 100;
 
+      this.shellIsLoaded = true;
+
       this.collisionOffset.y = 90;
       this.acc2.x = acc2x;
 
@@ -1197,8 +1220,9 @@ if (main.level > 0) {
     }
 
     fire() {
-      if (!this.isDead) {
+      if (!this.isDead && this.shellIsLoaded) {
         //THIS ADDS RECOIL TO THE TANK
+        this.shellIsLoaded = false;
         this.bodyExplodeVelocity.z = this.dirYRecoil / 200
         this.bodyExplodeVelocity.x = -this.dirXRecoil / 200;
 
@@ -1207,7 +1231,14 @@ if (main.level > 0) {
 
         this.cannonExplodeVelocity.z = this.dirYRecoil / 10
         this.cannonExplodeVelocity.x = -this.dirXRecoil / 10;
-        // this.cannonExplodeVelocity.add
+        // this.cannonExplodeVelocity.add      
+
+        //CANNON SOUND
+        this.playerTank ? sounds.playerCannon.play() : sounds.otherCannon.play();
+        //SHOW LOADER PICTURE
+        this.playerTank ? hud.shellLoaderGif.style.display = 'initial' : null;
+
+
 
         Shell.isFired(
           this.pos.x,
@@ -1235,6 +1266,13 @@ if (main.level > 0) {
           `TURRET_DUMMY`,
           this.id
         )
+      }
+    }
+
+    reloadShell(numberRate) {
+      if (frameCount % numberRate == 0) {
+        this.playerTank ? hud.shellLoaderGif.style.display = 'none' : null;
+        this.shellIsLoaded = true;
       }
     }
     scanBody() {
@@ -1584,6 +1622,21 @@ if (main.level > 0) {
     tree1Texture = loadImage("files/models/scenery/trees/tree1noleaves/tree1.jpg");
     treeModel1Texture = loadImage("files/models/scenery/trees/treeWithLeaves/bark1.jpg");
     tree3Texture = loadImage("files/models/scenery/trees/treeBoomDobro/bladeren.jpg");
+
+    //SOUNDS
+    soundFormats('mp3', 'ogg');
+    sounds.playerCannon = loadSound("files/sounds/pTankFireMono");
+    sounds.otherCannon = loadSound("files/sounds/otherTankFire");
+
+    sounds.nearExplosion1 = loadSound("files/sounds/explosionNear1");
+    sounds.nearExplosion2 = loadSound("files/sounds/explosionNear2");
+    sounds.distantExplosion1 = loadSound("files/sounds/explosionDistant1");
+    sounds.distantExplosion2 = loadSound("files/sounds/explosionDistant2");
+
+
+    // SOUND VOLUME AMMOUNTS
+    sounds.playerCannon.setVolume(0.5);
+
   }
   //#endregion
   //#region SETUP
@@ -1686,7 +1739,7 @@ if (main.level > 0) {
         : camera.mode === 2 ? camera.body.setPosition(pTank.pos.x, pTank.pos.y, pTank.pos.z) //FIRST PERSON
           : false;
 
-   
+
     keyIsDown(100) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
     keyIsDown(102) && camera.mode === 2 ? camera.body.pan(pTank.turretVel.y) : false;
     //#endregion
@@ -1697,7 +1750,7 @@ if (main.level > 0) {
     terrain.show();
 
     //MOUSE PRESSED
-    if (mouseIsPressed) { 
+    if (mouseIsPressed) {
       if (!lockOn) {
         lockOn = true;
         requestPointerLock();
@@ -1714,11 +1767,14 @@ if (main.level > 0) {
 
       if (object.objectType == `tank`) {
         tankCount++;
+        object.playerTank
+          ? object.reloadShell(300/(1+(hangar.tankUpgrades.getCannonValue() / 3)))
+          : object.reloadShell(300);
       }
       if (object.AIActive === `AIActive`) {
         object.AIControlled();
-        object.setAI();           
-        object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)    
+        object.setAI();
+        object.getTurretHeading(object.pos.x, pTank.pos.x, object.pos.z, pTank.pos.z)
       }
       object.playerTank === true ? object.playerControlled() : null;
       object.AIActive === false && object.playerTank === false ? object.updateOther() : null;
@@ -1732,7 +1788,7 @@ if (main.level > 0) {
     hud.moneyValue.innerText = playerEconomy.getMoneyCount();
 
     if (pTank.isDead === true) {
-      document.getElementById(`centerText`).style.display = `flex`;
+      document.getElementsByClassName(`centerText`)[0].style.display = `flex`;
 
       hangar.tankUpgrades.resetAll();
       //SOME TIMEOUT AFTER DEATH TO RETURN TO MAIN MENU
@@ -1742,8 +1798,7 @@ if (main.level > 0) {
 
     }
     if (tankCount - 1 === 0 && pTank.isDead == false) {
-      document.getElementById(`centerText`).style.display = `flex`;
-      document.getElementById(`centerText`).innerHTML = `<h1>YOU HAVE WON</h1>`;
+      document.getElementsByClassName(`centerText`)[1].style.display = `flex`;
       //SOME TIMEOUT AFTER WINNING BEFORE GO TO NEXT LEVEL
       if (frameCount % 500 == 0) {
         Main.nextLevel();
@@ -1767,7 +1822,9 @@ if (main.level > 0) {
     keyCode === 67 ? camera.mode++ : null;  //C KEY
     camera.mode === 4 ? camera.mode = 0 : null; //CYCLE CAMERA TO FIRST MODE
 
-    keyCode === 32 ? pTank.fire(true) : null;  //SPACE KEY    
+    if (keyCode === 32) {
+      pTank.fire(true);//SPACE KEY  
+    }
     if (keyCode === 27) { // ESCAPE KEY
       Main.toggleMenu();
     }

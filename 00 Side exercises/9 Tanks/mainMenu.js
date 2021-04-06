@@ -44,6 +44,7 @@ let menu = {
 //HUD
 let hud = {
     container: document.getElementById('HUDContainer'),
+    shellLoaderGif: document.getElementById('loaderGif'),
     enemyTanks: document.getElementById(`enemyTanksValue`),
     moneyValue: document.getElementById(`moneyValue`),
 }
@@ -141,6 +142,8 @@ hangar.refreshUpgradeValues();
 //HIDE MOST OF THE MENU ELEMENTS AND SHOW THEM WHEN CALLED
 menu.continueGameButton.style.display = 'none';
 hud.container.style.display = 'none';
+
+hud.shellLoaderGif.style.display = 'none';
 menu.loadingScreen.style.display = 'none';
 menu.optionsMenu.style.display = 'none';
 menu.controlsMenu.style.display = 'none';
