@@ -22,101 +22,69 @@
 * push() and pop() are used to contain one model properties in 1 place
 * translate() is used to translate the position of the object
 *
-*
-*
-*
 * Almost everything else is hard and honest work of functions.
 */
-let collisionClass;
-let collision = false;
-let sine;
 
 const globalExistenceDistanceLimit = 25000;
-const globalBoundry = 8000;
+const globalBoundry = 12000;
 
-// let terrain = [];
-let terrain;
+const assets = {
+  terrain: {},
+  collision: {},
+  environment: {},
+  lockOn: false,
+};
 
-let environment;
-let m1a2Body;
-let m1a2Turret;
-let m1a2Cannon;
-let steelBlockadeModel;
+const models = {
+  m1a2Body: "",
+  m1a2Turret: "",
+  m1a2Cannon: "",
+  howitzerBody: "",
+  howitzerTurret: "",
+  howitzerCannon: "",
+  howitzerRadar: "",
+  tree1: "",
+  tree3: "",
+  barbedWire: "",
+  grass: "",
+  shellHESH: "",
 
-let box1;
-let box2;
-
-let m1a2BodyTexture;
-let m1a2TurretTexture;
-let m1a2CannonTexture;
-
-let howitzerBody;
-let howitzerTurret
-let howitzerCannon;
-let howitzerRadar;
-
-// let particles = [];
-
-let skyTexture;
-let terrainTexture;
-let brick;
-
-let tree1;
-let treeModel1;
-let tree3;
-
-let complexTree = {
-  model: {
-    body: ``,
-    leaves: ``,
-    flowers: ``,
-  },
-  texture: {
-    body: ``,
-    leaves: ``,
-    flowers: ``,
+  complexTree: {
+    model: {
+      body: ``,
+      leaves: ``,
+      flowers: ``,
+    },
+    texture: {
+      body: ``,
+      leaves: ``,
+      flowers: ``,
+    }
   }
-}
+};
 
-let barbedWire;
-let grass;
-let grassTexture;
-let tree1Texture;
+const textures = {
+  brick: "",
+  grass: "",
+  tree1: "",
+  treeBark: "",
+  sky: "",
+  terrain: "",
+  shellHESH: "",
+  t34: "",
+  m1a2Body: "",
+  m1a2Turret: "",
+  m1a2Cannon: "",
+};
 
-let tree1Array = [];
-let walls = [];
-let grassArray = [];
-
-let rotX = 0;
-let rotXSpeed = 5;
-
-let rotY = 0;
-let rotYSpeed = 5;
-
-let brickSlices = 200;
-
-let tankModel;
-let t34Texture;
-
-let shellHESH;
-let shellHESHtexture;
-
-let tankRadius;
-
-let otherTanks = [];
-
-let shells = [];
-
-let lockOn = false;
-
-let sounds = {
+const sounds = {
   playerCannon: "",
   otherCannon: "",
   distantExplosion1: "",
   distantExplosion2: "",
   nearExplosion1: "",
   nearExplosion2: "",
-}
+};
 
 // RANDOM STATE NUMBERS ARE CALLED IN THE AI OF THE ENEMY TANKS
 let randomState = {
@@ -133,7 +101,7 @@ let randomState = {
   randomState8: false,
   randomState9: false,
   randomState10: false,
-}
+};
 let { randomStateArray, randomState1, randomState2, randomState3, randomState4, randomState5, randomState6, randomState7, randomState8, randomState9, randomState10 } = randomState;
 
 //#endregion
@@ -175,7 +143,7 @@ let main = new Main();
 //GAME IS STARTED
 if (main.level > 0) {
   //#region OPTIONS
-  options = {
+  const options = {
     tanksCount: 1,
     sceneryCount: 1,
     grassScale: 1,
@@ -202,7 +170,7 @@ if (main.level > 0) {
 
   switch (menu.getDetail()) {
     case 0:
-      options.sceneryCount = 0.5;
+      options.sceneryCount = 0.4;
       break;
     case 1:
       options.sceneryCount = 1;
@@ -476,8 +444,6 @@ if (main.level > 0) {
         for (let i = 0; i < this.objects.length; i++) {
           for (let g = i + 1; g < this.objects.length; g++) {
             //CHECK IF OBJECT IS IN GLOBAL EXISTENCE BOUNDARIES FIRST
-
-
             if (
               this.objects[g].pos.x > globalExistenceDistanceLimit ||
               this.objects[g].pos.z > globalExistenceDistanceLimit ||
@@ -506,11 +472,25 @@ if (main.level > 0) {
             }
 
             else if (this.objects[i].isTank === true) {
-              this.objects[i].pos.x < -globalBoundry ? this.objects[i].pos.x += 10
-                : this.objects[i].pos.x > globalBoundry ? this.objects[i].pos.x -= 10 : null;
+              if (this.objects[i].pos.x < -globalBoundry) {
+                this.objects[i].pos.x += 10;
+                this.objects[i].acc2.x = 5;
 
-              this.objects[i].pos.z < -globalBoundry ? this.objects[i].pos.z += 10
-                : this.objects[i].pos.z > globalBoundry ? this.objects[i].pos.z -= 10 : null;
+              }
+              else if (this.objects[i].pos.x > globalBoundry) {
+                this.objects[i].pos.x -= 10;
+                this.objects[i].acc2.x = 5;
+              }
+
+              if (this.objects[i].pos.z < -globalBoundry) {
+                this.objects[i].pos.z += 10;
+                this.objects[i].acc2.x = 5;
+
+              }
+              else if (this.objects[i].pos.z > globalBoundry) {
+                this.objects[i].pos.z -= 10;
+                this.objects[i].acc2.x = 5;
+              }
 
             }
 
@@ -697,7 +677,7 @@ if (main.level > 0) {
 
   }
   class Sky extends Environment {
-    constructor(x = 0, y = 0, z = 0, textureFileUrl = skyTexture) {
+    constructor(x = 0, y = 0, z = 0, textureFileUrl = textures.sky) {
       super();
       this.position = createVector(x, y, z)
       this.textureFileUrl = textureFileUrl;
@@ -716,7 +696,7 @@ if (main.level > 0) {
 
   }
   class Grass extends Elements {
-    constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, model = grass) {
+    constructor(x = 0, y = -100, z = 0, rotateX = PI, rotateY = 0, model = models.grass) {
       super(x, y, z);
 
       this.rotateX = rotateX;
@@ -735,7 +715,7 @@ if (main.level > 0) {
       rotateX(this.rotateX);
       scale(this.scale);
       noStroke();
-      texture(grassTexture);
+      texture(textures.grass);
       model(this.model);
       noFill();
       pop();
@@ -785,8 +765,8 @@ if (main.level > 0) {
       rotateZ(this.rot.z);
       scale(this.scale);
       noStroke();
-      texture(complexTree.texture.body);
-      model(complexTree.model.body);
+      texture(models.complexTree.texture.body);
+      model(models.complexTree.model.body);
       noFill();
       pop();
 
@@ -798,8 +778,8 @@ if (main.level > 0) {
       rotateZ(this.rot.z);
       scale(this.scale);
       noStroke();
-      texture(complexTree.texture.leaves);
-      model(complexTree.model.leaves);
+      texture(models.complexTree.texture.leaves);
+      model(models.complexTree.model.leaves);
       noFill();
       pop();
 
@@ -812,8 +792,8 @@ if (main.level > 0) {
       scale(this.scale);
       noStroke();
       ambientMaterial(255, 255, 0);
-      // texture(complexTree.texture.flowers);
-      model(complexTree.model.flowers);
+      // texture(models.complexTree.texture.flowers);
+      model(models.complexTree.model.flowers);
       noFill();
       pop();
     }
@@ -837,8 +817,8 @@ if (main.level > 0) {
       rotateZ(this.rot.z);
       scale(this.scale);
       noStroke();
-      texture(complexTree.texture.body);
-      model(complexTree.model.body);
+      texture(models.complexTree.texture.body);
+      model(models.complexTree.model.body);
       noFill();
       pop();
 
@@ -850,8 +830,8 @@ if (main.level > 0) {
       rotateZ(this.rot.z);
       scale(this.scale);
       noStroke();
-      texture(complexTree.texture.leaves);
-      model(complexTree.model.leaves);
+      texture(models.complexTree.texture.leaves);
+      model(models.complexTree.model.leaves);
       noFill();
       pop();
 
@@ -864,8 +844,8 @@ if (main.level > 0) {
       scale(this.scale);
       noStroke();
       ambientMaterial(255, 255, 0);
-      // texture(complexTree.texture.flowers);
-      model(complexTree.model.flowers);
+      // texture(models.complexTree.texture.flowers);
+      model(models.complexTree.model.flowers);
       noFill();
       pop();
     }
@@ -1063,8 +1043,8 @@ if (main.level > 0) {
       scale(this.scale);
       noStroke();
       ambientMaterial(100);
-      texture(m1a2BodyTexture);
-      model(m1a2Body);
+      texture(textures.m1a2Body);
+      model(models.m1a2Body);
       pop();
       this.bodyExplodeVelocity.limit(1000);
       this.bodyExplodePosition.add(this.bodyExplodeVelocity);
@@ -1084,8 +1064,8 @@ if (main.level > 0) {
       scale(this.scale);
       noStroke();
       ambientMaterial(100);
-      texture(m1a2TurretTexture);
-      model(m1a2Turret);
+      texture(textures.m1a2Turret);
+      model(models.m1a2Turret);
       pop();
       this.turretExplodeVelocity.limit(1000);
       this.turretExplodePosition.add(this.turretExplodeVelocity);
@@ -1104,8 +1084,8 @@ if (main.level > 0) {
       scale(this.scale);
       noStroke();
       ambientMaterial(100);
-      texture(t34Texture);
-      model(m1a2Cannon);
+      texture(textures.m1a2Cannon);
+      model(models.m1a2Cannon);
       pop();
       this.cannonExplodeVelocity.limit(1000);
       this.cannonExplodePosition.add(this.cannonExplodeVelocity);
@@ -1358,9 +1338,9 @@ if (main.level > 0) {
       scale(2);
       noStroke();
       specularMaterial(255, 230, 50);
-      // texture(shellHESHtexture);
+      // texture(textures.shellHESH);
 
-      model(shellHESH);
+      model(models.shellHESH);
       pop();
 
       // MULTIPLY THESE TO MAKE MISSILE PHYSICS 
@@ -1382,7 +1362,7 @@ if (main.level > 0) {
     }
 
     static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
-      collisionClass.objects.push(new Shell(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
+      assets.collison.objects.push(new Shell(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
     }
   }
   class DummyShellTurret extends Tank {
@@ -1439,7 +1419,7 @@ if (main.level > 0) {
     }
 
     static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
-      collisionClass.objects.push(new DummyShellTurret(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
+      assets.collison.objects.push(new DummyShellTurret(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
     }
   }
   class DummyShellBody extends Tank {
@@ -1503,7 +1483,7 @@ if (main.level > 0) {
     }
 
     static isFired(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id) {
-      collisionClass.objects.push(new DummyShellBody(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
+      assets.collison.objects.push(new DummyShellBody(x, y, z, rotX, rotY, rotZ, playerTank, type = `HESH`, id))
     }
   }
   class Particles extends Elements {
@@ -1544,19 +1524,19 @@ if (main.level > 0) {
       case 3:
       case 5:
 
-        skyTexture = loadImage("files/background/sky2.jpg");
-        terrainTexture = loadImage("files/background/sand.png");
-        brick = loadImage("files/background/brick.jpg");
+        textures.sky = loadImage("files/background/sky2.jpg");
+        textures.terrain = loadImage("files/background/sand.png");
+        textures.brick = loadImage("files/background/brick.jpg");
 
         //TREE1
-        complexTree.model.body = loadModel("files/models/scenery/trees/tree1noleaves.obj");
-        complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/nothing.obj");
-        complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/nothing.obj");
-        complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
+        models.complexTree.model.body = loadModel("files/models/scenery/trees/tree1noleaves.obj");
+        models.complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/nothing.obj");
+        models.complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/nothing.obj");
+        models.complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
 
 
-        grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
-        grassTexture = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
 
         options.grassScale = 1;
         options.grassCount = 0.7;
@@ -1572,20 +1552,20 @@ if (main.level > 0) {
       case 4:
       case 6:
 
-        skyTexture = loadImage("files/background/sky1.jpg");
-        terrainTexture = loadImage("files/background/sand.png");
-        brick = loadImage("files/background/brick.jpg");
+        textures.sky = loadImage("files/background/sky1.jpg");
+        textures.terrain = loadImage("files/background/sand.png");
+        textures.brick = loadImage("files/background/brick.jpg");
 
         //TREE1  
-        complexTree.model.body = loadModel("files/models/scenery/trees/tree/treeBody.obj");
-        complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/treeFlowers.obj");
-        complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/leaves.obj");
-        complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
-        complexTree.texture.leaves = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
-        complexTree.texture.flowers = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
+        models.complexTree.model.body = loadModel("files/models/scenery/trees/tree/treeBody.obj");
+        models.complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/treeFlowers.obj");
+        models.complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/leaves.obj");
+        models.complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
+        models.complexTree.texture.leaves = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
+        models.complexTree.texture.flowers = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
 
-        grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
-        grassTexture = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
 
         options.grassScale = 1;
         options.grassCount = 0.7;
@@ -1599,28 +1579,28 @@ if (main.level > 0) {
         break;
     }
 
-    tankModel = loadModel("files/models/t34.obj");
+    // tankModel = loadModel("files/models/t34.obj");
 
-    m1a2Body = loadModel("files/models/tanks/m1a2/m1a2body.obj");
-    m1a2Turret = loadModel("files/models/tanks/m1a2/m1a2turret.obj");
-    m1a2Cannon = loadModel("files/models/tanks/m1a2/m1a2cannon.obj");
+    models.m1a2Body = loadModel("files/models/tanks/m1a2/m1a2body.obj");
+    models.m1a2Turret = loadModel("files/models/tanks/m1a2/m1a2turret.obj");
+    models.m1a2Cannon = loadModel("files/models/tanks/m1a2/m1a2cannon.obj");
 
-    m1a2BodyTexture = loadImage("files/textures/m1a2texture.jpg")
-    m1a2CannonTexture = loadImage("files/textures/m1a2texture.jpg")
-    m1a2TurretTexture = loadImage("files/textures/m1a2texture.jpg")
+    textures.m1a2Body = loadImage("files/textures/m1a2texture.jpg")
+    textures.m1a2Cannon = loadImage("files/textures/m1a2texture.jpg")
+    textures.m1a2Turret = loadImage("files/textures/m1a2texture.jpg")
 
-    tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
-    tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
-    steelBlockadeModel = loadModel("files/models/scenery/objects/steelBlockade.obj");
+    models.tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
+    models.tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
+    models.steelBlockadeModel = loadModel("files/models/scenery/objects/steelBlockade.obj");
 
-    shellHESH = loadModel("files/models/tanks/tankShells/g1.obj");
+    models.shellHESH = loadModel("files/models/tanks/tankShells/g1.obj");
 
-    t34Texture = loadImage("files/textures/t34Texture.jpg");
-    shellHESHtexture = loadImage("files/textures/HESH.png");
+    // textures.t34 = loadImage("files/textures/t34.jpg");
+    textures.shellHESH = loadImage("files/textures/HESH.png");
 
 
-    tree1Texture = loadImage("files/models/scenery/trees/tree1noleaves/tree1.jpg");
-    treeModel1Texture = loadImage("files/models/scenery/trees/treeWithLeaves/bark1.jpg");
+    textures.tree1 = loadImage("files/models/scenery/trees/tree1noleaves/tree1.jpg");
+    textures.treeBarkTexture = loadImage("files/models/scenery/trees/treeWithLeaves/bark1.jpg");
     tree3Texture = loadImage("files/models/scenery/trees/treeBoomDobro/bladeren.jpg");
 
     //SOUNDS
@@ -1653,34 +1633,34 @@ if (main.level > 0) {
     perspective(PI / 2.3, width / height, 0.01, 35000)
 
     //CREATE ESSENTIALS
-    collisionClass = new Collision();
-    environment = new Environment();
-    terrain = new Terrain(0, 0, 25000, 25000, terrainTexture)
-    environment.sky = new Sky(0, 0, 0);
+    assets.collison = new Collision();
+    assets.environment = new Environment();
+    assets.terrain = new Terrain(0, 0, 25000, 25000, textures.terrain)
+    assets.environment.sky = new Sky(0, 0, 0);
     particles = new Particles();
 
     //CREATE PLAYER TANK
     pTank = new Tank(0, -100, 0, true, `BASHO`, 1, false, 0);
-    collisionClass.objects.push(pTank);
+    assets.collison.objects.push(pTank);
     console.log(pTank);
 
     //CREATE ENEMY TANKS
     for (let tankCount = 0; tankCount < options.tanksCount; tankCount++) {
-      collisionClass.objects.push(new Tank(random(-4000, 4000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
-      // collisionClass.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
+      assets.collison.objects.push(new Tank(random(-4000, 4000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
+      // assets.collison.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
     }
 
     //CREATE SCENERY
     for (let grassCount = 0; grassCount < 150 * options.sceneryCount * options.grassCount; grassCount++) {
-      collisionClass.objects.push(new Grass(random(-10000, 10000), 0, random(-10000, 10000), PI))
+      assets.collison.objects.push(new Grass(random(-10000, 10000), 0, random(-10000, 10000), PI))
     }
     for (let treeCount = 0; treeCount < 60 * options.sceneryCount * options.treesCount; treeCount++) {
-      collisionClass.objects.push(new YellowTree(random(-10000, 10000), 0, random(-10000, 10000)))
+      assets.collison.objects.push(new YellowTree(random(-10000, 10000), 0, random(-10000, 10000)))
     }
     //CREATE WALLS, BUT GRAPHICS IS GLITCHY SO THEY ARE NOT CREATED
     // for (let blocks = 1; blocks < 30; blocks++) {  
-    //     collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI / 2,PI / 2,PI / 2))    
-    //    collisionClass.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI,PI / 2))    
+    //     assets.collison.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI / 2,PI / 2,PI / 2))    
+    //    assets.collison.objects.push(new Walls(random(-8000,8000), 50, random(-8000,8000), PI,PI / 2))    
     // }
   }
   //#endregion
@@ -1696,8 +1676,8 @@ if (main.level > 0) {
     //LIGHT
     // lightFalloff(1, 0, 0);
     //SHOW SKY AND SET POSITION OF SKY
-    environment.sky.show();
-    environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
+    assets.environment.sky.show();
+    assets.environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 
     ambientLight(options.ambientLight);
     pointLight(options.sunReflectionColor[0], options.sunReflectionColor[1], options.sunReflectionColor[2], pTank.pos.x - options.sunReflectionOffset[0], -600 + options.sunReflectionOffset[2], pTank.pos.z + options.sunReflectionOffset[1]);
@@ -1711,13 +1691,13 @@ if (main.level > 0) {
     }
 
 
-    collisionClass.collision();
-    collisionClass.measureDistance();
+    assets.collison.collision();
+    assets.collison.measureDistance();
 
 
     //#region CAMERA
     //CLICK MOUSE TO LOOK AROUND
-    if (lockOn) {
+    if (assets.lockOn) {
       camera.body.pan(-movedX * 0.002);
       camera.body.tilt(movedY * 0.002);
     }
@@ -1747,28 +1727,28 @@ if (main.level > 0) {
     // pTank.seek(createVector(500, 1000));
 
     //DRAW TERRAIN  
-    terrain.show();
+    assets.terrain.show();
 
     //MOUSE PRESSED
     if (mouseIsPressed) {
-      if (!lockOn) {
-        lockOn = true;
+      if (!assets.lockOn) {
+        assets.lockOn = true;
         requestPointerLock();
       } else {
         exitPointerLock();
-        lockOn = false;
+        assets.lockOn = false;
       }
     }
 
     let tankCount = 0;
     //LOOP FOR REDRAWING CLASS METHODS
-    collisionClass.objects.forEach((object) => {
-      object.applyForce(createVector(environment.gravity[0], environment.gravity[1], environment.gravity[2]));
+    assets.collison.objects.forEach((object) => {
+      object.applyForce(createVector(assets.environment.gravity[0], assets.environment.gravity[1], assets.environment.gravity[2]));
 
       if (object.objectType == `tank`) {
         tankCount++;
         object.playerTank
-          ? object.reloadShell(300/(1+(hangar.tankUpgrades.getCannonValue() / 3)))
+          ? object.reloadShell(300 / +hangar.tankUpgrades.getCannonValue())
           : object.reloadShell(300);
       }
       if (object.AIActive === `AIActive`) {
@@ -1811,7 +1791,7 @@ if (main.level > 0) {
     //DELETE PARTICLES AFTER 30 FRAMES OR 0.5 SECOND
     particles.delete(30);
     //REGULARY DELETE DEAD OBJECTS FROM ARRAY
-    frameCount % 300 == 0 ? collisionClass.objects.forEach((object, index) => object.isDead ? collisionClass.objects.splice(index, 1) : null) : null;
+    frameCount % 300 == 0 ? assets.collison.objects.forEach((object, index) => object.isDead ? assets.collison.objects.splice(index, 1) : null) : null;
   }
 
   //#endregion

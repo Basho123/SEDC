@@ -22,8 +22,9 @@ canvas {
 #mainMenu{
   display: flex;
   flex-wrap: wrap;
+  height: 100vh;
   background-image: url("menuImages/panzer1942.jpg");
-  background-size: cover;
+  background-size:cover;  
 }
 
 #mainMenuHeader{
@@ -247,8 +248,8 @@ flex-direction: row-reverse;
 
 #p5_loading{
   background-image: url("menuImages/sherman1942.jpg");
-  height: 100vh;
   background-size: cover;
+  height: 100vh;
 }
 
 
