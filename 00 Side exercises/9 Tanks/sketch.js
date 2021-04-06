@@ -26,7 +26,7 @@
 */
 
 const globalExistenceDistanceLimit = 25000;
-const globalBoundry = 12000;
+const globalBoundry = 8000;
 
 const assets = {
   terrain: {},
@@ -75,6 +75,7 @@ const textures = {
   m1a2Body: "",
   m1a2Turret: "",
   m1a2Cannon: "",
+  desertCamo: "",
 };
 
 const sounds = {
@@ -149,6 +150,7 @@ if (main.level > 0) {
     grassScale: 1,
     treesCount: 1,
     grassCount: 1,
+    enemyTankRateOfFire: 1,
     ambientLight: [230, 240, 250],
     sunReflectionOffset: [-3000, 500, 0],
     sunReflectionColor: [250, 240, 200],
@@ -157,12 +159,16 @@ if (main.level > 0) {
   switch (menu.getDifficulty()) {
     case 0:
       options.tanksCount = 1 + +main.level;
+      options.enemyTankRateOfFire = 0.5;
       break;
     case 1:
       options.tanksCount = 2 + +main.level;
+      options.enemyTankRateOfFire = 1;
+
       break;
     case 2:
       options.tanksCount = 4 + +main.level;
+      options.enemyTankRateOfFire = 2;
       break;
     default:
       break;
@@ -516,9 +522,15 @@ if (main.level > 0) {
                 // this.objects[i].showCollisionBox();
 
                 if (this.objects[g].playerShell == true) {
-                  (this.objects[i] instanceof Tank) && this.objects[i].playerTank == false ? playerEconomy.addMoney(100)
-                    : (this.objects[i] instanceof Tree) ? playerEconomy.addMoney(50)
-                      : null;
+                  if ((this.objects[i] instanceof Tank) && this.objects[i].playerTank == false) {
+                    playerEconomy.addMoney(100 * (1 + (+menu.getDifficulty())));
+                    playerScore.add(800 * (1 + (+menu.getDifficulty())));
+                  }
+                  else if ((this.objects[i] instanceof Tree)) {
+                    playerEconomy.addMoney(50 * (1 + (+menu.getDifficulty())));
+                    playerScore.add(100 * (1 + (+menu.getDifficulty())));
+                  }
+                  else null;
                 }
 
 
@@ -666,13 +678,26 @@ if (main.level > 0) {
 
     show() {
       push();
-      translate(this.positionX, 100, this.positionZ)
+      translate(this.positionX-15000, 100, this.positionZ-15000)
       rotateX(PI / 2);
       ambientMaterial(0);
       texture(this.texture);
+      // texture(this.texture);
       noStroke();
-      plane(this.sizeX, this.sizeZ);
+      scale(150)
+      beginShape(TRIANGLE_STRIP);
+      vertex(0, 0, 0, 0, 0);
+      vertex(0, 200, 0, 0, 40000);
+      vertex(200, 0, 0, 40000, 0);
+      vertex(200, 200, 0, 40000, 40000);
+      vertex(200, 0, 0, 0, 0);
+      vertex(200, 200, 0, 0, 40000);
+      vertex(200, 0, 0, 40000, 0);
+      vertex(200, 200, 0, 40000, 40000);
+      endShape(CLOSE);
+      // plane(this.sizeX, this.sizeZ);
       pop();
+
     }
 
   }
@@ -1519,13 +1544,11 @@ if (main.level > 0) {
     menu.loadingScreen.style.display = 'block';
 
     // ONLY 2 DIFFERENT LEVELS FOR NOW
-    switch (+main.level) {
-      case 1:
-      case 3:
-      case 5:
+    switch (+main.level % 3) {
+      case 4:
 
         textures.sky = loadImage("files/background/sky2.jpg");
-        textures.terrain = loadImage("files/background/sand.png");
+        textures.terrain = loadImage("files/background/sandTexture.jpg");
         textures.brick = loadImage("files/background/brick.jpg");
 
         //TREE1
@@ -1548,12 +1571,9 @@ if (main.level > 0) {
 
 
         break;
-      case 2:
-      case 4:
-      case 6:
-
+      case 1:
         textures.sky = loadImage("files/background/sky1.jpg");
-        textures.terrain = loadImage("files/background/sand.png");
+        textures.terrain = loadImage("files/background/sandTexture.jpg");
         textures.brick = loadImage("files/background/brick.jpg");
 
         //TREE1  
@@ -1572,8 +1592,30 @@ if (main.level > 0) {
         options.treesCount = 1.5;
 
         options.ambientLight = [230, 240, 250];
-        options.sunReflectionOffset = [4000, 0, 0];
-        options.sunReflectionColor = [255, 255, 255];
+        options.sunReflectionOffset = [4000, 1000, 0];
+        options.sunReflectionColor = [255, 255, 200];
+        break;
+
+      case 0:
+        textures.sky = loadImage("files/background/sky3.jpg");
+        textures.terrain = loadImage("files/background/sandTexture.jpg");
+        textures.brick = loadImage("files/background/brick.jpg");
+
+        //TREE1  
+        models.complexTree.model.body = loadModel("files/models/scenery/trees/tree/nothing.obj");
+        models.complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/nothing.obj");
+        models.complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/nothing.obj");
+
+        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+
+        options.grassScale = 1.3;
+        options.grassCount = 3;
+        options.treesCount = 0;
+
+        options.ambientLight = [0, 0, 50];
+        options.sunReflectionOffset = [4000, -1000, -3000];
+        options.sunReflectionColor = [100, 120, 150];
         break;
       default:
         break;
@@ -1585,9 +1627,10 @@ if (main.level > 0) {
     models.m1a2Turret = loadModel("files/models/tanks/m1a2/m1a2turret.obj");
     models.m1a2Cannon = loadModel("files/models/tanks/m1a2/m1a2cannon.obj");
 
-    textures.m1a2Body = loadImage("files/textures/m1a2texture.jpg")
-    textures.m1a2Cannon = loadImage("files/textures/m1a2texture.jpg")
-    textures.m1a2Turret = loadImage("files/textures/m1a2texture.jpg")
+    textures.m1a2Body = loadImage("files/textures/unclamped2.jpg")
+    textures.m1a2Cannon = loadImage("files/textures/unclamped2.jpg")
+    textures.m1a2Turret = loadImage("files/textures/unclamped2.jpg")
+    textures.desertCamo = loadImage("files/textures/camo1.jpg")
 
     models.tree1 = loadModel("files/models/scenery/trees/tree1noleaves.obj");
     models.tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
@@ -1635,7 +1678,8 @@ if (main.level > 0) {
     //CREATE ESSENTIALS
     assets.collison = new Collision();
     assets.environment = new Environment();
-    assets.terrain = new Terrain(0, 0, 25000, 25000, textures.terrain)
+    textureWrap(MIRROR);
+    assets.terrain = new Terrain(0, 0, 25000, 25000, textures.terrain);
     assets.environment.sky = new Sky(0, 0, 0);
     particles = new Particles();
 
@@ -1726,7 +1770,7 @@ if (main.level > 0) {
 
     // pTank.seek(createVector(500, 1000));
 
-    //DRAW TERRAIN  
+    //DRAW TERRAIN      
     assets.terrain.show();
 
     //MOUSE PRESSED
@@ -1749,7 +1793,7 @@ if (main.level > 0) {
         tankCount++;
         object.playerTank
           ? object.reloadShell(300 / +hangar.tankUpgrades.getCannonValue())
-          : object.reloadShell(300);
+          : object.reloadShell(300 / options.enemyTankRateOfFire);
       }
       if (object.AIActive === `AIActive`) {
         object.AIControlled();
@@ -1768,6 +1812,9 @@ if (main.level > 0) {
     hud.moneyValue.innerText = playerEconomy.getMoneyCount();
 
     if (pTank.isDead === true) {
+
+      playerScore.setHigh();
+      playerScore.reset();
       document.getElementsByClassName(`centerText`)[0].style.display = `flex`;
 
       hangar.tankUpgrades.resetAll();
@@ -1783,6 +1830,9 @@ if (main.level > 0) {
       if (frameCount % 500 == 0) {
         Main.nextLevel();
         Main.save(+localStorage.getItem('level'));
+
+        playerScore.add(0);
+        playerScore.setHigh();
         hangar.go();
         window.location.reload();
       }

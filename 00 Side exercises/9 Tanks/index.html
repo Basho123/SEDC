@@ -93,8 +93,6 @@
         <h2>Servo Motors <span id="servoMotorsValueSpan">1</span></h2>
         <h2>Reload Speed <span id="cannonPowerValueSpan">1</span></h2>
         <h2 id="hangarMoney">Money <span id="hangarMoneyValueSpan">1</span> $</h2>
-
-
       </div>
       <div id="hangarButtonsContainer">
         <button class="hangarButtons" id="engineUpgradeButton">Engine Upgrade <span class="buttonPrice"
@@ -107,6 +105,11 @@
           $</button>
       </div>
       <div id="hangarFooter">
+        <h2 id="currentScore">
+          SCORE: <span id="currentScoreSpan">0</span><br>
+          HIGH SCORE: <span id="highScoreSpan">0</span>
+         </h2>
+        <!-- <h2 id="highScore">HIGH SCORE: <span id="highScoreSpan">10000</span></h2> -->
         <button id="leaveHangar">Leave Hangar</button>
       </div>
     </div>
@@ -114,13 +117,13 @@
 
   <div id="HUDContainer">
     <div id="HUDtopLeft">
-      <h2>ENEMY TANKS:<span id="enemyTanksValue">0</span></h2>
+      <h2>ENEMY TANKS:<span id="enemyTanksValue"></span></h2>
     </div>
     <div id="HUDtopCenter">
       <img id="loaderGif"src="menuImages/shellLoading.gif" alt="gifOfLoadingShell">
     </div>
     <div id="HUDtopRight">
-      <h2>MONEY:<span id="moneyValue">0</span> $</h2>
+      <h2>MONEY:<span id="moneyValue"></span> $</h2>
     </div>
   </div>
   <div class="centerText">

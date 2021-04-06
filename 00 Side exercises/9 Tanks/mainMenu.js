@@ -55,6 +55,37 @@ let playerEconomy = {
     addMoney: number => localStorage.setItem('playerMoney', playerEconomy.getMoneyCount() + number),
     deductMoney: number => localStorage.setItem('playerMoney', playerEconomy.getMoneyCount() - number),
 }
+let playerScore = {
+    currentScoreSpan: document.getElementById('currentScoreSpan'),
+    highScoreSpan: document.getElementById('highScoreSpan'),
+
+    currentScore: +localStorage.getItem('currentScore'),
+    highScore: localStorage.getItem('highScore'),
+
+    add: (number) => {
+        let getCurrentScore = +localStorage.getItem('currentScore');
+        getCurrentScore += number;
+        localStorage.setItem('currentScore', getCurrentScore);
+        playerScore.currentScore = +localStorage.getItem('currentScore');
+        playerScore.currentScoreSpan.innerText = localStorage.getItem('currentScore');
+    },
+    reset: () => {
+        localStorage.setItem('currentScore', 0);
+    },
+    setHigh: () => {
+        if (playerScore.currentScore > playerScore.highScore) {
+            localStorage.setItem('highScore', playerScore.currentScore)
+            playerScore.highScoreSpan.innerText = localStorage.getItem('highScore')
+        }
+        else null
+    },
+
+    getHigh: () => localStorage.getItem('highScore'),
+}
+playerScore.add(0);
+playerScore.setHigh();
+playerScore.highScoreSpan.innerText = playerScore.getHigh();
+
 
 //HANGAR DOM AND ALL UPGRADES AND UPGRADE METHODS
 let hangar = {
@@ -198,6 +229,7 @@ hangar.leaveButton.addEventListener('click', () => {
 //#region MAIN MENU
 //NEW GAME
 menu.newGameButton.addEventListener('click', () => {
+    playerScore.reset();
     localStorage.setItem('level', 1);
     localStorage.setItem('save', 1);
     hangar.go();
@@ -206,6 +238,7 @@ menu.newGameButton.addEventListener('click', () => {
 
 //CONTINUE GAME
 menu.loadGameButton.addEventListener('click', () => {
+    playerScore.reset();
     let saveValue = +localStorage.getItem('save');
     localStorage.setItem('level', saveValue);
     hangar.go();
@@ -213,7 +246,7 @@ menu.loadGameButton.addEventListener('click', () => {
 })
 
 //CONTROLS
-menu.controlsButton.addEventListener('click', ()=>{
+menu.controlsButton.addEventListener('click', () => {
     menu.firstMenu.style.display = 'none';
     menu.controlsMenu.style.display = 'block';
 })

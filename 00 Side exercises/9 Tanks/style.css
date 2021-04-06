@@ -179,8 +179,18 @@ box-shadow: 0 0 30px rgba(179, 0, 0, 0.486);
   width: 100%;
 display: flex;
 flex-wrap: wrap;
-flex-direction: row-reverse;
+justify-content: space-around;
+margin-top: 50px;
 }
+#currentScore{
+  background-color: rgba(0, 0, 0, 0.325);
+  border-radius: 25px;
+  color: white;
+  padding-left: 40px;
+  padding-right: 20px;
+  text-align: left;
+}
+
 
 #leaveHangar{
   height: 100px;
@@ -188,8 +198,6 @@ flex-direction: row-reverse;
   font-size: 30px;
   color: white;
   border-radius: 15px;
-  margin-top: 50px;
-  margin-right: 150px;
   background-color: rgba(0, 0, 0, 0.486);
 }
 
