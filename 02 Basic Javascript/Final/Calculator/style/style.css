@@ -63,23 +63,20 @@
 body {
     background-color: black;
     color: wheat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10%;   
+    text-align: center;
+    margin-top: 10px;    
 }
 
 #help{
-    position:absolute;
+    /* position:absolute; */
     align-self: flex-start;   
     background-color: rgba(65, 65, 65, 0);
-    color: rgb(92, 92, 92);
+    color: rgb(255, 255, 255);
     width: 20px;
     height: 20px;
     border-radius: 5px;
     box-shadow: none;
-    border: none;
-    
+    border: none;   
    
 }
 
@@ -87,11 +84,17 @@ body {
     background-color: rgb(133, 133, 133);
 }
 
-
 #help:focus{
     outline: none;
 }
 
+/* DIV FOR CENTERING THE CALCULATOR HOUSING*/
+#calculator{
+    margin-top: 5vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
 
 /* CALCULATOR HOUSING */
@@ -234,18 +237,16 @@ body {
     justify-content: space-between;      
 }
 
-/* THE YELLOW POWER BUTTON CONTAINER*/
-#power{    
-    margin:0;
-    order: 2;
-    margin-left: -15px;
-    margin-top: -230px;    
+/* THE POWER/AUDIO BUTTONS*/
+#utilityButtons{
+    display: flex;
+    flex-wrap: wrap;
 }
 
-/* THE YELLOW POWER BUTTON ITSELF*/
+/* THE YELLOW POWER BUTTON*/
 #powerButton{     
-    width: 15px;
-    height: 50px;
+    width: 50px;
+    height: 20px;
     font-size: 20px;
     background-color: rgb(173, 148, 5);
     color: rgb(0, 0, 0);
@@ -259,18 +260,10 @@ body {
     outline: none;
 }
 
-/* THE RED AUDIO BUTTON CONTAINER */
-#audioButtonDiv{
-    margin:0;
-    order: 2;
-    margin-left: -15px;
-    margin-top: -330px;
-}
-
-/* THE RED AUDIO BUTTON ITSELF*/
+/* THE RED AUDIO BUTTON*/
 #audioButton{
-    width: 15px;
-    height: 50px;
+    width: 50px;
+    height: 20px;
     font-size: 20x;
     text-align: center;
     background-color: rgb(104, 12, 12);
@@ -329,13 +322,16 @@ body {
  
 @media screen and (max-width: 500px){
     
-    body{
-        
+    body{       
        margin: 0;   
     }
+    /* DIV FOR CENTERING THE CALCULATOR HOUSING*/
+#calculator{
+    margin-top: 0px;  
+}
+
 
     #calculatorHousing {
-        margin-top: 0px;     
         width: 100%;
         height: 100%;
         border-radius: 0;      
