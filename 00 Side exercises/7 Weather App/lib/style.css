@@ -17,8 +17,6 @@ body{
 }
 }
 
-
-
 table{
     
     margin: 0px auto;
@@ -210,4 +208,129 @@ button:focus{
 }
 
 
+/* /////////////////////// */
+/* // MOBILE PHONE CSS  // */
+/* /////////////////////// */
 
+@media screen and (max-width: 700px){   
+        
+.currentHours{
+    font-size: 25px;
+}
+
+.currentDays{
+    font-size: 18px;
+}
+
+.currentTemperature{
+    font-size: 60px;
+}
+
+.currentFeelsLike{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-style: italic;
+    font-size: 10px;  
+}
+
+
+.currentWeatherDescription{    
+    font-size: 18px;
+}
+
+.currentUv{    
+    font-size: 15px;
+    font-style: italic;
+}
+
+.sunset,
+.sunrise{
+    font-size: 20px;    
+}
+
+.aqi{
+    font-size: 20px;
+}
+
+.pm2_5,
+.pm10{
+    font-size:15px;
+}
+
+/* cells class */
+
+/* ///////////////////// */
+/* HOURLY TABLE ELEMENTS */
+/* ///////////////////// */
+
+.hourlyHours{
+    font-weight: 500;
+    font-size: 20px;
+    
+}
+
+.hourlyDays{
+    color: rgb(153, 153, 153);
+}
+
+.hourlyTemperature{
+    
+    font-size: 50px;
+}
+
+.hourlyFeelsLike{  
+    font-size: 15px;
+}
+
+.hourlyWeatherDescription{    
+    font-size: 13px;
+}
+
+
+
+
+.parentDiv{
+    justify-content:space-between;  
+    padding: 0px;    
+}
+
+.parentDiv2{
+    height: 20px;
+}
+
+.div1,
+.div2,
+.div3,
+.div4,
+.div5,
+.div6{
+    display: flex;
+    flex-wrap: wrap;  
+    /* flex-direction: column; */
+    justify-content: center; 
+    padding-left: 10px;
+    padding-right: 10px; 
+
+}  
+    
+.tinyLetters{
+    font-size: 13px;
+}
+
+.imageElement{
+    margin: 0px auto;
+    width: 60%;
+ }
+
+
+.smallLetters{
+    font-size: 18px;
+}
+
+.mediumLetters{
+    font-size: 20px;
+}
+
+.largeLetters{
+    font-size: 45px;
+}
+    }
