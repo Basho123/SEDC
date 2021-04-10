@@ -1,3 +1,4 @@
+
 //#region variables
 
 /*
@@ -25,17 +26,17 @@
 * Almost everything else is hard and honest work of functions.
 */
 
-const globalExistenceDistanceLimit = 25000;
+const globalExistenceDistanceLimit = 10000;
 const globalBoundry = 8000;
 
-const assets = {
+let assets = {
   terrain: {},
   collision: {},
   environment: {},
   lockOn: false,
 };
 
-const models = {
+let models = {
   m1a2Body: "",
   m1a2Turret: "",
   m1a2Cannon: "",
@@ -63,7 +64,7 @@ const models = {
   }
 };
 
-const textures = {
+let textures = {
   brick: "",
   grass: "",
   tree1: "",
@@ -78,7 +79,7 @@ const textures = {
   desertCamo: "",
 };
 
-const sounds = {
+let sounds = {
   playerCannon: "",
   otherCannon: "",
   distantExplosion1: "",
@@ -158,16 +159,16 @@ if (main.level > 0) {
   }
   switch (menu.getDifficulty()) {
     case 0:
-      options.tanksCount = 1 + +main.level;
+      options.tanksCount = 1 + Math.floor(+main.level / 4);
       options.enemyTankRateOfFire = 0.5;
       break;
     case 1:
-      options.tanksCount = 2 + +main.level;
+      options.tanksCount = 2 + Math.floor(+main.level / 4);
       options.enemyTankRateOfFire = 1;
 
       break;
     case 2:
-      options.tanksCount = 4 + +main.level;
+      options.tanksCount = 4 + Math.floor(+main.level / 4);
       options.enemyTankRateOfFire = 2;
       break;
     default:
@@ -182,7 +183,7 @@ if (main.level > 0) {
       options.sceneryCount = 1;
       break;
     case 2:
-      options.sceneryCount = 2;
+      options.sceneryCount = 1.5;
       break;
     default:
       break;
@@ -615,10 +616,22 @@ if (main.level > 0) {
 
                 // #region 3. TANK INTERACTS WITH OBJECTS
 
-                if ((this.objects[i] instanceof Tank) && (this.objects[g] instanceof DummyShellTurret) === false) {
-                  this.objects[i].vel.x /= this.objects[g].mass
-                  this.objects[i].vel.y /= this.objects[g].mass
-                  this.objects[i].vel.z /= this.objects[g].mass
+                if (this.objects[i] instanceof Tank && this.objects[g] != undefined) {
+
+
+                  //THIS GUARDS THE COLLISION TO HAPPEN WITH DUMMY SHELL BUT NOT TO CONTINUE STOPPING THE TANK
+                  if (
+                    (this.objects[i] instanceof Shell) ||
+                    (this.objects[g] instanceof Shell) ||
+                    (this.objects[i] instanceof DummyShellTurret) ||
+                    (this.objects[g] instanceof DummyShellTurret)) {
+                    continue;
+                  }
+                  else { // COLLISION OBJECT FROM ARRAY IS NOT CHECKING WITH DUMMY SHELL, MOVING ON     
+                    this.objects[i].vel.x /= this.objects[g].mass
+                    this.objects[i].vel.y /= this.objects[g].mass
+                    this.objects[i].vel.z /= this.objects[g].mass
+                  }
 
                   //NONSTICK BOUNCE EFFECT
                   this.objects[g].pos.x -= ((this.objects[i].pos.x - this.objects[g].pos.x) / 500)
@@ -639,11 +652,8 @@ if (main.level > 0) {
                     }
                   }
                   //#endregion
-
-
                 }
-                // endregion               
-
+                // endregion       
               }
               else null;
             }
@@ -678,7 +688,7 @@ if (main.level > 0) {
 
     show() {
       push();
-      translate(this.positionX-15000, 100, this.positionZ-15000)
+      translate(this.positionX - 15000, 100, this.positionZ - 15000)
       rotateX(PI / 2);
       ambientMaterial(0);
       texture(this.texture);
@@ -687,13 +697,13 @@ if (main.level > 0) {
       scale(150)
       beginShape(TRIANGLE_STRIP);
       vertex(0, 0, 0, 0, 0);
-      vertex(0, 200, 0, 0, 40000);
-      vertex(200, 0, 0, 40000, 0);
-      vertex(200, 200, 0, 40000, 40000);
+      vertex(0, 200, 0, 0, 100000);
+      vertex(200, 0, 0, 100000, 0);
+      vertex(200, 200, 0, 100000, 100000);
       vertex(200, 0, 0, 0, 0);
-      vertex(200, 200, 0, 0, 40000);
-      vertex(200, 0, 0, 40000, 0);
-      vertex(200, 200, 0, 40000, 40000);
+      vertex(200, 200, 0, 0, 100000);
+      vertex(200, 0, 0, 100000, 0);
+      vertex(200, 200, 0, 100000, 100000);
       endShape(CLOSE);
       // plane(this.sizeX, this.sizeZ);
       pop();
@@ -967,11 +977,7 @@ if (main.level > 0) {
 
       this.id = `${this.playerTank ? `PlayerTank_ID` : `AITank_ID`}${random(0, 999999999)}`
 
-      if (this.playerTank === false) {
-        setInterval(() => {
-          this.scanTurret();
-        }, 1000)
-      }
+      //FIRE EVERY 60 FRAMES NEW SCANNING DUMMY SHELL FROM TURRET
 
       this.ai = {
         forward: false,
@@ -1000,32 +1006,34 @@ if (main.level > 0) {
         randomState9: false,
         randomState10: false,
       }
+    }
 
-      setInterval(() => {
+    randomizeAI(number) {  // THE NUMBER IN THIS CASE IS TIED TO THE GAME "frameCount" 60 frames per second default
+
+      if (number % 6 == 0) {
         let randomNumber = Math.random() * 100
-        if (randomNumber < 5) {
+        if (randomNumber < 10) {
           this.randomState.randomState1 = true;
           setTimeout(() => { this.randomState.randomState1 = false }, randomNumber * 100)
         }
-      }, 100)
+      }
 
-      setInterval(() => {
+      else if (number % 12 == 0) {
         let randomNumber = Math.random() * 100
         if (randomNumber < 10) {
           this.randomState.randomState2 = true;
-          setTimeout(() => { this.randomState.randomState1 = false }, randomNumber * 100)
+          setTimeout(() => { this.randomState.randomState2 = false }, randomNumber * 100)
         }
-      }, 1000)
-
-      setInterval(() => { this.randomState.randomState3 = randomStateArray[Math.floor(Math.random() * 2)] }, 1000)
-      setInterval(() => { this.randomState.randomState4 = randomStateArray[Math.floor(Math.random() * 2)] }, 2000)
-      setInterval(() => { this.randomState.randomState5 = randomStateArray[Math.floor(Math.random() * 2)] }, 4000)
-      setInterval(() => { this.randomState.randomState6 = randomStateArray[Math.floor(Math.random() * 2)] }, 6000)
-      setInterval(() => { this.randomState.randomState7 = randomStateArray[Math.floor(Math.random() * 2)] }, 7000)
-      setInterval(() => { this.randomState.randomState8 = randomStateArray[Math.floor(Math.random() * 2)] }, 8000)
-      setInterval(() => { this.randomState.randomState9 = randomStateArray[Math.floor(Math.random() * 2)] }, 9000)
-      setInterval(() => { this.randomState.randomState10 = randomStateArray[Math.floor(Math.random() * 2)] }, 12000)
-      // this.setAI();
+      }
+      // VARIOUS RANDOMIZED STATES
+      number % 60 == 0 ? this.randomState.randomState3 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 120 == 0 ? this.randomState.randomState4 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 240 == 0 ? this.randomState.randomState5 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 300 == 0 ? this.randomState.randomState6 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 400 == 0 ? this.randomState.randomState7 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 500 == 0 ? this.randomState.randomState8 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 600 == 0 ? this.randomState.randomState9 = randomStateArray[Math.floor(Math.random() * 2)] : null
+      number % 800 == 0 ? this.randomState.randomState10 = randomStateArray[Math.floor(Math.random() * 2)] : null
     }
 
     show() {
@@ -1211,17 +1219,11 @@ if (main.level > 0) {
     }
     setAI() {
 
-      this.ai.forward = this.randomState.randomState3;
+      this.ai.forward = this.randomState.randomState4;
 
       this.randomState.randomState10 === false
         ? this.ai.rotateLeft = this.randomState.randomState1
         : this.ai.rotateRight = this.randomState.randomState1;
-
-      // this.randomState.randomState10 === false
-      //   ? this.ai.turretRight = this.randomState.randomState6
-      //   : this.ai.turretLeft = this.randomState.randomState6;
-
-
     }
 
     fire() {
@@ -1544,8 +1546,10 @@ if (main.level > 0) {
     menu.loadingScreen.style.display = 'block';
 
     // ONLY 2 DIFFERENT LEVELS FOR NOW
+
+    //DAWN LEVEL ORANGE
     switch (+main.level % 3) {
-      case 4:
+      case 1:
 
         textures.sky = loadImage("files/background/sky2.jpg");
         textures.terrain = loadImage("files/background/sandTexture.jpg");
@@ -1558,8 +1562,8 @@ if (main.level > 0) {
         models.complexTree.texture.body = loadImage("files/models/scenery/trees/tree/treeBody/bark1.jpg");
 
 
-        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
-        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+        models.grass = loadModel("files/models/scenery/grass/SpiderPlant.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant/spiderLeafClean.png");
 
         options.grassScale = 1;
         options.grassCount = 0.7;
@@ -1571,7 +1575,9 @@ if (main.level > 0) {
 
 
         break;
-      case 1:
+
+      //DAY LEVEL DESERT
+      case 2:
         textures.sky = loadImage("files/background/sky1.jpg");
         textures.terrain = loadImage("files/background/sandTexture.jpg");
         textures.brick = loadImage("files/background/brick.jpg");
@@ -1584,8 +1590,8 @@ if (main.level > 0) {
         models.complexTree.texture.leaves = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
         models.complexTree.texture.flowers = loadImage("files/models/scenery/trees/tree/treeBody/bladeren.jpg");
 
-        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
-        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+        models.grass = loadModel("files/models/scenery/grass/SpiderPlant.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant/spiderLeafClean.png");
 
         options.grassScale = 1;
         options.grassCount = 0.7;
@@ -1596,9 +1602,10 @@ if (main.level > 0) {
         options.sunReflectionColor = [255, 255, 200];
         break;
 
+      //DUSK LEVEL CLOUDY
       case 0:
         textures.sky = loadImage("files/background/sky3.jpg");
-        textures.terrain = loadImage("files/background/sandTexture.jpg");
+        textures.terrain = loadImage("files/background/grassTexture1.jpg");
         textures.brick = loadImage("files/background/brick.jpg");
 
         //TREE1  
@@ -1606,11 +1613,11 @@ if (main.level > 0) {
         models.complexTree.model.flowers = loadModel("files/models/scenery/trees/tree/nothing.obj");
         models.complexTree.model.leaves = loadModel("files/models/scenery/trees/tree/nothing.obj");
 
-        models.grass = loadModel("files/models/scenery/grass/spiderPlant_nt.obj");
-        textures.grass = loadImage("files/models/scenery/grass/spiderPlant_nt/Spider_leaf_clean.png");
+        models.grass = loadModel("files/models/scenery/grass/SpiderPlant.obj");
+        textures.grass = loadImage("files/models/scenery/grass/spiderPlant/spiderLeafClean.png");
 
-        options.grassScale = 1.3;
-        options.grassCount = 3;
+        options.grassScale = 1;
+        options.grassCount = 2;
         options.treesCount = 0;
 
         options.ambientLight = [0, 0, 50];
@@ -1636,7 +1643,7 @@ if (main.level > 0) {
     models.tree3 = loadModel("files/models/scenery/trees/treeBoomDobro.obj");
     models.steelBlockadeModel = loadModel("files/models/scenery/objects/steelBlockade.obj");
 
-    models.shellHESH = loadModel("files/models/tanks/tankShells/g1.obj");
+    models.shellHESH = loadModel("files/models//tanks/tankShells/g1.obj");
 
     // textures.t34 = loadImage("files/textures/t34.jpg");
     textures.shellHESH = loadImage("files/textures/HESH.png");
@@ -1690,8 +1697,8 @@ if (main.level > 0) {
 
     //CREATE ENEMY TANKS
     for (let tankCount = 0; tankCount < options.tanksCount; tankCount++) {
+      console.log('tank has been spawned');
       assets.collison.objects.push(new Tank(random(-4000, 4000), -100, random(-4000, -6000), false, `AI Tank`, 100, `AIActive`, 60))
-      // assets.collison.objects.push(new Tank(random(-2000, 2000), -100, random(-1000, -1000), false, `AI Tank`, 100, `AIActive`, 60))
     }
 
     //CREATE SCENERY
@@ -1719,7 +1726,7 @@ if (main.level > 0) {
 
     //LIGHT
     // lightFalloff(1, 0, 0);
-    //SHOW SKY AND SET POSITION OF SKY
+    //SHOW SKY AND SET POSITION OF SKY   
     assets.environment.sky.show();
     assets.environment.sky.position.set(pTank.pos.x, 100, pTank.pos.z)
 
@@ -1784,10 +1791,19 @@ if (main.level > 0) {
       }
     }
 
+
     let tankCount = 0;
-    //LOOP FOR REDRAWING CLASS METHODS
+    /////////////////////////////////////
+    //LOOP FOR REDRAWING CLASS METHODS///
+    /////////////////////////////////////
     assets.collison.objects.forEach((object) => {
       object.applyForce(createVector(assets.environment.gravity[0], assets.environment.gravity[1], assets.environment.gravity[2]));
+
+      //ENEMY TANKS REDRAWING
+      if (object.playerTank === false && object.objectType == `tank`) {
+        frameCount % 120 == 0 ? object.scanTurret() : null; //EACH 2 SECONDS ENEMY TANKS SCAN FOR YOUR TANK
+        object.randomizeAI(frameCount);
+      }
 
       if (object.objectType == `tank`) {
         tankCount++;
@@ -1817,7 +1833,7 @@ if (main.level > 0) {
       playerScore.reset();
       document.getElementsByClassName(`centerText`)[0].style.display = `flex`;
 
-      hangar.tankUpgrades.resetAll();
+      // hangar.tankUpgrades.resetAll(); // RESET ALL UPGRADES ON DEATH, BUT GAME BECOMES TOO DIFFICULT
       //SOME TIMEOUT AFTER DEATH TO RETURN TO MAIN MENU
       if (frameCount % 600 == 0) {
         window.location.reload();
@@ -1867,8 +1883,4 @@ if (main.level > 0) {
 
 //RESET THE COUNTER TO ZERO SO WHEN PAGE IS REFRESHED IT RETURNS TO ZERO
 Main.level(0);
-
-
-
-
 
