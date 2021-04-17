@@ -143,8 +143,8 @@ namespace CinemaniaServices.Models
                                         if (employeeChoice == '3') Color.InvertedGreen();
                                         Console.WriteLine("║Press 3 to delete a member from database║");
                                         Color.Green();
-                                       
-                                        Console.WriteLine("║Press 4 to Quit                         ║");  
+
+                                        Console.WriteLine("║Press 4 to Quit                         ║");
                                         Console.WriteLine("╚════════════════════════════════════════╝");
                                         Console.WriteLine("");
 
@@ -156,13 +156,14 @@ namespace CinemaniaServices.Models
                                             Print.All(listOfMembers);
                                             Console.WriteLine("Enter member username to be deleted!!!");
                                             string memberToDelete = Console.ReadLine();
-                                            if (UsernameExists(memberToDelete, listOfMembers))
+                                            if (UsernameExists(memberToDelete, listOfMembers) && userName != memberToDelete)
                                             {
                                                 RemoveUser(memberToDelete, listOfMembers);
                                                 Console.WriteLine($"{memberToDelete} has been successfully deleted from the database!!!");
                                                 Console.WriteLine("");
                                             }
-                                            else Console.WriteLine("No such user exists");
+                                            else if (!UsernameExists(memberToDelete, listOfMembers)) Console.WriteLine("No such user exists");
+                                            else Console.WriteLine("You cannot delete yourself");
                                         }
                                     }
                                     break;
