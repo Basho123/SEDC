@@ -80,17 +80,13 @@ namespace HomeworkLinq
             Console.WriteLine("--------------------------------------------");
 
             Person youngest = people
-                                .Where(x => x.Age == people.Select(x => x.Age)
-                                .Min())
-                                .FirstOrDefault();
+               .FirstOrDefault(x => x.Age == people.Select(x => x.Age).Min());
 
-            Person Oldest = people
-                                .Where(x => x.Age == people.Select(x => x.Age)
-                                .Max())
-                                .FirstOrDefault();
-            Console.WriteLine("Age of youngest person is {0} and oldest person is {1}", youngest.FirstName, Oldest.FirstName);
+            Person oldest = people
+                                .FirstOrDefault(x => x.Age == people.Select(x => x.Age).Max());
 
-            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine("Age of youngest person is {0} and oldest person is {1}", youngest.FirstName, oldest.FirstName);
+
             Console.WriteLine("--------------------------------------------");
 
 
@@ -98,22 +94,57 @@ namespace HomeworkLinq
             // Task 05
             // find all male people aged 45 or more
 
+            List<Person> aged45orMore = people
+                                        .Where(x => x.Age > 45 && x.Gender == 'M')
+                                        .ToList();
+
             // Task 06
             // find all females whose name starts with V
+            Console.WriteLine("----------------find all females whose name starts with V----------------");
+
+            List<Person> allFemalesStartsWithV = people
+                                                    .Where(x => x.Gender == 'F' && x.FirstName.StartsWith("V"))
+                                                    .ToList();
+            if (allFemalesStartsWithV.Count == 0) Console.WriteLine("No such people found");
+            else allFemalesStartsWithV.ForEach(x => Console.WriteLine(x.FirstName));
+            Console.WriteLine("--------------------------------------------");
 
             // Task 07
             // find last female person older than 30 whose name starts with p
+            Person lastFemaleOlderThan30startsWithP = people
+                                                    .Where(x => x.Age > 30)
+                                                    .Where(x => x.Gender == 'F')
+                                                    .Where(x => x.FirstName.StartsWith("P"))
+                                                    .FirstOrDefault();
+            Console.WriteLine(lastFemaleOlderThan30startsWithP == null ? "No such person found" : $"find last female person older than 30 whose name starts with p {lastFemaleOlderThan30startsWithP.FirstName}");
+            Console.WriteLine("--------------------------------------------");
 
             // Task 08
             // find first male younger than 40
+            Person firstMaleYoungerThan40 = people
+                                                .Where(x => x.Age < 40 && x.Gender == 'M')
+                                                .FirstOrDefault();
+            Console.WriteLine(firstMaleYoungerThan40 == null ? "no such person found" : $"find first male younger than 40 {firstMaleYoungerThan40.FirstName}");
+            Console.WriteLine("--------------------------------------------");
 
             // Task 09
             // print the names of the male persons that have firstName longer than lastName
+            List<string> malePersonsLongFirstNames = people
+                                                        .Where(x => x.FirstName.Length > x.LastName.Length && x.Gender == 'M')
+                                                        .Select(x => x.FirstName)
+                                                        .ToList();
+            malePersonsLongFirstNames.ForEach(x => Console.WriteLine($"{x}"));
+            Console.WriteLine("--------------------------------------------");
 
             // Task 10
             // print the lastNames of the female persons that have odd number of ages
 
-
+            List<string> lastNamesOddAgesFemales = people
+                                                        .Where(x => x.Age % 2 == 1)
+                                                        .Select(x => x.LastName)
+                                                        .ToList();
+            Console.WriteLine("print the lastNames of the female persons that have odd number of ages");
+            lastNamesOddAgesFemales.ForEach(x => Console.WriteLine($"{x}"));
             Console.ReadLine();
         }
     }
