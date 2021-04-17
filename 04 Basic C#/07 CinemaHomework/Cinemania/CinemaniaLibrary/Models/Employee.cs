@@ -52,9 +52,7 @@ namespace CinemaniaLibrary.Models
         }
 
         public override void DisplayInfo()
-        {
-            Console.BackgroundColor = ConsoleColor.Red;
-            Console.ForegroundColor = ConsoleColor.White;
+        {         
             Console.WriteLine("--------------------------");
             Console.WriteLine($"First Name: {FirstName}");
             Console.WriteLine($"Last Name: {LastName}");
@@ -62,9 +60,7 @@ namespace CinemaniaLibrary.Models
             Console.WriteLine($"User Name: {UserName}");
             Console.WriteLine($"Phone Number: {PhoneNumber}");
             Console.WriteLine($"Date Of Registration: {DateOfRegistration}");            
-            Console.WriteLine("--------------------------");
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("--------------------------");        
         }
     }
 }

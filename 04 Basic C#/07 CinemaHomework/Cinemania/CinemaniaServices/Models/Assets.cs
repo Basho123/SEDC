@@ -125,7 +125,11 @@ namespace CinemaniaServices.Models
                                     {
                                         char employeeChoice = Console.ReadKey(true).KeyChar;
 
-                                        Console.Clear();                                       
+                                        Console.Clear();
+                                        Console.WriteLine("╔══════════════════╗");
+                                        Console.WriteLine($"║Welcome {userName} ");
+                                        Console.WriteLine("╚══════════════════╝");
+                                        Console.WriteLine("");
                                         Console.WriteLine("╔════════════════════════════════════════╗");
 
                                         if (employeeChoice == '1') Color.InvertedGreen();
@@ -186,6 +190,10 @@ namespace CinemaniaServices.Models
                                     {
                                         char employeeChoice = Console.ReadKey(true).KeyChar;
                                         Console.Clear();
+                                        Console.WriteLine("╔══════════════════╗");
+                                        Console.WriteLine($"║Welcome {user.UserName} ");
+                                        Console.WriteLine("╚══════════════════╝");
+                                        Console.WriteLine("");
                                         Console.WriteLine("╔════════════════════════════════════════╗");
                                         if (employeeChoice == '1') Color.InvertedDarkRed();
                                         Console.WriteLine("║Press 1 to rent a movie                 ║");
@@ -259,9 +267,9 @@ namespace CinemaniaServices.Models
                 else if (userName.Length > 3)
                 {
                     Console.Clear();
-                    Console.WriteLine("╔══════════════════════════════════════════════════╗");
-                    Console.WriteLine("║Enter your new password, must be 6 characters long║");
-                    Console.WriteLine("╚══════════════════════════════════════════════════╝");
+                    Console.WriteLine("╔═════════════════════════════════════════════════════════════════╗");
+                    Console.WriteLine("║Enter your new password, must be longer than 6 characters long   ║");
+                    Console.WriteLine("╚═════════════════════════════════════════════════════════════════╝");
 
                     while (passwordLoop)
                     {
