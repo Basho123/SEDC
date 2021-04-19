@@ -132,7 +132,8 @@ namespace LINQ.Homework
 
             // NA OVIE ZAGLAVIV SO DICTIONARY IZGLEA TREBA DA SE PRAVAT AMA NE MI E JASEN BASH DICTIONARY
             // - print the name of the artist that has most songs           
-            string ArtistWithMostSongs = Artists
+            Dictionary<Album, List<Song>> songsDictionary = new 
+            //string ArtistWithMostSongs = Artists
                                             .Where(x => x.Id == albumWithMostSongs.ArtistId)
                                             .LastOrDefault().FullName;
 

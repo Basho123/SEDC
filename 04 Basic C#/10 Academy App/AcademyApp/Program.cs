@@ -13,7 +13,7 @@ namespace AcademyApp
 
             //RANDOM STUDENT GENERATOR XOXOXO GENERATE MORE STUDENTS THAN PEOPLE ON EARTH OR MAYBE NOT
             // PANE OR KRISTINA SHOULD CHANGE THIS NUMBER TO GENERATE A WHOLE LOTTA PEOPLE, 
-            int numberOf2StudentsRandomlyGenerated = 10; 
+            int numberOf2StudentsRandomlyGenerated = 100; 
 
             for (int i = 0; i < numberOf2StudentsRandomlyGenerated; i++)
             {

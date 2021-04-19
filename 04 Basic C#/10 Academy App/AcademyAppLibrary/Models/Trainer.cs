@@ -35,8 +35,7 @@ namespace AcademyAppLibrary.Models
         public Trainer(string firstName, string lastName, string userName, string password, List<Subject> trainerSubjects)
         {
             Role = Role.Trainer;
-            TrainerSubjects = trainerSubjects;
-
+            TrainerSubjects = trainerSubjects;            
             FirstName = firstName;
             LastName = lastName;
             UserName = userName;

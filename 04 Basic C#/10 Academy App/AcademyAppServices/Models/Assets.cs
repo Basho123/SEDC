@@ -194,9 +194,10 @@ namespace AcademyAppServices.Models
                 if (!checkString.IsMatch(studentGradeString)) Console.WriteLine("Please enter valid number!!!");
                 else
                 {
-                    int studentGradeInt = int.Parse(studentGradeString);
                     try
                     {
+                        int studentGradeInt = int.Parse(studentGradeString);
+
                         student.Grades[gradeToBeRevised.Key] = (Grade)studentGradeInt;
                         Console.WriteLine($"Student's grade has been set to {(Grade)studentGradeInt}");
                     }
