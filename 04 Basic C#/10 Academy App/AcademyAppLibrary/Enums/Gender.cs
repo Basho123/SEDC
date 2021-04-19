@@ -8,5 +8,6 @@ namespace AcademyAppLibrary.Enums
     {
         Male,
         Female,
+        NotSpecified,
     }
 }

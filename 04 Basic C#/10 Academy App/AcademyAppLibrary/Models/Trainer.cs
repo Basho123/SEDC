@@ -14,7 +14,7 @@ namespace AcademyAppLibrary.Models
 
         public Trainer()
         {
-            //Role = Role.Trainer;
+            Role = Role.Trainer;
         }
 
         //SINGLE SUBJECT TRAINER CONSTRUCTOR

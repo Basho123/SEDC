@@ -11,7 +11,7 @@ namespace AcademyAppLibrary.Models
         public Dictionary<Subject, Grade> Grades { get; set; }
         public Student()
         {
-            //Role = Role.Student;
+            Role = Role.Student;
         }
         public Student(string firstName, string lastName, string userName, string password, Subject currentSubject, Gender gender, Dictionary<Subject, Grade> grades)
         {
@@ -65,6 +65,7 @@ namespace AcademyAppLibrary.Models
             }
 
             Console.WriteLine("===========================");
-        }
+        }     
+
     }
 }

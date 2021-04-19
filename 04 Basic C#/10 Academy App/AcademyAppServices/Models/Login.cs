@@ -53,12 +53,15 @@ namespace AcademyAppServices.Models
 
                             switch (loggedInPerson.Role)
                             {
+                                #region Student
                                 case Role.Student:
                                     Student loggedInStudent = (Student)loggedInPerson;
                                     Console.WriteLine($"Currently attending {loggedInStudent.CurrentSubject}");
                                     loggedInStudent.DisplayInfo();
                                     Console.ReadLine();
                                     break;
+                                #endregion
+                                #region Admin
                                 case Role.Admin:
                                     Admin loggedInAdmin = (Admin)loggedInPerson;
                                     loggedInAdmin.DisplayInfo();
@@ -68,16 +71,15 @@ namespace AcademyAppServices.Models
                                         Console.WriteLine("1) Check all members");
                                         Console.WriteLine("2) Delete a member");
                                         Console.WriteLine("3) Promote or demote a member");
-                                        Console.WriteLine("4) Exit");
-                                        char menuValue = Console.ReadKey(true).KeyChar;
-                                        char dummyChar = ' '; // USED FOR INTERFACE NAVIGATION PURPOSES, NOT USED FOR ANY VALUE
-                                        if (menuValue == '4') break;
+                                        Console.WriteLine("4) Create a new member");
+                                        Console.WriteLine("5) Exit");
+                                        char menuValue = Console.ReadKey(true).KeyChar;                                        
+                                        if (menuValue == '5') break;
                                         switch (menuValue)
                                         {
                                             case '1':
                                                 listOfPeople.ForEach(x => x.DisplayInfo());
-                                                Console.WriteLine("PRESS ANY KEY TO CONTINUE....");
-                                                dummyChar = Console.ReadKey(true).KeyChar;
+                                                Assets.PressAnyKeyToContinue();
                                                 Console.Clear();
                                                 break;
                                             case '2':
@@ -90,8 +92,7 @@ namespace AcademyAppServices.Models
                                                     Console.WriteLine($"User {userToBeRemoved} has been successfuly removed from the database");
                                                     Assets.RemoveUser(userToBeRemoved, listOfPeople);
                                                 };
-                                                Console.WriteLine("PRESS ANY KEY TO CONTINUE....");
-                                                dummyChar = Console.ReadKey(true).KeyChar;
+                                                Assets.PressAnyKeyToContinue();
                                                 Console.Clear();
                                                 break;
                                             case '3':
@@ -102,9 +103,9 @@ namespace AcademyAppServices.Models
                                                 else
                                                 {
                                                     Console.WriteLine("Enter the role you wish to be assigned to this user:");
-                                                    Console.WriteLine("1) Student");
-                                                    Console.WriteLine("2) Trainer");
-                                                    Console.WriteLine("3) Admin");
+                                                    Console.WriteLine(" 1) Student");
+                                                    Console.WriteLine(" 2) Trainer");
+                                                    Console.WriteLine(" 3) Admin");
                                                     char roleChar = Console.ReadKey(true).KeyChar;
                                                     switch (roleChar)
                                                     {
@@ -117,9 +118,8 @@ namespace AcademyAppServices.Models
 
                                                             listOfPeople.Remove(student);
                                                             listOfPeople.Add(new Student(student.FirstName, student.LastName, student.UserName, student.Password, student.Gender));
-                                                          
-                                                            Console.WriteLine("PRESS ANY KEY TO CONTINUE....");
-                                                            dummyChar = Console.ReadKey(true).KeyChar;
+
+                                                            Assets.PressAnyKeyToContinue();
                                                             break;
                                                         case '2':
                                                             Person trainer = Assets.getPersonFromUsername(userToBePromoted, listOfPeople);
@@ -127,10 +127,9 @@ namespace AcademyAppServices.Models
                                                             Console.WriteLine($"{trainer.UserName} has been set to status {trainer.Role}");
 
                                                             listOfPeople.Remove(trainer);
-                                                            listOfPeople.Add(new Trainer(trainer.FirstName,trainer.LastName,trainer.UserName,trainer.Password));
-                                                           
-                                                            Console.WriteLine("PRESS ANY KEY TO CONTINUE....");
-                                                            dummyChar = Console.ReadKey(true).KeyChar;
+                                                            listOfPeople.Add(new Trainer(trainer.FirstName, trainer.LastName, trainer.UserName, trainer.Password));
+
+                                                            Assets.PressAnyKeyToContinue();
                                                             break;
                                                         case '3':
                                                             Person admin = Assets.getPersonFromUsername(userToBePromoted, listOfPeople);
@@ -140,32 +139,65 @@ namespace AcademyAppServices.Models
                                                             listOfPeople.Remove(admin);
                                                             listOfPeople.Add(new Admin(admin.FirstName, admin.LastName, admin.UserName, admin.Password));
 
-                                                            Console.WriteLine("PRESS ANY KEY TO CONTINUE....");
-                                                            dummyChar = Console.ReadKey(true).KeyChar;
+                                                            Assets.PressAnyKeyToContinue();
                                                             break;
                                                         default:
                                                             break;
                                                     }
                                                 }
-
-
-
-
-
-
+                                                break;
+                                            case '4':
+                                                listOfPeople.Add(PersonGenerator.Person(listOfPeople));
                                                 break;
                                             default:
                                                 break;
                                         }
                                     }
                                     break;
+                                #endregion
+                                #region Trainer
                                 case Role.Trainer:
                                     Trainer loggedInTrainer = (Trainer)loggedInPerson;
                                     loggedInTrainer.DisplayInfo();
-                                    Console.ReadLine();
+                                    while (true)
+                                    {
+                                        Console.WriteLine("Input a number on keyboard for action");
+                                        Console.WriteLine("1) Info for all students");
+                                        Console.WriteLine("2) Check all subjects grades of a student");                                       
+                                        Console.WriteLine("3) Detailed Subject Info");
+                                        Console.WriteLine("4) Grade a student");
+                                        Console.WriteLine("5) Exit");
+                                        char menuValue = Console.ReadKey(true).KeyChar;
+                                        if (menuValue == '5') break;
+                                        switch (menuValue)
+                                        {
+                                            case '1':
+                                                listOfPeople.ForEach(x => x.DisplayInfo());
+                                                Assets.PressAnyKeyToContinue();
+                                                Console.Clear();
+                                                break;
+                                            case '2':
+                                                Assets.PrintStudentGrades(listOfPeople);                                              
+                                                Console.Clear();
+                                                break;
+                                            case '3':
+                                                Assets.PrintAllSubjectsAttendancy(listOfPeople);
+                                                Assets.PressAnyKeyToContinue();
+                                                Console.Clear();                                                
+                                                break;
+                                            case '4':
+                                                Assets.SetStudentGrade(listOfPeople, loggedInTrainer.TrainerSubject);
+                                                Assets.PressAnyKeyToContinue();
+                                                Console.Clear();
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
                                     break;
                                 default:
                                     break;
+                                    #endregion
                             }
                         }
                         else Console.WriteLine("Wrong password, please reenter your password");

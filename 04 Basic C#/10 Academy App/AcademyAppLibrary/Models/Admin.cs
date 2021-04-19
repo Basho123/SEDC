@@ -10,7 +10,7 @@ namespace AcademyAppLibrary.Models
     {
         public Admin()
         {
-            //Role = Role.Admin;
+            Role = Role.Admin;
             //Gender = Gender.Male;
         }
         public Admin(string firstName, string lastName, string userName, string password)

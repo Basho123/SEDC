@@ -6,7 +6,7 @@ namespace AcademyAppLibrary.Enums
 {
     public enum Grade
     {
-        NoGrade,
+        NoGrade = 0, 
         Appailing,
         VeryBad,
         Bad,
