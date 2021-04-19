@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AcademyLibrary.Enums
+namespace AcademyAppLibrary.Enums
 {
     public enum Subject
     {
-        Acoustics = 1,
+        Acoustics,
         RecordingTechniques,
         Electrotech,
         SoundReinforcementAndSoundSystems,

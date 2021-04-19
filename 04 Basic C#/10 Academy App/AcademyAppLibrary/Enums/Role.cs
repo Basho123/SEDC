@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AcademyLibrary.Enums
+namespace AcademyAppLibrary.Enums
 {
     public enum Role
     {
-        Student = 1,
+        Student, 
         Trainer,
         Admin
     }
