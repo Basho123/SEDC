@@ -5,7 +5,7 @@ using System.Text;
 
 namespace QuizzAppLibrary.Models
 {
-    public class User
+    public abstract class User
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
