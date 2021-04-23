@@ -53,7 +53,7 @@ namespace QuizzAppLibrary.Models
                 "Which of these is not one of Pluto's moons?",
                 "Styx",
                 "Hydra",
-                "Nix*",
+                "Demios*",
                 "Cerberos",
                 "Pluto has 5 moons, Styx, Hydra, Nix, Charon and Cerberos are them.",
 
@@ -76,7 +76,7 @@ namespace QuizzAppLibrary.Models
                 "Peru*",
                 "Australia",
                 "Niger",
-                "Peru has a population of 3.6 million, making it the world leader of alpaca population as is the leading producer of alpaca fiber."
+                "Peru has a population of 3.6 million alpacas, making it the world leader of alpaca population as is the leading producer of alpaca fiber."
             });
             #endregion
         }
