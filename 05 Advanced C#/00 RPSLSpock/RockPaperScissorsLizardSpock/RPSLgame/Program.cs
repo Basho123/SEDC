@@ -8,7 +8,7 @@ namespace RPSLgame
     {     
         static void Main(string[] args)
         {
-            Database database = new Database();
+            //Database Database = new Database();
             try
             {
                 while (true)
@@ -20,7 +20,7 @@ namespace RPSLgame
                     Console.WriteLine();
                     Console.WriteLine(" [1] New Game");
                     Console.WriteLine(" [2] Check Score");
-                    if (database.Players[1].Score != 0 || database.Players[0].Score != 0)  Console.WriteLine("\n [3] Continue");
+                    if (Database.Players[1].Score != 0 || Database.Players[0].Score != 0)  Console.WriteLine("\n [3] Continue");
                     Console.WriteLine("\n [9] Quit");
 
                     char userInput = Console.ReadKey(true).KeyChar;
@@ -31,15 +31,15 @@ namespace RPSLgame
                         default:
                             break;
                         case '1':
-                            database.Players[1].Score = 0;
-                            database.Players[0].Score = 0;
-                            Assets.PlayWithComputer(database.Players[1], database.Players[0]);
+                            Database.Players[1].Score = 0;
+                            Database.Players[0].Score = 0;
+                            Assets.PlayWithComputer(Database.Players[1], Database.Players[0]);
                             break;                  
                         case '2':
-                            Assets.ShowScore(database.Players[1], database.Players[0]);
+                            Assets.ShowScore(Database.Players[1], Database.Players[0]);
                             break;
                         case '3':
-                            Assets.PlayWithComputer(database.Players[1], database.Players[0]);
+                            Assets.PlayWithComputer(Database.Players[1], Database.Players[0]);
                             break;
 
                     }

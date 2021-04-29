@@ -132,14 +132,25 @@ namespace LINQ.Homework
 
             // NA OVIE ZAGLAVIV SO DICTIONARY IZGLEA TREBA DA SE PRAVAT AMA NE MI E JASEN BASH DICTIONARY
             // - print the name of the artist that has most songs           
-            Dictionary<Album, List<Song>> songsDictionary = new 
-            //string ArtistWithMostSongs = Artists
-                                            .Where(x => x.Id == albumWithMostSongs.ArtistId)
-                                            .LastOrDefault().FullName;
+            Artist mostSongsArtist = Artists
+                                          .Where(artist => artist.Albums
+                                                                    .Select(album => album.Songs.Count)
+                                                                    .Sum() == Artists
+                                                                                .Select(ar => ar.Albums
+                                                                                            .Select(al => al.Songs.Count)
+                                                                                            .Sum())
+                                                                                .Max())
+                                          .FirstOrDefault();
+
+
+
 
             // - print the type of the artist(SoloArtist/Band) that has most albums published before year 2000
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
-            ///
+            Artist mostOldAlbums = Artists
+                                   .FirstOrDefault(artist => artist.Albums
+                                                                    .Count(alb => alb.Year < 2000) == Artists
+                                                                    .Select(ar => ar.Albums.Count(al => al.Year < 2000))
+                                                                    .Max());
 
             // - print the average song duration, of the album that has most songs
             double averageSongDurationOfAlbumWithMostSongs = Albums
@@ -162,8 +173,8 @@ namespace LINQ.Homework
                                               .OrderBy(x => x.Songs
                                                     .Where(y => y.Name.Contains('a')))
                                               .Select(x => x.Name);
-                                              //.ToList();
-                                              //.LastOrDefault().Name;
+            //.ToList();
+            //.LastOrDefault().Name;
 
             //Console.WriteLine(albumNameSongsWithLetterA);                 //NE RABOTI NZ KAKO DA JA PODESAM
 
