@@ -40,6 +40,15 @@ namespace MillionaireQuizServices
                 "Colgate, Oral-B and Sensodyne sell and produce toothpase.",
                 "100"
             });
+            One.Add(2, new List<string> {
+                "In the UK, the abbreviation NHS stands for National 'what' Service?",
+                "Humanity",
+                "Health",
+                "Honour*",
+                "Sun cream",
+                "Colgate, Oral-B and Sensodyne sell and produce toothpase.",
+                "100"
+            });
             #endregion
 
             #region Two
@@ -332,7 +341,6 @@ namespace MillionaireQuizServices
                                 Console.WriteLine("Wrong Answer!");
                                 Console.ForegroundColor = ConsoleColor.White;
 
-                                Console.WriteLine("Wrong Answer!");
                                 Database.Update();
                                 user.UsedFiftyFiftyHelp = false;
                                 user.UsedPhoneHelp = false;
