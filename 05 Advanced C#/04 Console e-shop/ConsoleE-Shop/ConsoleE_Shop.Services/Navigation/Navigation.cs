@@ -62,15 +62,20 @@ namespace ConsoleE_Shop.Services.Navigation
             Console.WriteLine("Enter quantity");
             string quantityString = Console.ReadLine();
 
-            Regex validNumbers = new Regex("[0-9]");
+            int barcode = 0;
+            int quantity = 0;
 
-            if (!validNumbers.IsMatch(quantityString) || !validNumbers.IsMatch(barcodeString))
+            bool isValidBarcode = int.TryParse(barcodeString, out barcode);
+            bool isValidQuantity = int.TryParse(quantityString, out quantity);
+
+
+            if (!isValidBarcode || !isValidQuantity)
             {
                 Assets.PressAnyKey("Invalid input, please enter valid numbers in the fields");
                 return;
             }
 
-            ShoppingCart.AddItem(int.Parse(barcodeString), int.Parse(quantityString));
+            ShoppingCart.AddItem(barcode, quantity);
         }
 
         public static void RemoveProductFromCart()
@@ -91,7 +96,7 @@ namespace ConsoleE_Shop.Services.Navigation
             }
 
             ShoppingCart.RemoveItem(int.Parse(barcodeString));
-        }               
+        }
 
         public static List<Product> SearchProductsInDatabase(string userInput)
         {
@@ -105,12 +110,9 @@ namespace ConsoleE_Shop.Services.Navigation
                 listOfFoundProducts.Add(Database.ListOfProducts
                                        .Where(x => x.Barcode == i && x.Vendor.ToLower().Contains(userInput.ToLower()))
                                        .FirstOrDefault());
-            }   
-            
-            foreach (Product item in listOfFoundProducts)
-            {
-                if (item == null) listOfFoundProducts.Remove(item);
             }
+
+
             return listOfFoundProducts;
         }
         public static void Search()
@@ -124,20 +126,21 @@ namespace ConsoleE_Shop.Services.Navigation
             List<Product> listOfFoundProducts = new List<Product>();
             listOfFoundProducts = SearchProductsInDatabase(productString);
 
-           
+            listOfFoundProducts.RemoveAll(x => x == null);
 
             if (listOfFoundProducts.Count == 0)
             {
                 Console.WriteLine("No such product found");
                 Assets.PressAnyKey();
+                return;
+
             }
-            else
+
+            foreach (Product item in listOfFoundProducts)
             {
-                foreach (Product item in listOfFoundProducts)
-                {
-                    if (item != null) item.PrintShortInfo();
-                }               
+                if (item != null) item.PrintShortInfo();
             }
+
 
             Console.WriteLine();
             Console.WriteLine("Do you want to add product to cart? Y/N");
@@ -161,8 +164,8 @@ namespace ConsoleE_Shop.Services.Navigation
                         Console.WriteLine("Please enter valid number: {0}", ex);
                         Assets.PressAnyKey();
                     }
-                }              
-               
+                }
+
             }
             if (userChoice == 'n') return;
         }
