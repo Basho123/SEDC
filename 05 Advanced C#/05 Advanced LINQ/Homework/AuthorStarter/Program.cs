@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Serialization;
+using AuthorStarter;
 
 namespace AuthorStarter
 {
@@ -18,9 +19,14 @@ namespace AuthorStarter
 
             Dictionary<int, List<Book>> bookDictionary = new Dictionary<int, List<Book>>();
 
-            IEnumerable<Book> booksPublished = authors.SelectMany(x => x.Books);
+            IEnumerable<Book> allBooksPublished = authors
+                                                    .SelectMany(x => x.Books)
+                                                    .ToList();
 
-            IEnumerable<IGrouping<int, Book>> groupOfBooks = booksPublished
+
+            //List<Book> listOfAllBooks = allBooksPublished.ToList();
+
+            IEnumerable<IGrouping<int, Book>> groupOfBooks = allBooksPublished
                                                                .OrderBy(x => x.ID)
                                                                .GroupBy(x => x.ID);
 
@@ -28,18 +34,20 @@ namespace AuthorStarter
             {
                 bookDictionary.Add(item.Key, item.ToList());
             }
+
+
             Console.WriteLine("=================================");
 
             #region How many books are collaborations(have more than one author)?
 
-            int numberOfColaborations = bookDictionary
-                            .Where(x => x.Value.Count > 1)
-                            .Count();
+            IEnumerable<Book> colaborationBooks = bookDictionary.Where(x => x.Value.Count > 1)
+                                                             .Select(x => x.Value
+                                                             .FirstOrDefault());
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("How many books are collaborations?");
             Console.ResetColor();
-            Console.WriteLine($"{numberOfColaborations}");
+            Console.WriteLine($"{colaborationBooks.Count()}");
             Console.WriteLine("=================================");
 
 
@@ -62,7 +70,20 @@ namespace AuthorStarter
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("What author wrote most collaborations?");
             Console.ResetColor();
-            //?????????????????????????????????????          
+
+            Author authorWithMostColaborations = authors
+                                    .OrderBy(x => colaborationBooks.Distinct().Except(x.Books).Count())
+                                    //.OrderByDescending(x => x.Books.Where(x => colaborationBooks.Any(y => y == x)).Count())
+                                    .FirstOrDefault();
+
+            Author authorWithMostBooks = authors.OrderByDescending(x => x.Books.Count).FirstOrDefault();
+            Console.WriteLine($"Author with most books is {authorWithMostBooks.Name} with {authorWithMostBooks.Books.Count} books overall");
+            Console.WriteLine("AND");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Author with most colaborations is {authorWithMostColaborations.Name} with {authorWithMostColaborations.Books.Where(x => colaborationBooks.Any(y => y == x)).Count()} colaborations");
+            Console.ResetColor();
+
             Console.WriteLine("============================");
             #endregion
 
@@ -72,7 +93,7 @@ namespace AuthorStarter
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("In what year were published most books in a specific genre? Which genre ?");
             Console.ResetColor();
-            IGrouping<int, Book> booksInSpecificGenre = booksPublished.GroupBy(x => x.Year)
+            IGrouping<int, Book> booksInSpecificGenre = allBooksPublished.GroupBy(x => x.Year)
                                                     .OrderBy(x => x.Count())
                                                     .LastOrDefault();
 
@@ -141,9 +162,9 @@ namespace AuthorStarter
             Console.WriteLine("           Sci-Fi ║ Fantasy ║  Horror ");
             for (int i = 1300; i < DateTime.Now.Year; i += 10)
             {
-                string sciFi = $"{booksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.ScienceFiction)).Count()}";
-                string fantasy = $"{booksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Fantasy)).Count()}";
-                string horror = $"{booksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Horror)).Count()}";
+                string sciFi = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.ScienceFiction)).Count()}";
+                string fantasy = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Fantasy)).Count()}";
+                string horror = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Horror)).Count()}";
 
                 string space1 = sciFi.Length == 1 ? "     ║   " : sciFi.Length == 2 ? "    ║   " : sciFi.Length == 3 ? "   ║   " : "  ║   ";
                 string space2 = fantasy.Length == 1 ? "     ║   " : fantasy.Length == 2 ? "    ║   " : fantasy.Length == 3 ? "   ║   " : "  ║   ";
