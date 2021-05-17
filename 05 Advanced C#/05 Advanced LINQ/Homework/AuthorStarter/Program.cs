@@ -24,11 +24,10 @@ namespace AuthorStarter
                                                     .ToList();
 
 
-            //List<Book> listOfAllBooks = allBooksPublished.ToList();
-
             IEnumerable<IGrouping<int, Book>> groupOfBooks = allBooksPublished
                                                                .OrderBy(x => x.ID)
                                                                .GroupBy(x => x.ID);
+
 
             foreach (IGrouping<int, Book> item in groupOfBooks)
             {
@@ -44,6 +43,7 @@ namespace AuthorStarter
                                                              .Select(x => x.Value
                                                              .FirstOrDefault());
 
+          
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("How many books are collaborations?");
             Console.ResetColor();
@@ -76,10 +76,15 @@ namespace AuthorStarter
                                     //.OrderByDescending(x => x.Books.Where(x => colaborationBooks.Any(y => y == x)).Count())
                                     .FirstOrDefault();
 
+            var ccc = authors.Select(x => new
+            {
+                AuthorName = x.Name,
+                AuthorBooks = x.Books.Where(y=> colaborationBooks.Distinct().Any(z=> y==z)),
+            }).OrderByDescending(x=>x.AuthorBooks.Count()).FirstOrDefault();
+
             Author authorWithMostBooks = authors.OrderByDescending(x => x.Books.Count).FirstOrDefault();
             Console.WriteLine($"Author with most books is {authorWithMostBooks.Name} with {authorWithMostBooks.Books.Count} books overall");
             Console.WriteLine("AND");
-
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"Author with most colaborations is {authorWithMostColaborations.Name} with {authorWithMostColaborations.Books.Where(x => colaborationBooks.Any(y => y == x)).Count()} colaborations");
             Console.ResetColor();
@@ -97,9 +102,9 @@ namespace AuthorStarter
                                                     .OrderBy(x => x.Count())
                                                     .LastOrDefault();
 
-            Console.WriteLine("Year of most books in specific genre: {0}, genre: {1}", booksInSpecificGenre.Key, booksInSpecificGenre.GroupBy(x => x.Genres)
+            Console.WriteLine("Year of most books in specific genre: {0}, genre: {1}, count: {2}", booksInSpecificGenre.Key, booksInSpecificGenre.GroupBy(x => x.Genres)
                                                                                                                                     .OrderBy(x => x.Count())
-                                                                                                                                    .LastOrDefault().Key[0]);
+                                                                                                                                    .LastOrDefault().Key[0],booksInSpecificGenre.Count());
             Console.WriteLine("============================");
             #endregion
 
