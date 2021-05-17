@@ -23,6 +23,21 @@ namespace Vezba01
                                                     .Where(x => x.Age < 3)
                                                     .OrderBy(x => x.Name)
                                                     .ToList();
+
+            Dog dog = new Dog()
+            {
+                Name = "hehe",
+                Age = 155,
+            };
+
+            Dog dog2 = new Dog("Hehe",-213,"Red","Sharplaninec");
+          
+
+            dog.Print();
+            dog2.Print();
+
+
+
             Console.ReadLine();
         }
     }

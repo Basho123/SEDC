@@ -9,5 +9,7 @@ namespace Vezba02.Helpers
     {
         public static bool IsEven(this int inputInt) => inputInt % 2 == 0;
         public static List<int> GetNFromList(this List<int> inputList, int numberOfItemsToGet) => inputList.GetRange(0, numberOfItemsToGet);
+        public static List<int> GetNFromListLinq(this List<int> inputList, int numberOfItemsToGet) => inputList.Take(numberOfItemsToGet).ToList();
+
     }
 }

@@ -10,11 +10,8 @@ namespace Vezba03
     {
         static void Main(string[] args)
         {
-
             GenericHelper.PrintAnimals(Database.dogs);
-
             Console.ReadLine();
-
         }
 
 
