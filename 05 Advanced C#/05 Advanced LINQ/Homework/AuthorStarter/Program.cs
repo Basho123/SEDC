@@ -76,15 +76,6 @@ namespace AuthorStarter
                                     //.OrderByDescending(x => x.Books.Where(x => colaborationBooks.Any(y => y == x)).Count())
                                     .FirstOrDefault();
 
-            var ccc = authors.Select(x => new
-            {
-                AuthorName = x.Name,
-                AuthorBooks = x.Books.Where(y=> colaborationBooks.Distinct().Any(z=> y==z)),
-            }).OrderByDescending(x=>x.AuthorBooks.Count()).FirstOrDefault();
-
-            Author authorWithMostBooks = authors.OrderByDescending(x => x.Books.Count).FirstOrDefault();
-            Console.WriteLine($"Author with most books is {authorWithMostBooks.Name} with {authorWithMostBooks.Books.Count} books overall");
-            Console.WriteLine("AND");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"Author with most colaborations is {authorWithMostColaborations.Name} with {authorWithMostColaborations.Books.Where(x => colaborationBooks.Any(y => y == x)).Count()} colaborations");
             Console.ResetColor();
@@ -165,16 +156,24 @@ namespace AuthorStarter
             Console.ResetColor();
 
             Console.WriteLine("           Sci-Fi ║ Fantasy ║  Horror ");
-            for (int i = 1300; i < DateTime.Now.Year; i += 10)
+            for (int i = -500; i < DateTime.Now.Year; i += 10)
             {
-                string sciFi = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.ScienceFiction)).Count()}";
-                string fantasy = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Fantasy)).Count()}";
-                string horror = $"{allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10 && x.Genres.Any(y => y == Genre.Horror)).Count()}";
+                IEnumerable<Book> jare = allBooksPublished.Where(x => x.Year >= i && x.Year < i + 10);
+                int sciFiCount = jare.Where(x => x.Genres.Any(y => y == Genre.ScienceFiction)).Count();
+                int fantasyCount = jare.Where(x => x.Genres.Any(y => y == Genre.Fantasy)).Count();
+                int horrorCount = jare.Where(x => x.Genres.Any(y => y == Genre.Horror)).Count();
 
+                if (sciFiCount == 0 && fantasyCount == 0 && horrorCount == 0) continue;                
+
+                string sciFi = $"{sciFiCount}";
+                string fantasy = $"{fantasyCount}";
+                string horror = $"{horrorCount}";
+
+                string space0 = $"{i}".Length == 1 ? "   " : $"{i}".Length == 2 ? "  " : $"{i}".Length == 3 ? " " : "";
                 string space1 = sciFi.Length == 1 ? "     ║   " : sciFi.Length == 2 ? "    ║   " : sciFi.Length == 3 ? "   ║   " : "  ║   ";
                 string space2 = fantasy.Length == 1 ? "     ║   " : fantasy.Length == 2 ? "    ║   " : fantasy.Length == 3 ? "   ║   " : "  ║   ";
 
-                Console.WriteLine($"{i}        {sciFi}{space1}{fantasy}{space2}{horror}");
+                Console.WriteLine($"{i}{space0}        {sciFi}{space1}{fantasy}{space2}{horror}");
             }
             #endregion
 
