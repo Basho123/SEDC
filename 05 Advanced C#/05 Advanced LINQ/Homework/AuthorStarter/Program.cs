@@ -74,7 +74,7 @@ namespace AuthorStarter
             Author authorWithMostColaborations = authors
                                     .OrderBy(x => colaborationBooks.Distinct().Except(x.Books).Count())
                                     //.OrderByDescending(x => x.Books.Where(x => colaborationBooks.Any(y => y == x)).Count())
-                                    .FirstOrDefault();
+                                    .SingleOrDefault();
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"Author with most colaborations is {authorWithMostColaborations.Name} with {authorWithMostColaborations.Books.Where(x => colaborationBooks.Any(y => y == x)).Count()} colaborations");

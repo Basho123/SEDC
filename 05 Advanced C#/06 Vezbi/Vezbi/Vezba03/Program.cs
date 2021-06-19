@@ -10,7 +10,14 @@ namespace Vezba03
     {
         static void Main(string[] args)
         {
+            List<int> listOfIntegers = new List<int>() { 1, 3, 4 };
+            List<string> listOfStrings = new List<string>() { "abec", "dgds" };
+
+
             GenericHelper.PrintAnimals(Database.dogs);
+            GenericHelper.PrintList(listOfIntegers);
+            GenericHelper.PrintList(listOfStrings);
+
             Console.ReadLine();
         }
 

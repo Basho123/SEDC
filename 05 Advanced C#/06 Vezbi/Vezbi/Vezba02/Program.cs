@@ -23,7 +23,11 @@ namespace Vezba02
             Console.WriteLine("With Vanilla");
             lista.GetNFromList(7).ForEach(x => Console.WriteLine(x));
             Console.WriteLine("With LINQ");
-            lista.GetNFromListLinq(1).ForEach(x => Console.WriteLine(x));
+
+            lista.GetNFromListLinq(-25).ForEach(x => Console.WriteLine(x));
+
+
+            lista.GetNFromListLinq(-25).ForEach(x => Console.WriteLine(x));
 
 
 
