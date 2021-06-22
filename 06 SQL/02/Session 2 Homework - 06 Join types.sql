@@ -4,16 +4,27 @@ List all Teachers that has any exam Grade
 List all Teachers without exam Grade
 List all Students without exam Grade (using Right Join)
 */
+use SEDCHome
 
-SELECT s.FirstName as StudentName, a.Name as AchievmentType
-from dbo.Student s
+SELECT s.Name as StudentName, a.Name as AchievmentType
+from dbo.Course s
 CROSS JOIN dbo.AchievementType a
 GO
 
 SELECT DISTINCT t.FirstName
 FROM dbo.Teacher t
-LEFT JOIN dbo.Grade g ON g.TeacherID = t.ID
+INNER JOIN dbo.Grade g ON g.TeacherID = t.ID
 GO
+
+SELECT DISTINCT t.FirstName
+FROM dbo.Teacher t
+LEFT JOIN dbo.Grade g ON g.TeacherID = t.ID
+WHERE g.TeacherID IS NOT NULL
+GO
+
+SELECT * FROM dbo.Teacher
+SELECT * FROM dbo.Grade
+
 
 SELECT t.FirstName, g.TeacherID AS 'Grade id'
 FROM dbo.Teacher t
